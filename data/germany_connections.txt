@@ -23,7 +23,7 @@ hannover erfurt 19
 magdeburg berlin 10
 magdeburg halle 11
 berlin torgelow 15
-berlin frankfurt-o 6
+berlin frankfurt-d 6
 berlin halle 17
 rostock torgelow 19
 wilhelmshaven osnabruck 14
@@ -38,8 +38,8 @@ erfurt nurnberg 21
 erfurt halle 6
 erfurt dresden 19
 halle leipzig 0
-frankfurt-o leipzig 21
-frankfurt-o dresden 16
+frankfurt-d leipzig 21
+frankfurt-d dresden 16
 munster essen 6
 munster dortmund 2
 dortmund koln 10

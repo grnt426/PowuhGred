@@ -6,7 +6,7 @@ exports.Cities = function(){
 	this.cities = [];
 
 	this.addCity = function(city){
-		this.cities.push(city);
+		this.cities[city.name.toLowerCase()] = city;
 	};
 
 	this.findCheapestRoute = function(start, end){
@@ -53,10 +53,11 @@ exports.Cities = function(){
 	 */
 	this.parseCities = function(connections){
 		var data = fs.readFileSync(connections).toString().split('\n');
+//		console.log(this.cities);
 		for(var line in data){
 			var cityData = data[line];
 			var cityArgs = cityData.split(' ');
-//			this.cities[cityArgs[0]].addConnection(cityArgs[2], cityArgs[1]);
+			this.cities[cityArgs[0]].addConnection(cityArgs[2], cityArgs[1]);
 			console.log(cityArgs[0] + " - > " + parseInt(cityArgs[2]) + " - > " + cityArgs[1]);
 		}
 	};
