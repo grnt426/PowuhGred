@@ -1,4 +1,5 @@
-var cityjs = require('./city.js');
+var fs = require("fs"),
+	cityjs = require("./city.js");
 
 exports.Cities = function(){
 
@@ -11,6 +12,8 @@ exports.Cities = function(){
 	this.findCheapestRoute = function(start, end){
 		var cheapestRoutes = [];
 		var neighbors = start.connections;
+		var visited = [];
+		visited[start] = 0;
 
 		// Add all our neighbors
 		for(var city in neighbors){
@@ -18,6 +21,7 @@ exports.Cities = function(){
 				path : [neighbors[city].neighbor],
 				cost : neighbors[city].conn
 			});
+			visited[neighbors[city]] = neighbors[city].conn;
 		}
 
 		while(cheapestRoutes.length > 0){
@@ -43,8 +47,22 @@ exports.Cities = function(){
 		return cheapestRoutes[0];
 	};
 
+	/**
+	 * Adds connections to the cities.
+	 * @param connections	The file to parse.
+	 */
+	this.parseCities = function(connections){
+		var data = fs.readFileSync(connections).toString().split('\n');
+		for(var line in data){
+			var cityData = data[line];
+			var cityArgs = cityData.split(' ');
+//			this.cities[cityArgs[0]].addConnection(cityArgs[2], cityArgs[1]);
+			console.log(cityArgs[0] + " - > " + parseInt(cityArgs[2]) + " - > " + cityArgs[1]);
+		}
+	};
+
     this.parseCityList = function(filename){
-        if (!filename) filename = "./data/germany_cities.txt";
+        if (!filename) filename = "data/germany_cities.txt";
         var fs = require('fs');
         var array = fs.readFileSync(filename).toString().split("\n");
         for(i in array) {

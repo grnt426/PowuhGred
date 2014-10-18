@@ -6,13 +6,17 @@ var express = require('express'),
 	io = require('socket.io').listen(server),
 	communicationsjs = require('./communications.js');
     citiesjs = require('./cities.js');
-// routing
 
+// routing
 app.get("/", function(req, res) {
 	res.sendfile(__dirname + '/index.html');
 });
 
 server.listen(3000);
+
+var citiesDef = new citiesjs.Cities();
+citiesDef.parseCityList();
+citiesDef.parseCities("data/germany_connections.txt");
 
 comms = new communicationsjs.Communications(io);
 
@@ -31,6 +35,3 @@ io.sockets.on('connection', function(socket) {
 
 	});
 });
-
-cities = new citiesjs.Cities()
-cities.parseCityList()
