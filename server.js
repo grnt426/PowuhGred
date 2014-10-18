@@ -4,8 +4,8 @@ var express = require('express'),
 	app = express(),
 	server = http.createServer(app),
 	io = require('socket.io').listen(server),
-	communications = require('communications.js');
-
+	communicationsjs = require('./communications.js');
+    citiesjs = require('./cities.js');
 // routing
 
 app.get("/", function(req, res) {
@@ -14,7 +14,7 @@ app.get("/", function(req, res) {
 
 server.listen(3000);
 
-comms = new communications.Communications(io);
+comms = new communicationsjs.Communications(io);
 
 io.sockets.on('connection', function(socket) {
 
@@ -31,3 +31,6 @@ io.sockets.on('connection', function(socket) {
 
 	});
 });
+
+cities = new citiesjs.Cities()
+cities.parseCityList()

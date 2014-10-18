@@ -1,3 +1,5 @@
+var cityjs = require('./city.js');
+
 exports.Cities = function(){
 
 	this.cities = [];
@@ -40,4 +42,25 @@ exports.Cities = function(){
 		}
 		return cheapestRoutes[0];
 	};
+
+    this.parseCityList = function(filename){
+        if (!filename) filename = "./data/germany_cities.txt";
+        var fs = require('fs');
+        var array = fs.readFileSync(filename).toString().split("\n");
+        for(i in array) {
+            if(array[i]){
+                var oneLine = array[i].split(" ");
+                if(oneLine.length == 4) {
+                    var newCity = new cityjs.City(oneLine[2]);
+                    newCity.x = oneLine[0];
+                    newCity.y = oneLine[1];
+                    newCity.region = oneLine[3];
+
+                    this.addCity(newCity);
+                }
+            }
+        }
+
+        console.log(this.cities);
+    };
 };
