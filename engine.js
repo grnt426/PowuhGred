@@ -194,7 +194,7 @@ exports.Engine = function(){
 	 * @param data
 	 */
 	this.resolveAction = function(data){
-		var dataObj = JSON.parse(data);
+		var dataObj = data;
 		var uid = dataObj.uid;
 		var action = dataObj.action;
 		var args = dataObj.args;
