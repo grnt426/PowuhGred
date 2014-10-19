@@ -90,7 +90,5 @@ exports.Cities = function(){
                 }
             }
         }
-
-        console.log(this.cities);
     };
 };

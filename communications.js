@@ -44,10 +44,10 @@ exports.Communications = function(io){
 	 * Sends a message on CHAT channel from SERVER to the player.
 	 *
 	 * @param {Player} player	Player username to send message to.
-	 * @param {String} msg				The message to send.
+	 * @param {String} msg		The message to send.
 	 */
 	this.toPlayer = function(player, msg){
-//		player.socket.emit(this.CHAT, this.SERVER, msg);
+		player.socket.emit(this.CHAT, this.SERVER, msg);
 	};
 
 	/**
@@ -57,7 +57,7 @@ exports.Communications = function(io){
 	 * @param msg    The message to broadcast.
 	 */
 	this.toAllFrom = function(from, msg){
-		io.sockets.emit(this.CHAT, from.username, msg);
+		io.sockets.emit(this.CHAT, from.displayName, msg);
 	};
 
 	/**
