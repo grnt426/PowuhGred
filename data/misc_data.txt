@@ -1,0 +1,5 @@
+regions 3 3 4 5 5
+removed 8 8 4 0 0
+max_own 4 3 3 3 3
+step_two 10 7 7 7 6
+end 21 17 17 15 14
