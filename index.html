@@ -21,6 +21,9 @@
         var mapCanvas = document.getElementById("mapCanvas");
         var ctx = mapCanvas.getContext("2d");
 
+        var consoletext = "Console:";
+        var log = function(str) { console.log(str); consoletext += str + "\n"; redraw(); };
+
         var externalX = function (x) { return x * 1.1 - 5;  };
         var externalY = function (y) { return y * 1.1 - 96; };
         var internalX = function (x) { return (x + 5) / 1.1;  };
@@ -29,7 +32,7 @@
         var resourceGrid = {};
         for(var i = 0; i < 24; i++) {
             var box = {};
-            box.type = "coal"
+            box.type = "coal";
             box.size = 22;
             box.x = internalX((i * (box.size+3)) + (~~(i / 3) * 5) + 37);
             box.y = internalY(949);
@@ -37,7 +40,7 @@
         }
         for(var i = 0; i < 24; i++) {
             var box = {};
-            box.type = "oil"
+            box.type = "oil";
             box.size = 17;
             box.x = internalX((i * (box.size)) + (~~(i / 3) * 29) + 37);
             box.y = internalY(971);
@@ -45,7 +48,7 @@
         }
         for(var i = 0; i < 24; i++) {
             var box = {};
-            box.type = "trash"
+            box.type = "trash";
             box.size = 22;
             box.x = internalX((i * (box.size+3)) + (~~(i / 3) * 5) + 37);
             box.y = internalY(990);
@@ -53,7 +56,7 @@
         }
         for(var i = 0; i < 8; i++) {
             var box = {};
-            box.type = "uranium"
+            box.type = "uranium";
             if(i <= 9) {
                 box.size = 17;
                 box.x = internalX(((i*3+2) * (box.size)) + (~~((i*3+2) / 3) * 29) + 37 + 20);
@@ -63,12 +66,31 @@
         }
         for(var i = 0; i < 4; i++) {
             var box = {};
-            box.type = "uranium"
+            box.type = "uranium";
             box.size = 25;
             box.x = internalX((~~(i/2) * (box.size+6)) + 678);
             box.y = internalY(951 + ((i%2) * (box.size+11)));
             resourceGrid[i+80] = box;
         }
+
+        var buttonArray = {};
+        var createButton = function(disp,action,argsfun,x,y,w,h) {
+            var button = {};
+            button.disp = disp;
+            button.action = action;
+            button.argsfun = argsfun;
+            button.x = x;
+            button.y = y;
+            button.width = w;
+            button.height = h;
+            buttonArray[disp] = button;
+        }
+        createButton("start","start",bNoOp,700,0,200,50);
+        createButton("pass","pass",bNoOp,700,60,200,50);
+
+        var bNoOp = function () {
+            return {};
+        };
 
         // store user id
         socket.on('userid', function(data) {userid = data});
@@ -85,6 +107,11 @@
             bgImg.onload = function() {
                 redraw();
             };
+        });
+
+        socket.on('updates', function(data) {
+            log("RECEIVED on updates:");
+            log(data.toString());
         });
 
         var redraw = function() {
@@ -130,6 +157,25 @@
                 ctx.arc(x, y, 20, 0, 360, false);
                 ctx.stroke();
             }
+
+            // console output
+            ctx.fillStyle = "#FFFFFF";
+            ctx.fillRect(800,40,600,600);
+            ctx.fillStyle = "#000000";
+            ctx.font = "10px Arial";
+            txt = consoletext.split("\n");
+            $.each(txt, function(index, chunk) {
+                ctx.fillText(chunk,800,40+15*index);
+            });
+
+            // draw buttons
+            $.each(buttonArray, function(key, btn) {
+                ctx.fillStyle = "#000000";
+                ctx.strokeStyle = "#000000";
+                ctx.strokeRect(externalX(btn.x), externalY(btn.y), externalX(btn.width), externalY(btn.height))
+                ctx.font = "10px Arial";
+                ctx.fillText(consoletext,800,40);
+            });
         }
 
         var sqrDist = function(x1,x2,y1,y2) { return Math.pow(x1-x2,2)+Math.pow(y1-y2,2) }
@@ -138,15 +184,18 @@
             var x = internalX(event.pageX - 8),
                 y = internalY(event.pageY - 8);
 
-            var success = false;
-            selected = null;
-
-
-
-            $.each(citiesDef,function(key,city) {
-                if(sqrDist(x,city.x,y,city.y)<500) {selected = city; success = true}
+            $.each(buttonArray,function(key, btn) {
+                if(x > btn.x && x < (btn.x + btn.width) && y > btn.y && y < (btn.y - btn.height)) {
+                    log("SENDING " + btn.action + " on gameaction");
+                    socket.emit('gameaction', {uid:userid, action:btn.action, args:btn.argsfun()});
+                    return;
+                }
             });
 
+            $.each(citiesDef,function(key,city) {
+                if(sqrDist(x,city.x,y,city.y)<500) {selected = city;}
+            });
+            selected = null;
             redraw();
         },false);
 
