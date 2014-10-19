@@ -19,12 +19,18 @@ name:
 		group: 'displayName',
 		args: 'uid,newName'
 	}
+	
+Sending Chat Messages
+---------------------
 
 sendchat:
 
 	Request = String
 	
 	Response = undefined
+	
+First Connection
+----------------
 	
 connection:
 
@@ -34,6 +40,9 @@ connection:
 		group: 'newPlayer',
 		args: 'uid'
 	}
+	
+Performing Game Actions
+-----------------------
 	
 gameaction:
 
