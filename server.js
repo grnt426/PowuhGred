@@ -11,15 +11,7 @@ var express = require('express'),
 app.get("/", function(req, res) {
 	res.sendFile(__dirname + '/index.html');
 });
-app.get("/city.js", function(req, res) {
-    console.log("city.js requested by client");
-    res.sendFile(__dirname + '/city.js');
-});
-app.get("/cities.js", function(req, res) {
-    console.log("cities.js requested by client");
-    res.sendFile(__dirname + '/cities.js');
-});
-app.use('/resources', express.static(__dirname+'/resources'));
+app.use('/data', express.static(__dirname+'/data'));
 
 var citiesDef = new citiesjs.Cities();
 citiesDef.parseCityList();
