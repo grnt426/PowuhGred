@@ -31,7 +31,7 @@ engine.comms = comms;
 io.sockets.on('connection', function(socket) {
 
     // a user connected, send the map down
-	var uid = 'player' + engine.players.length;
+	var uid = 'player' + engine.currentPlayerCount;
 	engine.addPlayer(uid, socket);
 	socket.emit('userid', uid);
     socket.emit('definecities', citiesDef.cities);

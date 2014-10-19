@@ -111,7 +111,7 @@
 
         socket.on('updates', function(data) {
             log("RECEIVED on updates:");
-            log(data.toString());
+			log(data.group + " " + data.args);
         });
 
         var redraw = function() {

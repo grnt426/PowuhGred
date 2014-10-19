@@ -2,6 +2,9 @@ var playerjs = require("./player.js");
 
 exports.Engine = function(){
 
+	// Int
+	this.currentPlayerCount = 0;
+
 	// Communications
 	this.comms = false;
 
@@ -98,6 +101,7 @@ exports.Engine = function(){
 	};
 
 	this.addPlayer = function(uid, socket){
+		this.currentPlayerCount++;
 		var player = new playerjs.Player(uid, this.comms, socket);
 		this.players[uid] = player;
 		this.playerOrder.push(uid);
