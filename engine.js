@@ -32,9 +32,11 @@ exports.Engine = function(){
 	this.currentMarket = [];
 	this.futuresMarket = [];
 
-	// Bid information
 	// Array of UIDs
 	this.currentBidders = [];
+
+	// No longer can bid
+	this.finishedBidding = [];
 
 	// Int
 	this.currentBid = 0;
@@ -231,6 +233,12 @@ exports.Engine = function(){
 		this.comms.broadcastUpdate({group: 'currentPlayer', args: this.currentPlayer});
 	};
 
+	// TODO use a different order
+	this.nextBidder = function(){
+		this.currentPlayerIndex = (this.currentPlayerIndex + 1) % this.players.length;
+		this.currentPlayer = this.playerOrder[this.currentPlayerIndex];
+	};
+
 	this.nextAction = function(){
 		if(this.currentAction == this.START_AUCTION)
 			this.currentAction = this.BUY;
@@ -272,6 +280,7 @@ exports.Engine = function(){
 		}
 
 		if(args[0] === "pass"){
+			this.finishedBidding.push(this.currentPlayer);
 			this.nextPlayer();
 		}
 		else{
@@ -292,6 +301,11 @@ exports.Engine = function(){
 
 			this.currentBid = bid;
 			this.currentBidLeader = player.uid;
+			this.currentAction = this.BID;
+			for(var key in this.players){
+				if(this.finishedBidding.indexOf(this.players[key].uid) != -1)
+					this.currentBidders.push(this.players[key].uid);
+			}
 		}
 	};
 
@@ -302,7 +316,7 @@ exports.Engine = function(){
 			return;
 		}
 		if(args[0] === "pass"){
-			this.nextPlayer();
+			this.nextBidder();
 		}
 	};
 
