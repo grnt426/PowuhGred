@@ -6,16 +6,28 @@
     <script src="/socket.io/socket.io.js"></script>
 
 
-    <canvas id="mapCanvas" width="2000" height="2000" style=""></canvas>
+    <canvas id="mapCanvas" width="1000" height="1000" style=""></canvas>
 
 
     <script>
         var socket = io();
         var citiesDef = {};
-        var offsetx = -5;
-        var offsety = -96;
-        var scalex = 1.1;
-        var scaley = 1.1;
+        var userid = "NO USER ID";
+        var selected;
+
+        var bgImg = new Image();
+        bgImg.src = "./data/germany.jpg";
+
+        var mapCanvas = document.getElementById("mapCanvas");
+        var ctx = mapCanvas.getContext("2d");
+
+        var externalX = function (x) { return x * 1.1 - 5;  };
+        var externalY = function (y) { return y * 1.1 - 96; };
+        var internalX = function (x) { return (x + 5) / 1.1;  };
+        var internalY = function (y) { return (y + 96) / 1.1; };
+
+        // store user id
+        socket.on('userid', function(data) {userid = data});
 
         // load up the city map right after connecting
         socket.on('definecities', function(data){
@@ -25,32 +37,58 @@
                 citiesDef[key] = value;
             });
 
-            var c = document.getElementById("mapCanvas");
-            var ctx = c.getContext("2d");
-
-            // draw the background image
-            var imageObj = new Image();
-            imageObj.src = "./data/germany.jpg";
-
-            imageObj.onload = function() {
-                ctx.drawImage(imageObj, 0, 0);
-
-
-                // draw our internal data structure as an overlay
-                $.each(citiesDef, function(key, city){
-                    ctx.strokeStyle = "#444444";
-                    ctx.lineWidth = 1;
-                    ctx.beginPath();
-                    var x = city.x * scalex + offsetx;
-                    var y = city.y * scaley + offsety;
-                    ctx.arc(x, y, 12, 0, 360, false);
-                    ctx.stroke();
-
-                    ctx.font = "10px Arial";
-                    ctx.fillText(city.name.toUpperCase(),x,y);
-                });
+            // load the background image
+            bgImg.onload = function() {
+                redraw();
             };
         });
+
+        var redraw = function() {
+            ctx.drawImage(bgImg, 0, 0);
+
+            // draw our internal data structure as an overlay
+            $.each(citiesDef, function(key, city){
+                ctx.strokeStyle = "#444444";
+                ctx.fillStyle = "#FFFFFF";
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                var x = externalX(city.x);
+                var y = externalY(city.y);
+                ctx.arc(x, y, 20, 0, 360, false);
+                ctx.stroke();
+
+                ctx.font = "10px Arial";
+                ctx.fillText(city.name.toUpperCase(),x,y);
+            });
+
+            // highlight selected city
+            if(selected) {
+                ctx.strokeStyle = "#DD6622";
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                var x = externalX(selected.x);
+                var y = externalY(selected.y);
+                ctx.arc(x, y, 20, 0, 360, false);
+                ctx.stroke();
+            }
+        }
+
+        var sqrDist = function(x1,x2,y1,y2) { return Math.pow(x1-x2,2)+Math.pow(y1-y2,2) }
+
+        mapCanvas.addEventListener('click', function(event) {
+            var x = internalX(event.pageX - 8),
+                y = internalY(event.pageY - 8);
+
+            var success = false;
+            $.each(citiesDef,function(key,city) {
+                if(sqrDist(x,city.x,y,city.y)<500) {selected = city; success = true}
+            });
+
+            if(!success) selected = null;
+            else redraw();
+
+        },false);
+
     </script>
 
 
