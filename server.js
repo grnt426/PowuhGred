@@ -58,7 +58,7 @@ io.sockets.on('connection', function(socket) {
 	 * updates ->
 	 * {
 	 * 	group: 'displayName',
-	 * 	args: 'playerX,name'
+	 * 	args: 'UID,name'
 	 * }
  	 */
 	socket.on('name', function(name) {

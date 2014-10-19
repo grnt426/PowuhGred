@@ -137,7 +137,7 @@ exports.Communications = function(io){
 	 * @param msg		THe message contents for the client.
 	 */
 	this.broadcastUpdate = function(dataObj){
-		io.sockets.emit(dataObj);
+		io.sockets.emit(this.UPDATES, dataObj);
 	};
 };
 

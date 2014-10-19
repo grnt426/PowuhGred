@@ -173,7 +173,7 @@ exports.Engine = function(){
 	 *
 	 * Object Format:
 	 * {
-	 * 		username: 'playerX',
+	 * 		uid: 'playerX',
 	 * 		action: 'action',
 	 *		args: 'arg1,arg2,...'
 	 *	}
