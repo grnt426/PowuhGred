@@ -74,10 +74,10 @@
         }
 
         var buttonArray = {};
-        var createButton = function(disp,action,args,x,y,w,h) {
+        var createButton = function(disp,cmd,args,x,y,w,h) {
             var button = {};
             button.disp = disp;
-            button.action = action;
+            button.cmd = cmd;
             button.args = args;
             button.x = x;
             button.y = y;
@@ -85,8 +85,6 @@
             button.height = h;
             buttonArray[disp] = button;
         }
-        createButton("startGame","startGame","",800,110,60,10);
-        createButton("pass","pass","",900,110,60,10);
 
         // store user id
         socket.on('userid', function(data) {userid = data});
@@ -170,8 +168,8 @@
                 ctx.strokeStyle = "#777700";
                 ctx.lineWidth = 1;
                 ctx.strokeRect(externalX(btn.x), externalY(btn.y), btn.width, btn.height)
-                ctx.font = "14px Arial";
-                ctx.fillText(btn.disp,externalX(btn.x),externalY(btn.y));
+                ctx.font = "10px Arial";
+                ctx.fillText(btn.disp,externalX(btn.x+6),externalY(btn.y+btn.height-4));
             });
         }
 
@@ -184,17 +182,22 @@
             $.each(buttonArray,function(key, btn) {
                 if(x > btn.x && x < (btn.x + btn.width) && y > btn.y && y < (btn.y + btn.height)) {
                     log("SENDING " + btn.action + " on gameaction");
-                    socket.emit('gameaction', {uid:userid, action:btn.action, args:btn.args});
+                    socket.emit('gameaction', {uid:userid, cmd:btn.action, args:btn.args});
                     return;
                 }
             });
 
+            selected = null;
             $.each(citiesDef,function(key,city) {
                 if(sqrDist(x,city.x,y,city.y)<500) {selected = city;}
             });
-            selected = null;
             redraw();
         },false);
+
+
+        // createButton( Display, Cmd, Args, x,y,w,h);
+        createButton("startGame","startGame","",720,90,60,12);
+        createButton("pass","pass","",785,90,60,12);
 
     </script>
 
