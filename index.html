@@ -181,8 +181,8 @@
 
             $.each(buttonArray,function(key, btn) {
                 if(x > btn.x && x < (btn.x + btn.width) && y > btn.y && y < (btn.y + btn.height)) {
-                    log("SENDING " + btn.action + " on gameaction");
-                    socket.emit('gameaction', {uid:userid, cmd:btn.action, args:btn.args});
+                    log("SENDING " + btn.cmd + " on gameaction");
+                    socket.emit('gameaction', {uid:userid, cmd:btn.cmd, args:btn.args});
                     return;
                 }
             });
