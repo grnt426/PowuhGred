@@ -3,18 +3,23 @@
         <title>PowuhGred</title>
     </head>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-    <script src="//cdn.techpines.io/jquery.event.drag-2.0.js"></script>
     <script src="/socket.io/socket.io.js"></script>
     <script>
         var socket = io();
-        var citiesDef;
+        var citiesDef = [];
 
         socket.on('definecities', function(data){
-            citiesDef = data;
+
+            console.log("definecities data: ");
+            console.log(data);
+            $.each(data, function(key, value){
+                console.log("key: " + key);
+                citiesDef[key] = value;
+            });
+            console.log("citiesDef:");
+            console.log(citiesDef);
         });
 
-        console.log("citiesDef:");
-        console.log(citiesDef);
 
     </script>
 
