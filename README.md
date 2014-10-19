@@ -48,7 +48,7 @@ gameaction:
 
 	Request = {
 		uid: 'uid',
-		action: 'startGame|startAuction|bid|buy|build',
+		cmd: 'startGame|startAuction|bid|buy|build',
 		args: 'arg1,arg2,...'
 	}
 	
@@ -58,7 +58,7 @@ gameaction:
 	}
 	
 	* Start Game, Request
-		action: 'startGame',
+		cmd: 'startGame',
 		args: ''
 	* Start Game, 
 		Response1 = ResourcePoolResponse

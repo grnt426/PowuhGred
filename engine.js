@@ -54,9 +54,6 @@ exports.Engine = function(){
 
 	this.gameStarted = false;
 
-	// String
-	this.currentAction = this.START_GAME;
-
 	this.firstTurn = true;
 
 	this.START_GAME = "startGame";
@@ -65,14 +62,8 @@ exports.Engine = function(){
 	this.BUY = "buy";
 	this.BUILD = "build";
 
-	// Action map
-	this.actions = {
-		START_GAME: this.startGame,
-		START_AUCTION: this.startAuction,
-		BID: this.placeBid,
-		BUY: this.buyResources,
-		BUILD: this.buildCities
-	};
+	// String
+	this.currentAction = this.START_GAME;
 
 	/**
 	 * No args needed to start the game
@@ -178,7 +169,7 @@ exports.Engine = function(){
 	 * Object Format:
 	 * {
 	 * 		uid: 'playerX',
-	 * 		action: 'action',
+	 * 		cmd: 'cmd',
 	 *		args: 'arg1,arg2,...'
 	 *	}
 	 *
@@ -194,22 +185,26 @@ exports.Engine = function(){
 	 * @param data
 	 */
 	this.resolveAction = function(data){
-		var dataObj = data;
-		var uid = dataObj.uid;
-		var action = dataObj.action;
-		var args = dataObj.args;
+		var uid = data.uid;
+		var action = data.cmd;
+		var args = data.args;
 		var player = this.players[uid];
 
 		if(this.currentPlayer !== false && uid !== this.currentPlayer){
 			// for now, we only support listening to the current player
+			console.info(uid + " tried taking their turn when not theirs!");
 			this.comms.toPlayer(player, "Not your turn.");
 		}
 		else{
 			if(this.currentAction !== action){
+				console.info(uid + " tried giving an action we were not expecting, " + action);
+				console.info("Expecting: : " + this.currentAction);
 				this.comms.toPlayer(player, "Not expecting that action.");
 				return;
 			}
-			this.actions[action](args);
+			console.info(uid + " executing action: " + action);
+			console.info("Action map: " + this.actions + " action: " + this.actions[action]);
+//			this.actions[action](args);
 		}
 	};
 
@@ -344,5 +339,14 @@ exports.Engine = function(){
 		if(args[0] === "pass"){
 			this.nextPlayer();
 		}
+	};
+
+	// Action map
+	this.actions = {
+		START_GAME: this.startGame,
+		START_AUCTION: this.startAuction,
+		BID: this.placeBid,
+		BUY: this.buyResources,
+		BUILD: this.buildCities
 	};
 };

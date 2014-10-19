@@ -42,12 +42,14 @@ io.sockets.on('connection', function(socket) {
 	// When the client emits sendchat, this listens and executes
 	// sendchat -> String
 	socket.on('sendchat', function(data) {
-		comms.toAllFrom(engine.reverseLookUp[socket].username, data);
+		console.info(this.DEBUG + " " + data);
+		comms.toAllFrom(engine.reverseLookUp[socket], data);
 	});
 
 	// When the player does any action
 	// gameaction -> JsonObject
 	socket.on('gameaction', function(data){
+		console.info(data.uid + " " + data.cmd);
 		engine.resolveAction(data);
 	});
 
@@ -62,6 +64,7 @@ io.sockets.on('connection', function(socket) {
 	 * }
  	 */
 	socket.on('name', function(name) {
+		console.info(this.DEBUG + " " + name);
 		var player = engine.reverseLookUp[socket];
 		player.displayName = name;
 		comms.broadcastUpdate({group:'displayName', args:player.uid + "," + name});
