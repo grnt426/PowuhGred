@@ -23,7 +23,7 @@ powerPlants.parsePowerPlants("data/power_plants.txt");
 
 var engine = new enginejs.Engine();
 engine.cities = citiesDef;
-engine.plants = powerPlants;
+engine.plants = powerPlants.powerPlants;
 
 comms = new communicationsjs.Communications(io);
 engine.comms = comms;
@@ -49,6 +49,7 @@ io.sockets.on('connection', function(socket) {
 	// When the player does any action
 	// gameaction -> JsonObject
 	socket.on('gameaction', function(data){
+		engine.setupStartingResources();
 		console.info(data.uid + " " + data.cmd);
 		engine.resolveAction(data);
 	});

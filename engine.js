@@ -67,9 +67,9 @@ exports.Engine = function(){
 
 	/**
 	 * No args needed to start the game
-	 * @param args	Ignored.
+	 * @param args    Ignored.
 	 */
-	this.startGame = function(args){
+	this.startGame = function(){
 		if(this.gameStarted){
 			return;
 		}
@@ -77,10 +77,10 @@ exports.Engine = function(){
 		this.setupStartingResources();
 		this.randomizePlayerOrder();
 		this.currentPlayer = this.playerOrder[0];
-		this.comms.broadcastUpdate({group:'currentPlayer', args:this.currentPlayer});
+		this.comms.broadcastUpdate({group: 'currentPlayer', args: this.currentPlayer});
 		this.setupMarket();
 		this.currentAction = this.START_AUCTION;
-		this.comms.broadcastUpdate({group:'currentAction', args:this.currentAction})
+		this.comms.broadcastUpdate({group: 'currentAction', args: this.currentAction})
 	};
 
 	this.setupStartingResources = function(){
@@ -88,7 +88,7 @@ exports.Engine = function(){
 		this.resources['oil'] = 18;
 		this.resources['garbage'] = 6;
 		this.resources['uranium'] = 2;
-		this.comms.broadcastUpdate({group:'resourcePool', args:this.resources});
+		this.comms.broadcastUpdate({group: 'resourcePool', args: this.resources});
 	};
 
 	this.addPlayer = function(uid, socket){
@@ -106,7 +106,7 @@ exports.Engine = function(){
 	 */
 	this.randomizePlayerOrder = function(){
 		this.shuffle(this.playerOrder);
-		this.comms.broadcastUpdate({group:'playerOrder', args:this.playerOrder});
+		this.comms.broadcastUpdate({group: 'playerOrder', args: this.playerOrder});
 	};
 
 	/**
@@ -115,12 +115,12 @@ exports.Engine = function(){
 	 * cities, or the lowest cost power plant.
 	 */
 	this.resolveTurnOrder = function(){
-		this.playerOrder.sort(function(a,b){
+		this.playerOrder.sort(function(a, b){
 			return a.cities.length != b.cities.length
 				? a.cities.length - b.cities.length
 				: a.getHighestCostPowerPlant() - b.getHighestCostPowerPlant()
 		});
-		this.comms.broadcastUpdate({group:'playerOrder', args:this.playerOrder});
+		this.comms.broadcastUpdate({group: 'playerOrder', args: this.playerOrder});
 	};
 
 	/**
@@ -133,15 +133,15 @@ exports.Engine = function(){
 		this.shuffle(this.plants);
 		this.plants.splice(0, 0, topPlant);
 		this.plants.push(this.STEP_THREE);
-		this.comms.broadcastUpdate({group:'actualMarket', args:this.currentMarket});
-		this.comms.broadcastUpdate({group:'futureMarket', args:this.futuresMarket});
+		this.comms.broadcastUpdate({group: 'actualMarket', args: this.currentMarket});
+		this.comms.broadcastUpdate({group: 'futureMarket', args: this.futuresMarket});
 	};
 
 	/**
 	 * Fisher-Yates shuffle algorithm, operates on the array in-place.
 	 *
 	 * Copied from: http://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
-	 * @param array	Array to shuffle.
+	 * @param array    Array to shuffle.
 	 * @returns {*}
 	 */
 	this.shuffle = function(array){
@@ -174,11 +174,11 @@ exports.Engine = function(){
 	 *	}
 	 *
 	 * Expected actions are:
-	 * 	startGame
-	 * 	startAuction
-	 * 	bid
-	 * 	buy
-	 * 	build.
+	 *    startGame
+	 *    startAuction
+	 *    bid
+	 *    buy
+	 *    build.
 	 *
 	 * All arguments are of the form of a CSV.
 	 *
@@ -203,8 +203,21 @@ exports.Engine = function(){
 				return;
 			}
 			console.info(uid + " executing action: " + action);
-			console.info("Action map: " + this.actions + " action: " + this.actions[action]);
-//			this.actions[action](args);
+			if(this.START_GAME == action){
+				this.startGame();
+			}
+			else if(this.START_AUCTION == action){
+				this.startAuction(data);
+			}
+			else if(this.BID == action){
+				this.placeBid(data);
+			}
+			else if(this.BUY == action){
+				this.buyResources(data);
+			}
+			else if(this.BUILD == action){
+				this.buildCities(data);
+			}
 		}
 	};
 
@@ -266,9 +279,9 @@ exports.Engine = function(){
 
 	/**
 	 * The expected data is either
-	 * 	PowerPlantCost,StartingBid
+	 *    PowerPlantCost,StartingBid
 	 * or
-	 * 	pass
+	 *    pass
 	 * @param data
 	 */
 	this.startAuction = function(data){
@@ -339,14 +352,5 @@ exports.Engine = function(){
 		if(args[0] === "pass"){
 			this.nextPlayer();
 		}
-	};
-
-	// Action map
-	this.actions = {
-		START_GAME: this.startGame,
-		START_AUCTION: this.startAuction,
-		BID: this.placeBid,
-		BUY: this.buyResources,
-		BUILD: this.buildCities
 	};
 };
