@@ -7,7 +7,7 @@ exports.Cities = function(){
 	 * String -> City
 	 * @type {Array}
 	 */
-	this.cities = [];
+	this.cities = {};
 
 	this.addCity = function(city){
 		this.cities[city.name.toLowerCase()] = city;

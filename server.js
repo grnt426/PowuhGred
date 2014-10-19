@@ -30,8 +30,7 @@ comms = new communicationsjs.Communications(io);
 io.sockets.on('connection', function(socket) {
 
     //a user connected, send the map down
-    console.log(citiesDef.cities)
-    socket.emit('definecities', "TEST");
+    socket.emit('definecities', citiesDef.cities);
 
 	// when the client emits sendchat, this listens and executes
 	socket.on('sendchat', function(data) {

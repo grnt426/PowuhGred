@@ -4,25 +4,36 @@
     </head>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
     <script src="/socket.io/socket.io.js"></script>
+
+
+    <canvas id="mapCanvas" width="2000" height="2000" style=""></canvas>
+
+
     <script>
         var socket = io();
-        var citiesDef = [];
+        var citiesDef = {};
 
         socket.on('definecities', function(data){
-
-            console.log("definecities data: ");
-            console.log(data);
             $.each(data, function(key, value){
-                console.log("key: " + key);
                 citiesDef[key] = value;
             });
-            console.log("citiesDef:");
-            console.log(citiesDef);
+
+
+            var c = document.getElementById("mapCanvas");
+            var ctx = c.getContext("2d");
+
+            $.each(citiesDef, function(key, city){
+                ctx.strokeStyle = "#444444";
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.arc(city.x, city.y, 12, 0, 360, false);
+                ctx.stroke();
+
+                ctx.font = "10px Arial";
+                ctx.fillText(city.name.toUpperCase(),city.x,city.y);
+            })
         });
-
-
     </script>
 
 
-    <canvas width="2000" height="2000" style=""></canvas>
 </html>
