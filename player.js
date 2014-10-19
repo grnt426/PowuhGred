@@ -35,4 +35,8 @@ exports.Player = function(uid, comms, socket){
 		}
 		return high;
 	};
+
+	this.updateMoney = function(){
+		this.comms.broadcastUpdate({group:'money', args:this.uid + "," + this.money});
+	};
 };

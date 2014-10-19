@@ -36,6 +36,8 @@ io.sockets.on('connection', function(socket) {
 	socket.emit('userid', uid);
     socket.emit('definecities', citiesDef.cities);
 	comms.toAll(uid + " has joined the game.");
+	comms.broadcastUpdate({group:'newPlayer', args:uid});
+
 
 	// When the client emits sendchat, this listens and executes
 	// sendchat -> String
@@ -44,16 +46,25 @@ io.sockets.on('connection', function(socket) {
 	});
 
 	// When the player does any action
-	// gameaction -> {username: 'playerX', action: 'start|bid|buy|build', args: 'arg1,arg2,...'}
+	// gameaction -> JsonObject
 	socket.on('gameaction', function(data){
 		engine.resolveAction(data);
 	});
 
-	// Handles changing a player's name.
-	// name -> String
+	/**
+	 * Handles changing a player's name.
+	 * name -> String
+	 *
+	 * updates ->
+	 * {
+	 * 	group: 'displayName',
+	 * 	args: 'playerX,name'
+	 * }
+ 	 */
 	socket.on('name', function(name) {
 		var player = engine.reverseLookUp[socket];
 		player.displayName = name;
+		comms.broadcastUpdate({group:'displayName', args:player.uid + "," + name});
 	});
 
 	// when the user disconnects
@@ -63,4 +74,5 @@ io.sockets.on('connection', function(socket) {
 	});
 });
 
+// All setup is finished, start listening for connections.
 server.listen(3000);

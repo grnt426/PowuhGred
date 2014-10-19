@@ -2,34 +2,89 @@ var playerjs = require("./player.js");
 
 exports.Engine = function(){
 
+	// Communications
 	this.comms = false;
-	this.cities = false;
-	this.plants = false;
-	this.resources = {'coal': 0, 'oil': 0, 'garbage': 0, 'uranium': 0};
-	this.playerOrder = [];
-	this.players = {};
-	this.reverseLookUp = {};
-	this.currentPlayer = false;
 
-	this.currentMarket = {};
-	this.futuresMarket = {};
+	// City Name -> City
+	this.cities = false;
+
+	// Array of PowerPlant
+	this.plants = false;
+
+	// The resources available for purchase.
+	this.resources = {'coal': 0, 'oil': 0, 'garbage': 0, 'uranium': 0};
+
+	// Array of UIDs
+	this.playerOrder = [];
+
+	// UID -> Player
+	this.players = {};
+
+	// Socket -> Player
+	this.reverseLookUp = {};
+
+	// UID
+	this.currentPlayer = false;
+	this.currentPlayerIndex = 0;
+
+	// Current plants for Auction
+	// Array of PowerPlant
+	this.currentMarket = [];
+	this.futuresMarket = [];
+
+	// Bid information
+	// Array of UIDs
+	this.currentBidders = [];
+
+	// Int
+	this.currentBid = 0;
+
+	// UID
+	this.currentBidLeader = false;
 
 	this.STARTING_MONEY = 50;
 
+	// The Step Three card
+	this.STEP_THREE = "Step3";
+
+	this.gameStarted = false;
+
+	// String
+	this.currentAction = this.START_GAME;
+
+	this.firstTurn = true;
+
+	this.START_GAME = "startGame";
+	this.START_AUCTION = "startAuction";
+	this.BID = "bid";
+	this.BUY = "buy";
+	this.BUILD = "build";
+
 	// Action map
 	this.actions = {
-		start: this.startAuction,
-		bid: this.placeBid,
-		buy: this.buyResources,
-		build: this.buildCities
+		START_GAME: this.startGame,
+		START_AUCTION: this.startAuction,
+		BID: this.placeBid,
+		BUY: this.buyResources,
+		BUILD: this.buildCities
 	};
 
-	this.startGame = function(){
-		this.setNumberOfPlayers(this.players.length);
+	/**
+	 * No args needed to start the game
+	 * @param args	Ignored.
+	 */
+	this.startGame = function(args){
+		if(this.gameStarted){
+			return;
+		}
+		this.gameStarted = true;
 		this.setupStartingResources();
 		this.randomizePlayerOrder();
 		this.currentPlayer = this.playerOrder[0];
+		this.comms.broadcastUpdate({group:'currentPlayer', args:this.currentPlayer});
 		this.setupMarket();
+		this.currentAction = this.START_AUCTION;
+		this.comms.broadcastUpdate({group:'currentAction', args:this.currentAction})
 	};
 
 	this.setupStartingResources = function(){
@@ -37,6 +92,7 @@ exports.Engine = function(){
 		this.resources['oil'] = 18;
 		this.resources['garbage'] = 6;
 		this.resources['uranium'] = 2;
+		this.comms.broadcastUpdate({group:'resourcePool', args:this.resources});
 	};
 
 	this.addPlayer = function(uid, socket){
@@ -45,10 +101,7 @@ exports.Engine = function(){
 		this.playerOrder.push(uid);
 		this.reverseLookUp[socket] = player;
 		player.money = this.STARTING_MONEY;
-	};
-
-	this.setNumberOfPlayers = function(count){
-		this.playerOrder.splice(count);
+		player.updateMoney();
 	};
 
 	/**
@@ -56,6 +109,7 @@ exports.Engine = function(){
 	 */
 	this.randomizePlayerOrder = function(){
 		this.shuffle(this.playerOrder);
+		this.comms.broadcastUpdate({group:'playerOrder', args:this.playerOrder});
 	};
 
 	/**
@@ -69,10 +123,21 @@ exports.Engine = function(){
 				? a.cities.length - b.cities.length
 				: a.getHighestCostPowerPlant() - b.getHighestCostPowerPlant()
 		});
+		this.comms.broadcastUpdate({group:'playerOrder', args:this.playerOrder});
 	};
 
+	/**
+	 * This assumes the plants are in ascending order by cost.
+	 */
 	this.setupMarket = function(){
-
+		this.currentMarket = this.plants.splice(0, 4);
+		this.futuresMarket = this.plants.splice(0, 4);
+		var topPlant = this.plants.splice(2, 1);
+		this.shuffle(this.plants);
+		this.plants.splice(0, 0, topPlant);
+		this.plants.push(this.STEP_THREE);
+		this.comms.broadcastUpdate({group:'actualMarket', args:this.currentMarket});
+		this.comms.broadcastUpdate({group:'futureMarket', args:this.futuresMarket});
 	};
 
 	/**
@@ -101,6 +166,27 @@ exports.Engine = function(){
 		return array;
 	};
 
+	/**
+	 * Expects a JSON object describing the action a player took.
+	 *
+	 * Object Format:
+	 * {
+	 * 		username: 'playerX',
+	 * 		action: 'action',
+	 *		args: 'arg1,arg2,...'
+	 *	}
+	 *
+	 * Expected actions are:
+	 * 	startGame
+	 * 	startAuction
+	 * 	bid
+	 * 	buy
+	 * 	build.
+	 *
+	 * All arguments are of the form of a CSV.
+	 *
+	 * @param data
+	 */
 	this.resolveAction = function(data){
 		var dataObj = JSON.parse(data);
 		var uid = dataObj.uid;
@@ -113,23 +199,132 @@ exports.Engine = function(){
 			this.comms.toPlayer(player, "Not your turn.");
 		}
 		else{
+			if(this.currentAction !== action){
+				this.comms.toPlayer(player, "Not expecting that action.");
+				return;
+			}
 			this.actions[action](args);
 		}
 	};
 
-	this.startAuction = function(data){
+	/**
+	 * Progresses to the next player, or starts the next Action.
+	 */
+	this.nextPlayer = function(){
+		var turnOrder = -1;
+		if(this.currentAction == this.START_AUCTION)
+			turnOrder = 1;
 
+		this.currentPlayerIndex = this.currentPlayerIndex + turnOrder;
+		if(this.currentPlayerIndex < this.players.length){
+			this.currentPlayer = this.playerOrder[this.currentPlayerIndex];
+		}
+		else{
+			this.currentPlayerIndex = this.players.length;
+			if(this.firstTurn){
+				this.resolveTurnOrder();
+				this.firstTurn = false;
+			}
+			this.currentPlayer = this.playerOrder[0];
+			this.nextAction();
+		}
+		this.comms.broadcastUpdate({group: 'currentPlayer', args: this.currentPlayer});
+	};
+
+	this.nextAction = function(){
+		if(this.currentAction == this.START_AUCTION)
+			this.currentAction = this.BUY;
+		else if(this.currentAction == this.BUY)
+			this.currentAction = this.BUILD;
+		else
+			this.getMoney();
+		this.comms.broadcastUpdate({group: 'currentAction', args: this.currentAction});
+	};
+
+	this.getMoney = function(){
+
+		// Give out money
+
+		this.resolveTurnOrder();
+
+		// Handle Step 2
+
+		// Handle Step 3
+
+		// Start the next auction
+		this.currentAction = this.START_AUCTION;
+		this.currentPlayerIndex = 0;
+		this.currentPlayer = this.playerOrder[this.currentPlayerIndex];
+	};
+
+	/**
+	 * The expected data is either
+	 * 	PowerPlantCost,StartingBid
+	 * or
+	 * 	pass
+	 * @param data
+	 */
+	this.startAuction = function(data){
+		var args = data.split(",");
+		if(args.length < 1 || args.length > 2){
+			// sanity error
+			return;
+		}
+
+		if(args[0] === "pass"){
+			this.nextPlayer();
+		}
+		else{
+			var plant = args[0];
+			var bid = args[1];
+			if(bid < plant){
+				// Reject bid
+				this.comms.toPlayer(this.players[this.currentPlayer], "bid too low.");
+				return;
+			}
+
+			var player = this.players[this.currentPlayer];
+			if(bid > player.money){
+				// Reject bid
+				this.comms.toPlayer(this.players[this.currentPlayer], "not enough money.");
+				return;
+			}
+
+			this.currentBid = bid;
+			this.currentBidLeader = player.uid;
+		}
 	};
 
 	this.placeBid = function(data){
-
+		var args = data.split(",");
+		if(args.length != 1){
+			// sanity error
+			return;
+		}
+		if(args[0] === "pass"){
+			this.nextPlayer();
+		}
 	};
 
 	this.buyResources = function(data){
-
+		var args = data.split(",");
+		if(args.length != 3 && args.length != 1){
+			// sanity error
+			return;
+		}
+		if(args[0] === "pass"){
+			this.nextPlayer();
+		}
 	};
 
 	this.buildCities = function(data){
-
+		var args = data.split(",");
+		if(args.length != 1){
+			// sanity error
+			return;
+		}
+		if(args[0] === "pass"){
+			this.nextPlayer();
+		}
 	};
 };

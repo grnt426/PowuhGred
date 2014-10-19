@@ -8,7 +8,7 @@ exports.Communications = function(io){
 	this.CHAT = 'updatechat';
 
 	// Game commands
-
+	this.UPDATES = "updates";
 
 	// Names of "hosts" sending the messages
 	this.SERVER = 'SERVER';
@@ -115,6 +115,8 @@ exports.Communications = function(io){
 	};
 
 	/**
+	 * Not Used.
+	 *
 	 * Updates a player's gamestate client side.
 	 *
 	 * @param player	The player to update.
@@ -134,8 +136,8 @@ exports.Communications = function(io){
 	 * @param command	The command to update with.
 	 * @param msg		THe message contents for the client.
 	 */
-	this.broadcastCommand = function(command, msg){
-		io.sockets.emit(command, msg);
+	this.broadcastUpdate = function(dataObj){
+		io.sockets.emit(dataObj);
 	};
 };
 
