@@ -36,7 +36,7 @@ io.sockets.on('connection', function(socket) {
 	socket.emit('userid', uid);
     socket.emit('definecities', citiesDef.cities);
 	comms.toAll(uid + " has joined the game.");
-	comms.broadcastUpdate({group:'newPlayer', args:uid});
+	comms.broadcastUpdate({group:'newPlayer', args:{uid:uid}});
 
 
 	// When the client emits sendchat, this listens and executes
@@ -68,7 +68,7 @@ io.sockets.on('connection', function(socket) {
 		console.info(this.DEBUG + " " + name);
 		var player = engine.reverseLookUp[socket];
 		player.displayName = name;
-		comms.broadcastUpdate({group:'displayName', args:player.uid + "," + name});
+		comms.broadcastUpdate({group:'displayName', args:{uid:player.uid, displayName:name}});
 	});
 
 	// when the user disconnects

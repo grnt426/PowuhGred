@@ -37,6 +37,6 @@ exports.Player = function(uid, comms, socket){
 	};
 
 	this.updateMoney = function(){
-		this.comms.broadcastUpdate({group:'money', args:this.uid + "," + this.money});
+		this.comms.broadcastUpdate({group:'money', args:{uid:this.uid, money:this.money}});
 	};
 };

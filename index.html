@@ -21,7 +21,7 @@
         var mapCanvas = document.getElementById("mapCanvas");
         var ctx = mapCanvas.getContext("2d");
 
-        var consoletext = "Console:";
+        var consoletext = "Console:\n";
         var log = function(str) { console.log(str); consoletext += str + "\n"; redraw(); };
 
         var externalX = function (x) { return x * 1.1 - 5;  };
@@ -84,7 +84,7 @@
             button.width = w;
             button.height = h;
             buttonArray[disp] = button;
-        }
+        };
 
         // store user id
         socket.on('userid', function(data) {userid = data});
@@ -105,8 +105,82 @@
 
         socket.on('updates', function(data) {
             log("RECEIVED on updates:");
-			log(data.group + " " + data.args);
+			if(data.group == "resourcePool"){
+				updateResources(data.args);
+			}
+			else if(data.group == "playerOrder"){
+				updatePlayerOrder(data.args);
+			}
+			else if(data.group == "currentPlayer"){
+				updateCurrentPlayer(data.args);
+			}
+			else if(data.group == "actualMarket"){
+				updateActualMarket(data.args);
+			}
+			else if(data.group == "futureMarket"){
+				updateFutureMarket(data.args);
+			}
+			else if(data.group == "currentAction"){
+				updateCurrentAction(data.args);
+			}
+			else if(data.group == "money"){
+				updateMoney(data.args);
+			}
+			else if(data.group == "newPlayer"){
+				updateNewPlayer(data.args);
+			}
+			else if(data.group == "name"){
+				updatePlayerName(data.args);
+			}
+			else{
+				log("'" + data.group + "' has no handler!");
+			}
         });
+
+		var updateResources = function(data){
+			log("Oil: " + data.oil + " - Coal: " + data.coal
+					+ " - Garbage: " + data.garbage + " - Uranium: " + data.uranium);
+		};
+
+		var updatePlayerOrder = function(data){
+			log("Player Order: " + data);
+		};
+
+		var updateCurrentPlayer = function(data){
+			log("Current Player: " + data);
+		};
+
+		var updateActualMarket = function(data){
+			log("Actual Market =>");
+			for(var m in data){
+				log("Cost: " + data[m].cost + " Type: " + data[m].type
+					+ " Requires: " + data[m].requires + " Powers: " + data[m].powers);
+			}
+		};
+
+		var updateFutureMarket = function(data){
+			log("Future Market =>");
+			for(var m in data){
+				log("Cost: " + data[m].cost + " Type: " + data[m].type
+					+ " Requires: " + data[m].requires + " Powers: " + data[m].powers);
+			}
+		};
+
+		var updateCurrentAction = function(data){
+			log("Current Action: " + data)
+		};
+
+		var updateMoney = function(data){
+			log(data.uid + " now has " + data.money + " money");
+		};
+
+		var updateNewPlayer = function(data){
+			log(data.uid + " has joined the game");
+		};
+
+		var updatePlayerName = function(data){
+			log(data.uid + " has changed their name to " + data.displayName);
+		};
 
         var redraw = function() {
             ctx.drawImage(bgImg, 0, 0);
@@ -171,7 +245,7 @@
                 ctx.font = "10px Arial";
                 ctx.fillText(btn.disp,externalX(btn.x+6),externalY(btn.y+btn.height-4));
             });
-        }
+        };
 
         var sqrDist = function(x1,x2,y1,y2) { return Math.pow(x1-x2,2)+Math.pow(y1-y2,2) }
 
