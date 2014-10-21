@@ -44,6 +44,15 @@ exports.Engine = function(){
 	// Int
 	this.currentBid = 0;
 
+	// Int
+	this.currentPlayerBidIndex = -1;
+
+	// Int
+	this.currentBidChoice = -1;
+
+	// UID
+	this.currentBidder = false;
+
 	// UID
 	this.currentBidLeader = false;
 
@@ -190,7 +199,13 @@ exports.Engine = function(){
 		var args = data.args;
 		var player = this.players[uid];
 
-		if(this.currentPlayer !== false && uid !== this.currentPlayer){
+		// TODO: compress the boolean logic
+		if(this.currentPlayer !== false && uid !== this.currentPlayer && this.currentAction != this.BID){
+			// for now, we only support listening to the current player
+			console.info(uid + " tried taking their turn when not theirs!");
+			this.comms.toPlayer(player, "Not your turn.");
+		}
+		else if(this.currentAction == this.BID && uid != this.currentBidder){
 			// for now, we only support listening to the current player
 			console.info(uid + " tried taking their turn when not theirs!");
 			this.comms.toPlayer(player, "Not your turn.");
@@ -207,16 +222,16 @@ exports.Engine = function(){
 				this.startGame();
 			}
 			else if(this.START_AUCTION == action){
-				this.startAuction(data);
+				this.startAuction(data.args);
 			}
 			else if(this.BID == action){
-				this.placeBid(data);
+				this.placeBid(data.args);
 			}
 			else if(this.BUY == action){
-				this.buyResources(data);
+				this.buyResources(data.args);
 			}
 			else if(this.BUILD == action){
-				this.buildCities(data);
+				this.buildCities(data.args);
 			}
 		}
 	};
@@ -247,8 +262,11 @@ exports.Engine = function(){
 
 	// TODO use a different order
 	this.nextBidder = function(){
-		this.currentPlayerIndex = (this.currentPlayerIndex + 1) % this.players.length;
-		this.currentPlayer = this.playerOrder[this.currentPlayerIndex];
+		console.info(this.currentBidder + " index: " + this.currentPlayerBidIndex);
+		this.currentPlayerBidIndex = (this.currentPlayerBidIndex + 1) % this.currentBidders.length;
+		this.currentBidder = this.currentBidders[this.currentPlayerBidIndex];
+		console.info(this.currentBidder + " index: " + this.currentPlayerBidIndex);
+		this.comms.broadcastUpdate({group:'currentBidder',args:{uid:this.currentBidder}});
 	};
 
 	this.nextAction = function(){
@@ -279,57 +297,75 @@ exports.Engine = function(){
 
 	/**
 	 * The expected data is either
-	 *    PowerPlantCost,StartingBid
+	 *    {cost:PowerPlantCost,bid:StartingBid}
 	 * or
 	 *    pass
 	 * @param data
 	 */
 	this.startAuction = function(data){
-		var args = data.split(",");
-		if(args.length < 1 || args.length > 2){
-			// sanity error
-			return;
-		}
 
-		if(args[0] === "pass"){
+		if(data === "pass"){
 			this.finishedBidding.push(this.currentPlayer);
 			this.nextPlayer();
 		}
 		else{
-			var plant = args[0];
-			var bid = args[1];
+			console.info(data);
+			var player = this.players[this.currentPlayer];
+			var plant = data.cost;
+			var bid = data.bid;
 			if(bid < plant){
 				// Reject bid
-				this.comms.toPlayer(this.players[this.currentPlayer], "bid too low.");
+				this.comms.toPlayer(player, "bid too low.");
 				return;
 			}
 
-			var player = this.players[this.currentPlayer];
 			if(bid > player.money){
 				// Reject bid
-				this.comms.toPlayer(this.players[this.currentPlayer], "not enough money.");
+				this.comms.toPlayer(player, "not enough money.");
 				return;
 			}
 
 			this.currentBid = bid;
+			this.currentBidChoice = plant;
 			this.currentBidLeader = player.uid;
 			this.currentAction = this.BID;
+
 			for(var key in this.players){
-				if(this.finishedBidding.indexOf(this.players[key].uid) != -1)
+				console.info("Eligible? " + this.finishedBidding.indexOf(this.players[key].uid));
+				if(this.finishedBidding.indexOf(this.players[key].uid) == -1)
 					this.currentBidders.push(this.players[key].uid);
 			}
+			this.currentPlayerBidIndex = this.currentBidders.indexOf(player.uid);
+			this.comms.broadcastUpdate({group:'auctionStart',
+				args:{uid:player.uid,cost:plant,bid:bid}});
+			this.nextBidder();
 		}
 	};
 
 	this.placeBid = function(data){
-		var args = data.split(",");
-		if(args.length != 1){
-			// sanity error
+		if(data === "pass"){
+			this.nextBidder();
 			return;
 		}
-		if(args[0] === "pass"){
-			this.nextBidder();
+
+		var bid = data.bid;
+		if(bid < this.currentBid){
+			// reject bid
+			this.comms.toPlayer(this.players[this.currentBidder], "bid too low.");
+			return;
 		}
+
+		var player = this.players[this.currentBidder];
+		if(bid > player.money){
+			// Reject bid
+			this.comms.toPlayer(player, "not enough money.");
+			return;
+		}
+
+		this.currentBid = bid;
+		this.currentBidLeader = player.uid;
+		this.comms.broadcastUpdate({group:'bid',args:{uid:player.uid,bid:bid}});
+		this.nextBidder();
 	};
 
 	this.buyResources = function(data){

@@ -132,6 +132,15 @@
 			else if(data.group == "name"){
 				updatePlayerName(data.args);
 			}
+			else if(data.group == "auctionStart"){
+				updateStartAuction(data.args);
+			}
+			else if(data.group == "bid"){
+				updateNewBid(data.args);
+			}
+			else if(data.group == "currentBidder"){
+				updateCurrentBidder(data.args);
+			}
 			else{
 				log("'" + data.group + "' has no handler!");
 			}
@@ -180,6 +189,19 @@
 
 		var updatePlayerName = function(data){
 			log(data.uid + " has changed their name to " + data.displayName);
+		};
+
+		var updateStartAuction = function(data){
+			log(data.uid + " has started an auction on power plant: "
+					+ data.cost + " with bid " + data.bid);
+		};
+
+		var updateNewBid = function(data){
+			log(data.uid + " placed a new bid of " + data.bid);
+		};
+
+		var updateCurrentBidder = function(data){
+			log(data.uid + " must now place a bid or pass");
 		};
 
         var redraw = function() {
@@ -271,7 +293,9 @@
 
         // createButton( Display, Cmd, Args, x,y,w,h);
         createButton("startGame","startGame","",720,90,60,12);
-        createButton("pass","pass","",785,90,60,12);
+        createButton("pass","pass","",785,90,40,12);
+		createButton("Start Auction","startAuction",{cost:3,bid:3},830,90,80,12);
+		createButton("Bid","bid",{bid:4},915,90,30,12);
 
     </script>
 
