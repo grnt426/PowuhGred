@@ -49,7 +49,6 @@ io.sockets.on('connection', function(socket) {
 	// When the player does any action
 	// gameaction -> JsonObject
 	socket.on('gameaction', function(data){
-		engine.setupStartingResources();
 		console.info(data.uid + " " + data.cmd);
 		engine.resolveAction(data);
 	});
