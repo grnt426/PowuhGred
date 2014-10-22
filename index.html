@@ -10,6 +10,8 @@
 
 
     <script>
+		var DEBUG = false;
+
         var socket = io();
         var citiesDef = {};
         var userid = "NO USER ID";
@@ -242,14 +244,16 @@
                 ctx.strokeStyle = "#444444";
                 ctx.fillStyle = "#FFFFFF";
                 ctx.lineWidth = 2;
-                ctx.beginPath();
-                var x = externalX(city.x);
-                var y = externalY(city.y);
-                ctx.arc(x, y, 20, 0, 360, false);
-                ctx.stroke();
+				if(DEBUG){
+					ctx.beginPath();
+					var x = externalX(city.x);
+					var y = externalY(city.y);
+					ctx.arc(x, y, 20, 0, 360, false);
+					ctx.stroke();
 
-                ctx.font = "10px Arial";
-                ctx.fillText(city.name.toUpperCase(),x,y);
+					ctx.font = "10px Arial";
+					ctx.fillText(city.name.toUpperCase(),x,y);
+				}
             });
 
             // draw internal resource grid
@@ -263,12 +267,15 @@
                 if(box.type==="garbage") {ctx.strokeStyle = ctx.fillStyle = "#FFFF19";}
                 ctx.lineWidth = 1;
 
-				// Draw debug box
-//                ctx.beginPath();
-                var x = externalX(box.x);
-                var y = externalY(box.y);
-//                ctx.rect(x,y,box.size,box.size);
-//                ctx.stroke();
+
+				var x = externalX(box.x);
+				var y = externalY(box.y);
+
+				if(DEBUG){
+					ctx.beginPath();
+					ctx.rect(x, y, box.size, box.size);
+					ctx.stroke();
+				}
 
 				// Draw resource unit
 				if(box.type == "coal" && key % regular  >= 24 - resources.coal){
