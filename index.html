@@ -17,12 +17,26 @@
 
         var bgImg = new Image();
         bgImg.src = "./data/germany.jpg";
+		var plantImg = new Image();
+		plantImg.src = "./data/plants.jpg";
 
         var mapCanvas = document.getElementById("mapCanvas");
         var ctx = mapCanvas.getContext("2d");
 
-        var consoletext = "Console:\n";
-        var log = function(str) { console.log(str); consoletext += str + "\n"; redraw(); };
+        var consoleHeader = "Console:\n";
+		var consoleText = "";
+		var consoleHistory = [];
+        var log = function(str) {
+			console.log(str);
+			consoleHistory.push(str);
+			if(consoleHistory.length > 15)
+				consoleHistory.splice(0, 1);
+			consoleText = consoleHeader;
+			for(var line in consoleHistory){
+				consoleText += consoleHistory[line] + "\n";
+			}
+			redraw();
+		};
 
         var externalX = function (x) { return x * 1.1 - 5;  };
         var externalY = function (y) { return y * 1.1 - 96; };
@@ -253,7 +267,7 @@
             ctx.fillRect(800,40,600,600);
             ctx.fillStyle = "#000000";
             ctx.font = "10px Arial";
-            txt = consoletext.split("\n");
+            var txt = consoleText.split("\n");
             $.each(txt, function(index, chunk) {
                 ctx.fillText(chunk,800,40+15*index);
             });
@@ -267,6 +281,10 @@
                 ctx.font = "10px Arial";
                 ctx.fillText(btn.disp,externalX(btn.x+6),externalY(btn.y+btn.height-4));
             });
+
+			ctx.drawImage(plantImg, ppp[38].x * pppWidth, ppp[38].y * pppHeight,
+					pppWidth, pppHeight,
+					0, 0, pppWidth, pppHeight);
         };
 
         var sqrDist = function(x1,x2,y1,y2) { return Math.pow(x1-x2,2)+Math.pow(y1-y2,2) }
