@@ -14,16 +14,30 @@
 
 		var currentActionState = "unstarted";
 
-		var UNSTARTED_F =	1;
-		var AUCTION_F =		2;
-		var BID_F = 		4;
-		var RESOURCE_F = 	8;
-		var CITY_F =		16;
-		var MONEY_F =		32;
+		var UNSTARTED_F =	1;              //bitwise 000001
+		var AUCTION_F =		2;              //bitwise 000010
+		var BID_F = 		4;              //bitwise 000100
+		var RESOURCE_F = 	8;              //bitwise 001000
+		var CITY_F =		16;             //bitwise 010000
+		var MONEY_F =		32;             //bitwise 100000
 
+        //initiates Color Vars
+        var WHITE =     "#FFFFFF";
+        var BLACK =     "#000000";
+        var GRAY =      "#444444";
+        var BROWN =     "#452E17";
+        var BLUE =      "#0000FF";
+        var LTBLUE =    "#00B8E6";
+        var GREEN =     "#009900";
+        var LTGREEN =   "#00CC00";
+        var YELLOW =    "#FFFF19";
+        var PINK =      "#FF6699";
+        var ORANGE =    "#DD6622";
+
+        // Not sure what these do yet
 		var ACTIONS_FLAGS = [];
 		ACTIONS_FLAGS[currentActionState] = UNSTARTED_F;
-		ACTIONS_FLAGS["startAuction"] = AUCTION_F | BID_F;
+		ACTIONS_FLAGS["startAuction"] = AUCTION_F | BID_F;  //| is bitwise OR command, 000010 OR 000100 = 000110 => 6
 		ACTIONS_FLAGS["bid"] = BID_F;
 		ACTIONS_FLAGS["buyResources"] = RESOURCE_F;
 		ACTIONS_FLAGS["buyCities"] = CITY_F;
@@ -35,7 +49,7 @@
         var selectedCity;
 
 		var selectedBid = 0;
-		var selectedPlant = 0;
+		var selectedPlant = -1;
 
 		// Global stuff
 		var resources = {};
@@ -45,17 +59,23 @@
 		// Player stuff
 		var ownedPlants = [];
 
+        // Initialize images for Map and PowerPlant Cards
+        // Power Plant cards are located all in one .jpg with specific format labeled below
         var bgImg = new Image();
         bgImg.src = "./data/germany.jpg";
 		var plantImg = new Image();
 		plantImg.src = "./data/plants.jpg";
 
+        // mapCanvas is map image area
         var mapCanvas = document.getElementById("mapCanvas");
-        var ctx = mapCanvas.getContext("2d");
+        var ctx = mapCanvas.getContext("2d");           // NOTSURE: what is context?
 
+        // initializations and functions for console input/output
         var consoleHeader = "Console:\n";
 		var consoleText = "";
 		var consoleHistory = [];
+        // This function used to add to output of chat panel in game
+        // NOTSURE: could be used only for debugging
         var log = function(str) {
 			console.log(str);
 			consoleHistory.push(str);
@@ -68,6 +88,7 @@
 			redraw();
 		};
 
+        //Used to transform between external and internal coordinates (must be for map)
         var externalX = function (x) { return x * 1.1 - 5;  };
         var externalY = function (y) { return y * 1.1 - 96; };
         var internalX = function (x) { return (x + 5) / 1.1;  };
@@ -76,6 +97,7 @@
         var resourceGrid = {};
 
 		// V V V Talk to Kyle before changing ANYTHING V V V
+        // black changed so Duplicate Vars bs wouldn't keep showing up
         for(var i = 0; i < 24; i++) {
             var box = {};
             box.type = "coal";
@@ -84,24 +106,24 @@
             box.y = internalY(949);
             resourceGrid[i] = box;
         }
-        for(var i = 0; i < 24; i++) {
-            var box = {};
+        for(i = 0; i < 24; i++) {
+            box = {};
             box.type = "oil";
             box.size = 17;
             box.x = internalX((i * (box.size)) + (~~(i / 3) * 29) + 37);
             box.y = internalY(971);
             resourceGrid[i+24] = box;
         }
-        for(var i = 0; i < 24; i++) {
-            var box = {};
+        for(i = 0; i < 24; i++) {
+            box = {};
             box.type = "garbage";
             box.size = 22;
             box.x = internalX((i * (box.size+3)) + (~~(i / 3) * 5) + 37);
             box.y = internalY(990);
             resourceGrid[i+48] = box;
         }
-        for(var i = 0; i < 8; i++) {
-            var box = {};
+        for(i = 0; i < 8; i++) {
+            box = {};
             box.type = "uranium";
             if(i <= 9) {
                 box.size = 17;
@@ -110,8 +132,8 @@
             }
             resourceGrid[i+72] = box;
         }
-        for(var i = 0; i < 4; i++) {
-            var box = {};
+        for(i = 0; i < 4; i++) {
+            box = {};
             box.type = "uranium";
             box.size = 25;
             box.x = internalX(((i%2) * (box.size+6)) + 678);
@@ -120,6 +142,9 @@
         }
 		// ^ ^ ^ OK, YOU CAN DO SHIT NOW ^ ^ ^
 
+        // initializes buttonArray and function for making buttons
+        // solely for buttons at top of window (start game, bidding, etc.)
+        // Disp is string displayed on button, NOTSURE: what listener/flags do
         var buttonArray = {};
         var createButton = function(disp,listener,flags) {
             var button = {};
@@ -150,6 +175,7 @@
             };
         });
 
+        // NOTSURE: what the data format for input is
         socket.on('updates', function(data) {
             log("RECEIVED on updates:");
 			if(data.group == "resourcePool"){
@@ -199,14 +225,17 @@
 			resources = data;
 		};
 
+        // Currently only outputs log
 		var updatePlayerOrder = function(data){
 			log("Player Order: " + data);
 		};
 
+        // Currently only outputs log
 		var updateCurrentPlayer = function(data){
 			log("Current Player: " + data);
 		};
 
+        // Outputs Log, and changes actual market, data looks like power plant data
 		var updateActualMarket = function(data){
 			log("Actual Market =>");
 			actualMarket = [];
@@ -217,6 +246,7 @@
 			}
 		};
 
+        // Outputs Log, changes future market, data looks like power plant data
 		var updateFutureMarket = function(data){
 			log("Future Market =>");
 			futureMarket = [];
@@ -232,40 +262,47 @@
 			currentActionState = data;
 		};
 
+        // Currently only Outputs a Log
 		var updateMoney = function(data){
 			log(data.uid + " now has " + data.money + " money");
 		};
 
+        // Currently only Outputs a Log
 		var updateNewPlayer = function(data){
 			log(data.uid + " has joined the game");
 		};
 
+        // Currently only Outputs a Log
 		var updatePlayerName = function(data){
 			log(data.uid + " has changed their name to " + data.displayName);
 		};
 
+        // Currently only Outputs a Log
 		var updateStartAuction = function(data){
 			log(data.uid + " has started an auction on power plant: "
 					+ data.cost + " with bid " + data.bid);
 		};
 
+        // Currently only Outputs a Log
 		var updateNewBid = function(data){
 			log(data.uid + " placed a new bid of " + data.bid);
 		};
 
+        // Currently only Outputs a Log
 		var updateCurrentBidder = function(data){
 			log(data.uid + " must now place a bid or pass");
 		};
 
         var redraw = function() {
-			ctx.fillStyle = "#FFFFFF";
+            // Fills background with white
+			ctx.fillStyle = WHITE;
 			ctx.fillRect(0,0,1680,1050);
             ctx.drawImage(bgImg, 0, 0);
 
             // draw internal city map
             $.each(citiesDef, function(key, city){
-                ctx.strokeStyle = "#444444";
-                ctx.fillStyle = "#FFFFFF";
+                ctx.strokeStyle = GRAY;
+                ctx.fillStyle = WHITE;
                 ctx.lineWidth = 2;
 				if(DEBUG){
 					ctx.beginPath();
@@ -283,11 +320,11 @@
 			var regular = 24;
 			var uranium = 12;
             $.each(resourceGrid, function(key,box) {
-                ctx.strokeStyle = "#0000FF";
-                if(box.type==="coal") {ctx.strokeStyle = ctx.fillStyle = "#452E17";}
-                if(box.type==="oil") {ctx.strokeStyle = ctx.fillStyle = "#000000";}
-                if(box.type==="uranium") {ctx.strokeStyle = ctx.fillStyle = "#00CC00";}
-                if(box.type==="garbage") {ctx.strokeStyle = ctx.fillStyle = "#FFFF19";}
+                ctx.strokeStyle = BLUE;
+                if(box.type==="coal") {ctx.strokeStyle = ctx.fillStyle = BROWN;}
+                if(box.type==="oil") {ctx.strokeStyle = ctx.fillStyle = BLACK;}
+                if(box.type==="uranium") {ctx.strokeStyle = ctx.fillStyle = PINK;}
+                if(box.type==="garbage") {ctx.strokeStyle = ctx.fillStyle = YELLOW;}
                 ctx.lineWidth = 1;
 
 
@@ -321,7 +358,7 @@
 
             // highlight selected city
             if(selectedCity) {
-                ctx.strokeStyle = "#DD6622";
+                ctx.strokeStyle = ORANGE;
                 ctx.lineWidth = 3;
                 ctx.beginPath();
                 var x = externalX(selectedCity.x);
@@ -330,20 +367,22 @@
                 ctx.stroke();
             }
 
-			if(selectedPlant){
-				ctx.strokeStyle = "#DD6622";
-				ctx.lineWidth = 3;
+            // draws a selection box on a plant if it's selected (not selected = -1)
+			if(selectedPlant>=0){
+				ctx.strokeStyle = ORANGE;
+				ctx.lineWidth = 5;
 				ctx.beginPath();
-				var x = externalX(805 + actualMarket.indexOf(selectedPlant) * 114);
-				var y = externalY(295);
+				x = (800 + (selectedPlant * 120)); //Changed 114 => 120 to account for spaces
+				y = 300;
 				ctx.strokeRect(x, y, 114, 114);
 				ctx.stroke();
+                ctx.stroke();
 			}
 
             // console output
-            ctx.fillStyle = "#FFFFFF";
+            ctx.fillStyle = WHITE;
             ctx.fillRect(800,600,600,600);
-            ctx.fillStyle = "#000000";
+            ctx.fillStyle = BLACK;
             ctx.font = "10px Arial";
             var txt = consoleText.split("\n");
             $.each(txt, function(index, chunk) {
@@ -361,12 +400,12 @@
 			}
 
 			// Draw the actual market
-			var count = 0;
-			ctx.strokeStyle = "#00B8E6";
+			count = 0;
+			ctx.strokeStyle = LTBLUE;
 			ctx.lineWidth = 1;
 			ctx.strokeRect(794, 294, 4 * 120 + 7, 125);
-			for(var p in actualMarket){
-				var cost = actualMarket[p];
+			for(p in actualMarket){
+				cost = actualMarket[p];
 				ctx.drawImage(plantImg, ppp[cost].x * pppWidth, ppp[cost].y * pppHeight,
 									pppWidth, pppHeight,
 									800 + count * 120, 300, pppWidth, pppHeight);
@@ -375,10 +414,10 @@
 
 			// Draw the future market
 			count = 0;
-			ctx.strokeStyle = "#FF6699";
+			ctx.strokeStyle = PINK;
 			ctx.strokeRect(794, 444, 4 * 120 + 7, 125);
-			for(var p in futureMarket){
-				var cost = futureMarket[p];
+			for(p in futureMarket){
+				cost = futureMarket[p];
 				ctx.drawImage(plantImg, ppp[cost].x * pppWidth, ppp[cost].y * pppHeight,
 									pppWidth, pppHeight,
 									800 + count * 120, 450, pppWidth, pppHeight);
@@ -387,7 +426,7 @@
 
 
             // draw buttons
-			ctx.fillStyle = "#FFFFFF";
+			ctx.fillStyle = WHITE;
 			var currentWidth = 800;
 			var bufferSpace = 5;
             for(key in buttonArray) {
@@ -396,8 +435,8 @@
 				var cur = ACTIONS_FLAGS[currentActionState];
 				var flag = btn.flags;
 				if((cur & flag) > 0){
-					ctx.fillStyle = "#009900";
-					ctx.strokeStyle = "#009900";
+					ctx.fillStyle = GREEN;
+					ctx.strokeStyle = GREEN;
 					ctx.lineWidth = 1;
 					var pos = currentWidth;
 					btn.x = pos;
@@ -422,7 +461,7 @@
 
 			log("Click: " + x + ", " + y);
 
-			selectedPlant = null;
+			selectedPlant = -1;
 			selectedCity = null;
 
             for(key in buttonArray) {
@@ -434,7 +473,8 @@
             }
 
 			if(x > 800 && x < 1280 && y > 300 && y < 420){
-				selectedPlant = Math.floor((1280 - x) / 114);
+				selectedPlant = 3-(Math.floor((1280 - x) / 114));
+                redraw();           // I don't believe this should need to be here but it does.
 				return;
 			}
 
