@@ -393,7 +393,9 @@
             for(key in buttonArray) {
 				var btn = buttonArray[key];
 
-				if(ACTIONS_FLAGS[currentActionState] && btn.flags > 0){
+				var cur = ACTIONS_FLAGS[currentActionState];
+				var flag = btn.flags;
+				if((cur & flag) > 0){
 					ctx.fillStyle = "#009900";
 					ctx.strokeStyle = "#009900";
 					ctx.lineWidth = 1;
