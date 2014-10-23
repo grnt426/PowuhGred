@@ -12,10 +12,30 @@
     <script>
 		var DEBUG = false;
 
+		var currentActionState = "unstarted";
+
+		var UNSTARTED_F =	1;
+		var AUCTION_F =		2;
+		var BID_F = 		4;
+		var RESOURCE_F = 	8;
+		var CITY_F =		16;
+		var MONEY_F =		32;
+
+		var ACTIONS_FLAGS = [];
+		ACTIONS_FLAGS[currentActionState] = UNSTARTED_F;
+		ACTIONS_FLAGS["startAuction"] = AUCTION_F | BID_F;
+		ACTIONS_FLAGS["bid"] = BID_F;
+		ACTIONS_FLAGS["buyResources"] = RESOURCE_F;
+		ACTIONS_FLAGS["buyCities"] = CITY_F;
+		ACTIONS_FLAGS["moneyPhase"] = MONEY_F;
+
         var socket = io();
         var citiesDef = {};
         var userid = "NO USER ID";
-        var selected;
+        var selectedCity;
+
+		var selectedBid = 0;
+		var selectedPlant = 0;
 
 		// Global stuff
 		var resources = {};
@@ -101,15 +121,15 @@
 		// ^ ^ ^ OK, YOU CAN DO SHIT NOW ^ ^ ^
 
         var buttonArray = {};
-        var createButton = function(disp,cmd,args,x,y,w,h) {
+        var createButton = function(disp,listener,flags) {
             var button = {};
             button.disp = disp;
-            button.cmd = cmd;
-            button.args = args;
-            button.x = x;
-            button.y = y;
-            button.width = w;
-            button.height = h;
+            button.listener = listener;
+			button.flags = flags;
+            button.width = disp.length > 5 ?
+					(disp.length > 8 ? disp.length * 8 : disp.length * 9)
+					: disp.length * 10;
+            button.height = 12;
             buttonArray[disp] = button;
         };
 
@@ -208,7 +228,8 @@
 		};
 
 		var updateCurrentAction = function(data){
-			log("Current Action: " + data)
+			log("Current Action: " + data);
+			currentActionState = data;
 		};
 
 		var updateMoney = function(data){
@@ -237,6 +258,8 @@
 		};
 
         var redraw = function() {
+			ctx.fillStyle = "#FFFFFF";
+			ctx.fillRect(0,0,1680,1050);
             ctx.drawImage(bgImg, 0, 0);
 
             // draw internal city map
@@ -297,15 +320,25 @@
             });
 
             // highlight selected city
-            if(selected) {
+            if(selectedCity) {
                 ctx.strokeStyle = "#DD6622";
                 ctx.lineWidth = 3;
                 ctx.beginPath();
-                var x = externalX(selected.x);
-                var y = externalY(selected.y);
+                var x = externalX(selectedCity.x);
+                var y = externalY(selectedCity.y);
                 ctx.arc(x, y, 20, 0, 360, false);
                 ctx.stroke();
             }
+
+			if(selectedPlant){
+				ctx.strokeStyle = "#DD6622";
+				ctx.lineWidth = 3;
+				ctx.beginPath();
+				var x = externalX(805 + actualMarket.indexOf(selectedPlant) * 114);
+				var y = externalY(295);
+				ctx.strokeRect(x, y, 114, 114);
+				ctx.stroke();
+			}
 
             // console output
             ctx.fillStyle = "#FFFFFF";
@@ -323,7 +356,7 @@
 				var cost = ownedPlants[p];
 				ctx.drawImage(plantImg, ppp[cost].x * pppWidth, ppp[cost].y * pppHeight,
 									pppWidth, pppHeight,
-									800 + count * 125, 300, pppWidth, pppHeight);
+									800 + count * 125, 150, pppWidth, pppHeight);
 				count += 1;
 			}
 
@@ -354,43 +387,97 @@
 
 
             // draw buttons
-            $.each(buttonArray, function(key, btn) {
-                ctx.fillStyle = "#777700";
-                ctx.strokeStyle = "#777700";
-                ctx.lineWidth = 1;
-                ctx.strokeRect(externalX(btn.x), externalY(btn.y), btn.width, btn.height);
-                ctx.font = "10px Arial";
-                ctx.fillText(btn.disp,externalX(btn.x+6),externalY(btn.y+btn.height-4));
-            });
+			ctx.fillStyle = "#FFFFFF";
+			var currentWidth = 800;
+			var bufferSpace = 5;
+            for(key in buttonArray) {
+				var btn = buttonArray[key];
+
+				if(ACTIONS_FLAGS[currentActionState] && btn.flags > 0){
+					ctx.fillStyle = "#009900";
+					ctx.strokeStyle = "#009900";
+					ctx.lineWidth = 1;
+					var pos = currentWidth;
+					btn.x = pos;
+					btn.y = 5;
+					ctx.strokeRect(pos, 5, btn.width, btn.height);
+					ctx.font = "12px monospace";
+					ctx.fillText(btn.disp, pos + 5, 15);
+					currentWidth = pos + btn.width + bufferSpace;
+				}
+				else{
+					btn.x = -1;
+					btn.y = -1;
+				}
+            }
         };
 
         var sqrDist = function(x1,x2,y1,y2) { return Math.pow(x1-x2,2)+Math.pow(y1-y2,2) };
 
         mapCanvas.addEventListener('click', function(event) {
-            var x = internalX(event.pageX - 8),
-                y = internalY(event.pageY - 8);
+            var x = event.pageX - 8;
+			var y = event.pageY - 8;
 
-            $.each(buttonArray,function(key, btn) {
+			log("Click: " + x + ", " + y);
+
+			selectedPlant = null;
+			selectedCity = null;
+
+            for(key in buttonArray) {
+				var btn = buttonArray[key];
                 if(x > btn.x && x < (btn.x + btn.width) && y > btn.y && y < (btn.y + btn.height)) {
-                    log("SENDING " + btn.cmd + " on gameaction");
-                    socket.emit('gameaction', {uid:userid, cmd:btn.cmd, args:btn.args});
-                    return;
+                    btn.listener();
+					return;
                 }
-            });
+            }
 
-            selected = null;
+			if(x > 800 && x < 1280 && y > 300 && y < 420){
+				selectedPlant = Math.floor((1280 - x) / 114);
+				return;
+			}
+
+			x = internalX(event.pageX - 8);
+			y = internalY(event.pageY - 8);
             $.each(citiesDef,function(key,city) {
-                if(sqrDist(x,city.x,y,city.y)<500) {selected = city;}
+                if(sqrDist(x,city.x,y,city.y)<500) {selectedCity = city;}
             });
             redraw();
         },false);
 
+		var startGameButton = function(){
+			socket.emit('gameaction', {uid:userid, cmd:"startGame", args:{}});
+		};
+
+		var passButton = function(){
+			socket.emit('gameaction', {uid:userid, cmd:"pass", args:{}});
+		};
+
+		var startAuctionButton = function(){
+			socket.emit('gameaction', {uid:userid, cmd:"startAuction",
+				args:{cost:selectedPlant,bid:selectedBid}});
+		};
+
+		var bidUpButton = function(){
+			selectedBid += 1;
+			log("Bid amount: $" + selectedBid);
+		};
+
+		var bidDownButton = function(){
+			selectedBid -= 1;
+			log("Bid amount: $" + selectedBid);
+		};
+
+		var confirmBidButton = function(){
+			socket.emit('gameaction', {uid:userid, cmd:"bid", args:{bid:selectedBid}});
+		};
 
         // createButton( Display, Cmd, Args, x,y,w,h);
-        createButton("startGame","startGame","",720,90,60,12);
-        createButton("pass","pass","",785,90,40,12);
-		createButton("Start Auction","startAuction",{cost:3,bid:3},830,90,80,12);
-		createButton("Bid","bid",{bid:4},915,90,30,12);
+        createButton("Start Game!", startGameButton, UNSTARTED_F);
+        createButton("Pass", passButton, UNSTARTED_F | AUCTION_F | BID_F | RESOURCE_F | CITY_F | MONEY_F);
+		createButton("Start Auction", startAuctionButton, AUCTION_F);
+		createButton("Bid Up", bidUpButton, AUCTION_F | BID_F);
+		createButton("Bid Down", bidDownButton, AUCTION_F | BID_F);
+		createButton("Confirm Bid", confirmBidButton, AUCTION_F | BID_F);
 
 		// Card positions
 		var pppWidth = 114;
