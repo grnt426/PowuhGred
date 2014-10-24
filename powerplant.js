@@ -16,6 +16,5 @@ exports.PowerPlants = function(){
 			var powers = parseInt(args[3]);
 			this.powerPlants.push({cost:cost, type:type, requires:requires, powers:powers});
 		}
-		console.log(this.powerPlants);
 	};
 };

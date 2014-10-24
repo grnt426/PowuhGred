@@ -217,7 +217,12 @@
 			else{
 				log("'" + data.group + "' has no handler!");
 			}
+			redraw();
         });
+
+		socket.on('updatechat', function(data) {
+			log(data.sender + ": " + data.msg);
+		});
 
 		var updateResources = function(data){
 			log("Oil: " + data.oil + " - Coal: " + data.coal
@@ -380,8 +385,6 @@
 			}
 
             // console output
-            ctx.fillStyle = WHITE;
-            ctx.fillRect(800,600,600,600);
             ctx.fillStyle = BLACK;
             ctx.font = "10px Arial";
             var txt = consoleText.split("\n");
@@ -451,6 +454,14 @@
 					btn.y = -1;
 				}
             }
+
+			// Draw bid amount box
+			if((ACTIONS_FLAGS[currentActionState] & (AUCTION_F | BID_F)) > 0){
+				ctx.strokeStyle = GREEN;
+				ctx.font = "14px monospace";
+				ctx.fillText("Current Bid: " + selectedBid, 800, 30);
+				ctx.fillText("Highest Bid: N/A", 925, 30);
+			}
         };
 
         var sqrDist = function(x1,x2,y1,y2) { return Math.pow(x1-x2,2)+Math.pow(y1-y2,2) };
@@ -462,9 +473,6 @@
 
 			log("Click: " + x + ", " + y);
 
-			selectedPlant = -1;
-			selectedCity = null;
-
             for(key in buttonArray) {
 				var btn = buttonArray[key];
                 if(x > btn.x && x < (btn.x + btn.width) && y > btn.y && y < (btn.y + btn.height)) {
@@ -474,15 +482,16 @@
             }
 
 			if(x > 800 && x < 1280 && y > 300 && y < 420){
-				selectedPlant = 3-(Math.floor((1280 - x) / 114));
-                redraw();           // I don't believe this should need to be here but it does.
+				selectedPlant = 3-(Math.floor((1260 - x) / 114));
+				selectedCity = null;
+                redraw();
 				return;
 			}
 
 			x = internalX(event.pageX - 8);
 			y = internalY(event.pageY - 8);
             $.each(citiesDef,function(key,city) {
-                if(sqrDist(x,city.x,y,city.y)<500) {selectedCity = city;}
+                if(sqrDist(x,city.x,y,city.y)<500) {selectedCity = city;selectedPlant = -1;}
             });
             redraw();
         },false);
@@ -496,8 +505,13 @@
 		};
 
 		var startAuctionButton = function(){
-			socket.emit('gameaction', {uid:userid, cmd:"startAuction",
-				args:{cost:selectedPlant,bid:selectedBid}});
+			if(selectedPlant != -1){
+				socket.emit('gameaction', {uid: userid, cmd: "startAuction",
+					args: {cost: actualMarket[selectedPlant], bid: selectedBid}});
+			}
+			else{
+				log("Select a power plant first.");
+			}
 		};
 
 		var bidUpButton = function(){
@@ -506,7 +520,10 @@
 		};
 
 		var bidDownButton = function(){
-			selectedBid -= 1;
+			if(selectedBid <= 0)
+				selectedBid = 0;
+			else
+				selectedBid -= 1;
 			log("Bid amount: $" + selectedBid);
 		};
 
@@ -514,9 +531,9 @@
 			socket.emit('gameaction', {uid:userid, cmd:"bid", args:{bid:selectedBid}});
 		};
 
-        // createButton( Display, Cmd, Args, x,y,w,h);
+        // createButton( Display String, listener, buttons flags);
         createButton("Start Game!", startGameButton, UNSTARTED_F);
-        createButton("Pass", passButton, UNSTARTED_F | AUCTION_F | BID_F | RESOURCE_F | CITY_F | MONEY_F);
+        createButton("Pass", passButton, AUCTION_F | BID_F | RESOURCE_F | CITY_F | MONEY_F);
 		createButton("Start Auction", startAuctionButton, AUCTION_F);
 		createButton("Bid Up", bidUpButton, AUCTION_F | BID_F);
 		createButton("Bid Down", bidDownButton, AUCTION_F | BID_F);

@@ -47,7 +47,7 @@ exports.Communications = function(io){
 	 * @param {String} msg		The message to send.
 	 */
 	this.toPlayer = function(player, msg){
-		player.socket.emit(this.CHAT, this.SERVER, msg);
+		player.socket.emit(this.CHAT, {sender:this.SERVER, msg:msg});
 	};
 
 	/**

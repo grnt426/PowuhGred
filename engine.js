@@ -199,6 +199,8 @@ exports.Engine = function(){
 		var args = data.args;
 		var player = this.players[uid];
 
+		console.info(uid + ", action: " + action + ", args: " + JSON.stringify(args));
+
 		// TODO: compress the boolean logic
 		if(this.currentPlayer !== false && uid !== this.currentPlayer && this.currentAction != this.BID){
 			// for now, we only support listening to the current player
@@ -217,7 +219,7 @@ exports.Engine = function(){
 				this.comms.toPlayer(player, "Not expecting that action.");
 				return;
 			}
-			console.info(uid + " executing action: " + action);
+
 			if(this.START_GAME == action){
 				this.startGame();
 			}
@@ -315,12 +317,14 @@ exports.Engine = function(){
 			var bid = data.bid;
 			if(bid < plant){
 				// Reject bid
+				console.info("Bid too low.");
 				this.comms.toPlayer(player, "bid too low.");
 				return;
 			}
 
 			if(bid > player.money){
 				// Reject bid
+				console.info("Not enough money.");
 				this.comms.toPlayer(player, "not enough money.");
 				return;
 			}

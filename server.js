@@ -37,7 +37,7 @@ io.sockets.on('connection', function(socket) {
     socket.emit('definecities', citiesDef.cities);
 	comms.toAll(uid + " has joined the game.");
 	comms.broadcastUpdate({group:'newPlayer', args:{uid:uid}});
-
+	console.info(uid + " has joined the game");
 
 	// When the client emits sendchat, this listens and executes
 	// sendchat -> String
@@ -49,7 +49,6 @@ io.sockets.on('connection', function(socket) {
 	// When the player does any action
 	// gameaction -> JsonObject
 	socket.on('gameaction', function(data){
-		console.info(data.uid + " " + data.cmd);
 		engine.resolveAction(data);
 	});
 
