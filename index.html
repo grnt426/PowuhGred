@@ -471,7 +471,9 @@
             var x = event.pageX - 8;
 			var y = event.pageY - 8;
 
-			log("Click: " + x + ", " + y);
+			if(DEBUG){
+				log("Click: " + x + ", " + y);
+			}
 
             for(key in buttonArray) {
 				var btn = buttonArray[key];
