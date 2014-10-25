@@ -109,7 +109,7 @@ exports.Engine = function(comms){
 	this.resolveTurnOrder = function(){
 		this.playerOrder.sort(function(a, b){
 			var aCityCount = a.cities !== undefined ? a.cities.length : 0;
-			var bCityCount = ba.cities !== undefined ? b.cities.length : 0;
+			var bCityCount = b.cities !== undefined ? b.cities.length : 0;
 			return aCityCount != bCityCount
 				? a.cities.length - b.cities.length
 				: a.getHighestCostPowerPlant() - b.getHighestCostPowerPlant()
