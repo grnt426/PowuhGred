@@ -34,7 +34,7 @@ var redraw = function(){
 			ctx.strokeStyle = ctx.fillStyle = BLACK;
 		}
 		if(box.type === "uranium"){
-			ctx.strokeStyle = ctx.fillStyle = PINK;
+			ctx.strokeStyle = ctx.fillStyle = RED;
 		}
 		if(box.type === "garbage"){
 			ctx.strokeStyle = ctx.fillStyle = YELLOW;

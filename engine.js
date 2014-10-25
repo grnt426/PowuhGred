@@ -192,7 +192,7 @@ exports.Engine = function(comms){
 			console.info(uid + " tried taking their turn when not theirs!");
 			this.comms.toPlayer(player, "Not your turn.");
 		}
-		else if(this.currentAction == this.BID && uid != this.currentBidder){
+		else if(this.currentAction == this.BID && uid != auction.currentBidder){
 			// for now, we only support listening to the current player
 			console.info(uid + " tried taking their turn when not theirs!");
 			this.comms.toPlayer(player, "Not your turn.");

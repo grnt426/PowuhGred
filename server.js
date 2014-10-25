@@ -77,7 +77,7 @@ var resolveCommand = function(socket, data){
 	var command = data.substring(0, data.indexOf(' '));
 	if(command == "/name"){
 		var name = data.substring(data.indexOf(' ') + 1);
-		console.info(this.DEBUG + " " + name);
+		console.info("Name recevied: " + name);
 		var player = engine.reverseLookUp[socket];
 		var oldName = player.displayName;
 		player.displayName = name;
