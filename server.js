@@ -55,7 +55,7 @@ io.sockets.on('connection', function(socket) {
 		}
 		else{
 			console.info("Chat message: " + data);
-			comms.toAllFrom(engine.reverseLookUp[socket], data);
+			comms.toAllFrom(engine.reverseLookUp[socket.id], data);
 		}
 	});
 
@@ -68,7 +68,7 @@ io.sockets.on('connection', function(socket) {
 	// when the user disconnects
 	socket.on('disconnect', function() {
 		// TODO handle players leaving.
-		comms.toAll(engine.reverseLookUp[socket].displayName + " has left the game.");
+		comms.toAll(engine.reverseLookUp[socket.id].displayName + " has left the game.");
 	});
 });
 
@@ -78,7 +78,7 @@ var resolveCommand = function(socket, data){
 	if(command == "/name"){
 		var name = data.substring(data.indexOf(' ') + 1);
 		console.info("Name recevied: " + name);
-		var player = engine.reverseLookUp[socket];
+		var player = engine.reverseLookUp[socket.id];
 		var oldName = player.displayName;
 		player.displayName = name;
 		comms.broadcastUpdate({group:'displayName', args:{uid:player.uid, oldDisplayName:oldName,displayName:name}});

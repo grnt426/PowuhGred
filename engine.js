@@ -25,7 +25,7 @@ exports.Engine = function(comms){
 	this.players = {};
 
 	// Socket -> Player
-	this.reverseLookUp = {};
+	this.reverseLookUp = [];
 
 	// UID
 	this.currentPlayer = false;
@@ -88,7 +88,7 @@ exports.Engine = function(comms){
 		var player = new playerjs.Player(uid, this.comms, socket);
 		this.players[uid] = player;
 		this.playerOrder.push(uid);
-		this.reverseLookUp[socket] = player;
+		this.reverseLookUp[socket.id] = player;
 		player.money = this.STARTING_MONEY;
 		player.updateMoney();
 	};
