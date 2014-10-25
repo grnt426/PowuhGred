@@ -1,93 +1,28 @@
-Power Grid
+Powuh Gred
 ===========
 
-This is, without a doubt, a Work In Progress.
+Yes, this is remake of the board game Power Grid. Written in NodeJS for the pure
+benefit of making us better game developers and working together to produce a
+viable playable game. A boardgame was chosen for its simplicity of design and
+implementation.
 
-Here be dragons.
+Power Grid is a game of market superiority. Your goal is to power more cities
+than your opponents. Power plants are brough to auction for all players to bid
+on, powered by coal, oil, garbage or uranium or wind, they are the workhorses of
+your utility.  Resources are purchased in a market where prices are dominated by
+supply and demand.  Players build out their connections to more cities in a
+network like fashion and earn money for the number of cities powered.
 
-Request Response Model
-======================
-
-Changing Display Name
-------------------
-
-name:
-
-	Request = String
-
-	Response = {
-		group: 'displayName',
-		args: 'uid,newName'
-	}
-	
-Sending Chat Messages
----------------------
-
-sendchat:
-
-	Request = String
-	
-	Response = undefined
-	
-First Connection
-----------------
-	
-connection:
-
-	Request = Socket Object
-	
-	Response = {
-		group: 'newPlayer',
-		args: 'uid'
-	}
-	
-Performing Game Actions
------------------------
-	
-gameaction:
-
-	Request = {
-		uid: 'uid',
-		cmd: 'startGame|startAuction|bid|buy|build',
-		args: 'arg1,arg2,...'
-	}
-	
-	Response = {
-		group: 'varies',
-		args: varies
-	}
-	
-	* Start Game, Request
-		cmd: 'startGame',
-		args: ''
-	* Start Game, 
-		Response1 = ResourcePoolResponse
-		Response2 = CurrentPlayerOrderResponse
-		Response3 = CurrentPlayerResponse
-	
-	
-Various Responses
+Starting the Game
 -----------------
 
-CurrentPlayerResponse = {
+Start the server
 
-}
+	node server.js
 	
-CurrentPlayerOrder = {
-	group: 'playerOrder',
-	args: Array of Player UIDs
-}
+Connect to the server
 
-ResourcePoolResponse = {
-	group: 'resourcePool',
-	args: Map of Resources, String -> count
-}
+	http://localhost:3000/
 	
-other:
-	
-	
-	
-	
-	
-	
+And start playing!	
 	
