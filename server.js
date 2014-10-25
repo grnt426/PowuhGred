@@ -24,18 +24,17 @@ app.get("/includes/cardpositions.js", function(req, res) {
 });
 app.use('/data', express.static(__dirname+'/data'));
 
+comms = new communicationsjs.Communications(io);
+
 var citiesDef = new citiesjs.Cities();
 citiesDef.parseCityList();
 citiesDef.parseCities("data/germany_connections.txt");
 var powerPlants = new powerplantjs.PowerPlants();
 powerPlants.parsePowerPlants("data/power_plants.txt");
 
-var engine = new enginejs.Engine();
+var engine = new enginejs.Engine(comms);
 engine.cities = citiesDef;
 engine.plants = powerPlants.powerPlants;
-
-comms = new communicationsjs.Communications(io);
-engine.comms = comms;
 
 io.sockets.on('connection', function(socket) {
 

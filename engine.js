@@ -1,12 +1,13 @@
-var playerjs = require("./player.js");
+var playerjs = require("./player.js"),
+	auctionjs = require("./phases/auction.js");
 
-exports.Engine = function(){
+exports.Engine = function(comms){
 
 	// Int
 	this.currentPlayerCount = 0;
 
 	// Communications
-	this.comms = false;
+	this.comms = comms;
 
 	// City Name -> City
 	this.cities = false;
@@ -35,30 +36,6 @@ exports.Engine = function(){
 	this.currentMarket = [];
 	this.futuresMarket = [];
 
-	// Array of UIDs
-	this.currentBidders = [];
-
-	// No longer can bid
-	this.finishedBidding = [];
-
-	// No longer can start auctions
-	this.finishedAuctions = [];
-
-	// Int
-	this.currentBid = 0;
-
-	// Int
-	this.currentPlayerBidIndex = -1;
-
-	// Int
-	this.currentBidChoice = -1;
-
-	// UID
-	this.currentBidder = false;
-
-	// UID
-	this.currentBidLeader = false;
-
 	this.STARTING_MONEY = 50;
 
 	// The Step Three card
@@ -76,6 +53,9 @@ exports.Engine = function(){
 
 	// String
 	this.currentAction = this.START_GAME;
+
+	// Phases
+	var auction = new auctionjs.Auction(this, this.comms);
 
 	/**
 	 * No args needed to start the game
@@ -229,7 +209,7 @@ exports.Engine = function(){
 				this.startGame();
 			}
 			else if(this.START_AUCTION == action){
-				this.startAuction(data.args);
+				auction.startAuction(data.args);
 			}
 			else if(this.BID == action){
 				this.placeBid(data.args);
@@ -265,30 +245,6 @@ exports.Engine = function(){
 			this.nextAction();
 		}
 		this.comms.broadcastUpdate({group: 'currentPlayer', args: this.currentPlayer});
-	};
-
-	// TODO use a different order
-	this.nextBidder = function(pass){
-
-		// award the power plant
-		if(this.currentBidders.length == 2 && pass){
-			this.currentBidders.slice(this.currentPlayerBidIndex, 1);
-			var bidWinner = this.currentBidLeader;
-			this.finishedAuctions.push(bidWinner);
-			this.finishedBidding.push(bidWinner);
-			var displayName = this.players[bidWinner].displayName;
-			this.comms.broadcastUpdate({group: 'bidWinner', args:{uid:bidWinner, name:displayName}});
-			var player = this.players[bidWinner];
-			player.awardPlant(this.currentBidChoice, this.currentBid);
-			this.updatePlants(this.currentBidChoice);
-		}
-		else{
-			console.info(this.currentBidder + " index: " + this.currentPlayerBidIndex);
-			this.currentPlayerBidIndex = (this.currentPlayerBidIndex + 1) % this.currentBidders.length;
-			this.currentBidder = this.currentBidders[this.currentPlayerBidIndex];
-			console.info(this.currentBidder + " index: " + this.currentPlayerBidIndex);
-			this.comms.broadcastUpdate({group: 'currentBidder', args: {uid: this.currentBidder}});
-		}
 	};
 
 	this.updatePlants = function(removedPlant){
@@ -329,81 +285,7 @@ exports.Engine = function(){
 		this.currentPlayer = this.playerOrder[this.currentPlayerIndex];
 	};
 
-	/**
-	 * The expected data is either
-	 *    {cost:PowerPlantCost,bid:StartingBid}
-	 * or
-	 *    pass
-	 * @param data
-	 */
-	this.startAuction = function(data){
 
-		if(data === "pass"){
-			this.finishedBidding.push(this.currentPlayer);
-			this.finishedAuctions.push(this.currentPlayer);
-			this.nextPlayer();
-		}
-		else{
-			console.info(data);
-			var player = this.players[this.currentPlayer];
-			var plant = data.cost;
-			var bid = data.bid;
-			if(bid < plant){
-				// Reject bid
-				console.info("Bid too low.");
-				this.comms.toPlayer(player, "bid too low.");
-				return;
-			}
-
-			if(bid > player.money){
-				// Reject bid
-				console.info("Not enough money.");
-				this.comms.toPlayer(player, "not enough money.");
-				return;
-			}
-
-			this.currentBid = bid;
-			this.currentBidChoice = plant;
-			this.currentBidLeader = player.uid;
-			this.currentAction = this.BID;
-
-			for(var key in this.players){
-				console.info("Eligible? " + this.finishedBidding.indexOf(this.players[key].uid));
-				if(this.finishedBidding.indexOf(this.players[key].uid) == -1)
-					this.currentBidders.push(this.players[key].uid);
-			}
-			this.currentPlayerBidIndex = this.currentBidders.indexOf(player.uid);
-			this.comms.broadcastUpdate({group:'auctionStart',
-				args:{uid:player.uid,cost:plant,bid:bid}});
-			this.nextBidder(false);
-		}
-	};
-
-	this.placeBid = function(data){
-		if(data === "pass"){
-			this.nextBidder(true);
-			return;
-		}
-
-		var bid = data.bid;
-		if(bid <= this.currentBid){
-			// reject bid
-			this.comms.toPlayer(this.players[this.currentBidder], "bid too low.");
-			return;
-		}
-
-		var player = this.players[this.currentBidder];
-		if(bid > player.money){
-			// Reject bid
-			this.comms.toPlayer(player, "not enough money.");
-			return;
-		}
-
-		this.currentBid = bid;
-		this.currentBidLeader = player.uid;
-		this.comms.broadcastUpdate({group:'bid',args:{uid:player.uid,bid:bid}});
-		this.nextBidder(false);
-	};
 
 	this.buyResources = function(data){
 		var args = data.split(",");
