@@ -41,6 +41,9 @@ exports.Engine = function(){
 	// No longer can bid
 	this.finishedBidding = [];
 
+	// No longer can start auctions
+	this.finishedAuctions = [];
+
 	// Int
 	this.currentBid = 0;
 
@@ -125,7 +128,9 @@ exports.Engine = function(){
 	 */
 	this.resolveTurnOrder = function(){
 		this.playerOrder.sort(function(a, b){
-			return a.cities.length != b.cities.length
+			var aCityCount = a.cities !== undefined ? a.cities.length : 0;
+			var bCityCount = ba.cities !== undefined ? b.cities.length : 0;
+			return aCityCount != bCityCount
 				? a.cities.length - b.cities.length
 				: a.getHighestCostPowerPlant() - b.getHighestCostPowerPlant()
 		});
@@ -213,7 +218,7 @@ exports.Engine = function(){
 			this.comms.toPlayer(player, "Not your turn.");
 		}
 		else{
-			if(this.currentAction !== action){
+			if(this.currentAction !== action && data.args !== "pass"){
 				console.info(uid + " tried giving an action we were not expecting, " + action);
 				console.info("Expecting: : " + this.currentAction);
 				this.comms.toPlayer(player, "Not expecting that action.");
@@ -263,12 +268,39 @@ exports.Engine = function(){
 	};
 
 	// TODO use a different order
-	this.nextBidder = function(){
-		console.info(this.currentBidder + " index: " + this.currentPlayerBidIndex);
-		this.currentPlayerBidIndex = (this.currentPlayerBidIndex + 1) % this.currentBidders.length;
-		this.currentBidder = this.currentBidders[this.currentPlayerBidIndex];
-		console.info(this.currentBidder + " index: " + this.currentPlayerBidIndex);
-		this.comms.broadcastUpdate({group:'currentBidder',args:{uid:this.currentBidder}});
+	this.nextBidder = function(pass){
+
+		// award the power plant
+		if(this.currentBidders.length == 2 && pass){
+			this.currentBidders.slice(this.currentPlayerBidIndex, 1);
+			var bidWinner = this.currentBidLeader;
+			this.finishedAuctions.push(bidWinner);
+			this.finishedBidding.push(bidWinner);
+			var displayName = this.players[bidWinner].displayName;
+			this.comms.broadcastUpdate({group: 'bidWinner', args:{uid:bidWinner, name:displayName}});
+			var player = this.players[bidWinner];
+			player.awardPlant(this.currentBidChoice, this.currentBid);
+			this.updatePlants(this.currentBidChoice);
+		}
+		else{
+			console.info(this.currentBidder + " index: " + this.currentPlayerBidIndex);
+			this.currentPlayerBidIndex = (this.currentPlayerBidIndex + 1) % this.currentBidders.length;
+			this.currentBidder = this.currentBidders[this.currentPlayerBidIndex];
+			console.info(this.currentBidder + " index: " + this.currentPlayerBidIndex);
+			this.comms.broadcastUpdate({group: 'currentBidder', args: {uid: this.currentBidder}});
+		}
+	};
+
+	this.updatePlants = function(removedPlant){
+		this.currentMarket.slice(this.currentMarket.indexOf(removedPlant), 1);
+		var shownPlants = this.currentMarket;
+		shownPlants.concat(this.futuresMarket);
+		shownPlants.push(this.plants.slice(0, 1));
+		shownPlants.sort();
+		this.currentMarket = shownPlants.slice(0, 4);
+		this.futuresMarket = shownPlants.slice(0, 4);
+		this.comms.broadcastUpdate({group: 'actualMarket', args: this.currentMarket});
+		this.comms.broadcastUpdate({group: 'futureMarket', args: this.futuresMarket});
 	};
 
 	this.nextAction = function(){
@@ -308,6 +340,7 @@ exports.Engine = function(){
 
 		if(data === "pass"){
 			this.finishedBidding.push(this.currentPlayer);
+			this.finishedAuctions.push(this.currentPlayer);
 			this.nextPlayer();
 		}
 		else{
@@ -342,18 +375,18 @@ exports.Engine = function(){
 			this.currentPlayerBidIndex = this.currentBidders.indexOf(player.uid);
 			this.comms.broadcastUpdate({group:'auctionStart',
 				args:{uid:player.uid,cost:plant,bid:bid}});
-			this.nextBidder();
+			this.nextBidder(false);
 		}
 	};
 
 	this.placeBid = function(data){
 		if(data === "pass"){
-			this.nextBidder();
+			this.nextBidder(true);
 			return;
 		}
 
 		var bid = data.bid;
-		if(bid < this.currentBid){
+		if(bid <= this.currentBid){
 			// reject bid
 			this.comms.toPlayer(this.players[this.currentBidder], "bid too low.");
 			return;
@@ -369,7 +402,7 @@ exports.Engine = function(){
 		this.currentBid = bid;
 		this.currentBidLeader = player.uid;
 		this.comms.broadcastUpdate({group:'bid',args:{uid:player.uid,bid:bid}});
-		this.nextBidder();
+		this.nextBidder(false);
 	};
 
 	this.buyResources = function(data){

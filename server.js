@@ -13,8 +13,14 @@ var express = require('express'),
 app.get("/", function(req, res) {
 	res.sendFile(__dirname + '/index.html');
 });
-app.get("/includes/CanvasInput.min.js", function(req, res) {
-	res.sendFile(__dirname + '/includes/CanvasInput.min.js');
+app.get("/includes/redraw.js", function(req, res) {
+	res.sendFile(__dirname + '/includes/redraw.js');
+});
+app.get("/includes/sockethandlers.js", function(req, res) {
+	res.sendFile(__dirname + '/includes/sockethandlers.js');
+});
+app.get("/includes/cardpositions.js", function(req, res) {
+	res.sendFile(__dirname + '/includes/cardpositions.js');
 });
 app.use('/data', express.static(__dirname+'/data'));
 
@@ -35,8 +41,8 @@ io.sockets.on('connection', function(socket) {
 
     // a user connected, send the map down
 	var uid = 'player' + engine.currentPlayerCount;
-	engine.addPlayer(uid, socket);
 	socket.emit('userid', uid);
+	engine.addPlayer(uid, socket);
     socket.emit('definecities', citiesDef.cities);
 	comms.toAll(uid + " has joined the game.");
 	comms.broadcastUpdate({group:'newPlayer', args:{uid:uid}});
