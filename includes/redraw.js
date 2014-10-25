@@ -1,7 +1,7 @@
 var redraw = function(){
 
 	// Fills background with white
-	ctx.fillStyle = WHITE;
+	ctx.fillStyle = "#EEEEEE";
 	ctx.fillRect(0, 0, 1680, 1050);
 	ctx.drawImage(bgImg, 0, 0);
 
@@ -166,6 +166,8 @@ var redraw = function(){
 			btn.y = -1;
 		}
 	}
+
+    drawScorePanel(scorePanel, ctx, ppp);
 
 	// Draw bid amount box
 	if((ACTIONS_FLAGS[currentActionState] & (AUCTION_F | BID_F)) > 0){

@@ -17,7 +17,10 @@ app.get("/includes/redraw.js", function(req, res) {
 	res.sendFile(__dirname + '/includes/redraw.js');
 });
 app.get("/includes/sockethandlers.js", function(req, res) {
-	res.sendFile(__dirname + '/includes/sockethandlers.js');
+    res.sendFile(__dirname + '/includes/sockethandlers.js');
+});
+app.get("/includes/scorepanel.js", function(req, res) {
+    res.sendFile(__dirname + '/includes/scorepanel.js');
 });
 app.get("/includes/cardpositions.js", function(req, res) {
 	res.sendFile(__dirname + '/includes/cardpositions.js');
