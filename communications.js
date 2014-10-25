@@ -24,7 +24,7 @@ exports.Communications = function(io){
 	 * @param msg    The message to broadcast.
 	 */
 	this.toAll = function(msg){
-		io.sockets.emit(this.CHAT, this.SERVER, msg);
+		io.sockets.emit(this.CHAT, {sender:this.SERVER, msg:msg});
 	};
 
 	/**
@@ -57,7 +57,8 @@ exports.Communications = function(io){
 	 * @param msg    The message to broadcast.
 	 */
 	this.toAllFrom = function(from, msg){
-		io.sockets.emit(this.CHAT, from.displayName, msg);
+		console.info(from.uid + " " + from.displayName);
+		io.sockets.emit(this.CHAT, {sender:from.displayName, msg:msg});
 	};
 
 	/**
@@ -90,7 +91,6 @@ exports.Communications = function(io){
 	this.debug = function(toPrint, msg){
 		if(!this.CONSOLE_ALL_OFF && toPrint){
 			console.info(this.DEBUG + " " + msg);
-
 		}
 	};
 

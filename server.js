@@ -13,6 +13,9 @@ var express = require('express'),
 app.get("/", function(req, res) {
 	res.sendFile(__dirname + '/index.html');
 });
+app.get("/includes/CanvasInput.min.js", function(req, res) {
+	res.sendFile(__dirname + '/includes/CanvasInput.min.js');
+});
 app.use('/data', express.static(__dirname+'/data'));
 
 var citiesDef = new citiesjs.Cities();
@@ -42,8 +45,13 @@ io.sockets.on('connection', function(socket) {
 	// When the client emits sendchat, this listens and executes
 	// sendchat -> String
 	socket.on('sendchat', function(data) {
-		console.info(this.DEBUG + " " + data);
-		comms.toAllFrom(engine.reverseLookUp[socket], data);
+		if(data[0] == '/'){
+			resolveCommand(socket, data);
+		}
+		else{
+			console.info("Chat message: " + data);
+			comms.toAllFrom(engine.reverseLookUp[socket], data);
+		}
 	});
 
 	// When the player does any action
@@ -52,29 +60,25 @@ io.sockets.on('connection', function(socket) {
 		engine.resolveAction(data);
 	});
 
-	/**
-	 * Handles changing a player's name.
-	 * name -> String
-	 *
-	 * updates ->
-	 * {
-	 * 	group: 'displayName',
-	 * 	args: 'UID,name'
-	 * }
- 	 */
-	socket.on('name', function(name) {
-		console.info(this.DEBUG + " " + name);
-		var player = engine.reverseLookUp[socket];
-		player.displayName = name;
-		comms.broadcastUpdate({group:'displayName', args:{uid:player.uid, displayName:name}});
-	});
-
 	// when the user disconnects
 	socket.on('disconnect', function() {
 		// TODO handle players leaving.
 		comms.toAll(engine.reverseLookUp[socket].displayName + " has left the game.");
 	});
 });
+
+var resolveCommand = function(socket, data){
+	console.info(data);
+	var command = data.substring(0, data.indexOf(' '));
+	if(command == "/name"){
+		var name = data.substring(data.indexOf(' ') + 1);
+		console.info(this.DEBUG + " " + name);
+		var player = engine.reverseLookUp[socket];
+		var oldName = player.displayName;
+		player.displayName = name;
+		comms.broadcastUpdate({group:'displayName', args:{uid:player.uid, oldDisplayName:oldName,displayName:name}});
+	}
+};
 
 // All setup is finished, start listening for connections.
 server.listen(3000);

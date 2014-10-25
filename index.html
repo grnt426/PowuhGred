@@ -8,6 +8,8 @@
 
     <canvas id="mapCanvas" width="1680" height="1050" style=""></canvas>
 
+	<input type="text" id="chatInputBox"
+		   style="position:absolute;left:800px;top:600px;width:300px;" onkeypress="handleChatInput(event)"/>
 
     <script>
 		var DEBUG = false;
@@ -72,18 +74,23 @@
 
         // initializations and functions for console input/output
         var consoleHeader = "Console:\n";
-		var consoleText = "";
-		var consoleHistory = [];
+		var CONSOLE_O = "console";
+		var CHAT_O = "chat";
+		var outputDisplays = {
+			chat:{text:"\t= Chat =\n",history:[],header:"\t= Chat =\n"},
+			console:{text:"\t- Console -\n",history:[],header:"\t- Console -\n"}
+		};
+
         // This function used to add to output of chat panel in game
-        // NOTSURE: could be used only for debugging
-        var log = function(str) {
-			console.log(str);
-			consoleHistory.push(str);
-			if(consoleHistory.length > 15)
-				consoleHistory.splice(0, 1);
-			consoleText = consoleHeader;
-			for(var line in consoleHistory){
-				consoleText += consoleHistory[line] + "\n";
+        var log = function(str, output) {
+			console.log(output + " => " + str);
+			var output = outputDisplays[output];
+			output.history.push(str);
+			if(output.history.length > 15)
+				output.history.splice(0, 1);
+			output.text = output.header;
+			for(var line in output.history){
+				output.text += output.history[line] + "\n";
 			}
 			redraw();
 		};
@@ -158,6 +165,15 @@
             buttonArray[disp] = button;
         };
 
+		var handleChatInput = function(event){
+			var key= event.keyCode || event.which;
+			if(key == 13) {
+				var input = document.getElementById('chatInputBox').value;
+				socket.emit('sendchat', input);
+				document.getElementById('chatInputBox').value = "";
+			}
+		};
+
         // store user id
         socket.on('userid', function(data) {userid = data});
 
@@ -177,7 +193,6 @@
 
         // NOTSURE: what the data format for input is
         socket.on('updates', function(data) {
-            log("RECEIVED on updates:");
 			if(data.group == "resourcePool"){
 				updateResources(data.args);
 			}
@@ -214,88 +229,95 @@
 			else if(data.group == "currentBidder"){
 				updateCurrentBidder(data.args);
 			}
+			else if(data.group == "displayName"){
+				updateDisplayName(data.args);
+			}
 			else{
-				log("'" + data.group + "' has no handler!");
+				log("'" + data.group + "' has no handler!", CONSOLE_O);
 			}
 			redraw();
         });
 
 		socket.on('updatechat', function(data) {
-			log(data.sender + ": " + data.msg);
+			log(data.sender + ": " + data.msg, CHAT_O);
 		});
+
+		var updateDisplayName = function(data){
+			log("* " + data.oldDisplayName + " changed their name to " + data.displayName + " *", CHAT_O);
+		};
 
 		var updateResources = function(data){
 			log("Oil: " + data.oil + " - Coal: " + data.coal
-					+ " - Garbage: " + data.garbage + " - Uranium: " + data.uranium);
+					+ " - Garbage: " + data.garbage + " - Uranium: " + data.uranium, CONSOLE_O);
 			resources = data;
 		};
 
         // Currently only outputs log
 		var updatePlayerOrder = function(data){
-			log("Player Order: " + data);
+			log("Player Order: " + data, CONSOLE_O);
 		};
 
         // Currently only outputs log
 		var updateCurrentPlayer = function(data){
-			log("Current Player: " + data);
+			log("Current Player: " + data, CONSOLE_O);
 		};
 
         // Outputs Log, and changes actual market, data looks like power plant data
 		var updateActualMarket = function(data){
-			log("Actual Market =>");
+			log("Actual Market =>", CONSOLE_O);
 			actualMarket = [];
 			for(var m in data){
 				log("Cost: " + data[m].cost + " Type: " + data[m].type
-					+ " Requires: " + data[m].requires + " Powers: " + data[m].powers);
+					+ " Requires: " + data[m].requires + " Powers: " + data[m].powers, CONSOLE_O);
 				actualMarket.push(data[m].cost);
 			}
 		};
 
         // Outputs Log, changes future market, data looks like power plant data
 		var updateFutureMarket = function(data){
-			log("Future Market =>");
+			log("Future Market =>", CONSOLE_O);
 			futureMarket = [];
 			for(var m in data){
 				log("Cost: " + data[m].cost + " Type: " + data[m].type
-					+ " Requires: " + data[m].requires + " Powers: " + data[m].powers);
+					+ " Requires: " + data[m].requires + " Powers: " + data[m].powers, CONSOLE_O);
 				futureMarket.push(data[m].cost);
 			}
 		};
 
 		var updateCurrentAction = function(data){
-			log("Current Action: " + data);
+			log("Current Action: " + data, CONSOLE_O);
 			currentActionState = data;
 		};
 
         // Currently only Outputs a Log
 		var updateMoney = function(data){
-			log(data.uid + " now has " + data.money + " money");
+			log(data.uid + " now has " + data.money + " money", CONSOLE_O);
 		};
 
         // Currently only Outputs a Log
 		var updateNewPlayer = function(data){
-			log(data.uid + " has joined the game");
+			log(data.uid + " has joined the game", CONSOLE_O);
 		};
 
         // Currently only Outputs a Log
 		var updatePlayerName = function(data){
-			log(data.uid + " has changed their name to " + data.displayName);
+			log(data.uid + " has changed their name to " + data.displayName, CONSOLE_O);
 		};
 
         // Currently only Outputs a Log
 		var updateStartAuction = function(data){
 			log(data.uid + " has started an auction on power plant: "
-					+ data.cost + " with bid " + data.bid);
+					+ data.cost + " with bid " + data.bid, CONSOLE_O);
 		};
 
         // Currently only Outputs a Log
 		var updateNewBid = function(data){
-			log(data.uid + " placed a new bid of " + data.bid);
+			log(data.uid + " placed a new bid of " + data.bid, CONSOLE_O);
 		};
 
         // Currently only Outputs a Log
 		var updateCurrentBidder = function(data){
-			log(data.uid + " must now place a bid or pass");
+			log(data.uid + " must now place a bid or pass", CONSOLE_O);
 		};
 
         var redraw = function() {
@@ -387,10 +409,15 @@
             // console output
             ctx.fillStyle = BLACK;
             ctx.font = "10px Arial";
-            var txt = consoleText.split("\n");
+            var txt = outputDisplays[CHAT_O].text.split("\n");
             $.each(txt, function(index, chunk) {
-                ctx.fillText(chunk,800,600+15*index);
+                ctx.fillText(chunk,800,650+15*index);
             });
+
+			txt = outputDisplays[CONSOLE_O].text.split("\n");
+			$.each(txt, function(index, chunk) {
+				ctx.fillText(chunk,1200,650+15*index);
+			});
 
 			// Draw the player's power plants
 			var count = 0;
@@ -472,7 +499,7 @@
 			var y = event.pageY - 8;
 
 			if(DEBUG){
-				log("Click: " + x + ", " + y);
+				log("Click: " + x + ", " + y, CONSOLE_O);
 			}
 
             for(key in buttonArray) {
@@ -512,13 +539,13 @@
 					args: {cost: actualMarket[selectedPlant], bid: selectedBid}});
 			}
 			else{
-				log("Select a power plant first.");
+				log("Select a power plant first.", CONSOLE_O);
 			}
 		};
 
 		var bidUpButton = function(){
 			selectedBid += 1;
-			log("Bid amount: $" + selectedBid);
+			log("Bid amount: $" + selectedBid, CONSOLE_O);
 		};
 
 		var bidDownButton = function(){
@@ -526,7 +553,7 @@
 				selectedBid = 0;
 			else
 				selectedBid -= 1;
-			log("Bid amount: $" + selectedBid);
+			log("Bid amount: $" + selectedBid, CONSOLE_O);
 		};
 
 		var confirmBidButton = function(){
