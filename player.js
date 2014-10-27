@@ -10,6 +10,7 @@ exports.Player = function(uid, comms, socket){
 	this.plants = {};
 	this.money = 0;
 	this.cities = [];
+    this.resources = {'coal': 0, 'oil': 0, 'garbage': 0, 'uranium': 0};
 
 	/**
 	 * Alerts the player it is their turn.

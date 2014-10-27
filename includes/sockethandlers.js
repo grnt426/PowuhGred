@@ -61,9 +61,12 @@ socket.on('updates', function(data){
 	else if(data.group == "bidWinner"){
 		updateBidWin(data.args);
 	}
-	else if(data.group == "playerPlants"){
-		updatePlayerPlants(data.args);
-	}
+    else if(data.group == "playerPlants"){
+        updatePlayerPlants(data.args);
+    }
+    else if(data.group == "updateScore"){
+        updateScorePanel(data.args);
+    }
 	else{
 		log("'" + data.group + "' has no handler!", CONSOLE_O);
 	}
