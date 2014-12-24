@@ -1,5 +1,6 @@
 var playerjs = require("./player.js"),
-	auctionjs = require("./phases/auction.js");
+	auctionjs = require("./phases/auction.js"),
+	util = require("./util.js");
 
 exports.Engine = function(comms){
 
@@ -15,7 +16,7 @@ exports.Engine = function(comms){
 	// Array of PowerPlant
 	this.plants = false;
 
-	// The resources available for purchase.
+	// The resources available for purchase. String -> Int
 	this.resources = {'coal': 0, 'oil': 0, 'garbage': 0, 'uranium': 0};
 
 	// Array of UIDs
@@ -29,6 +30,8 @@ exports.Engine = function(comms){
 
 	// UID
 	this.currentPlayer = false;
+
+	// Int
 	this.currentPlayerIndex = 0;
 
 	// Current plants for Auction
@@ -38,11 +41,15 @@ exports.Engine = function(comms){
 
 	this.STARTING_MONEY = 50;
 
-	// The Step Three card
+	// The Step Three card constant, for simple comparison.
 	this.STEP_THREE = "Step3";
 
+	// Whether the game has actually begun, or if we are still waiting for
+	// players.
 	this.gameStarted = false;
 
+	// Some game specific rules and setup are performed if this is the first
+	// turn. Not relevant after the first turn.
 	this.firstTurn = true;
 
 	this.START_GAME = "startGame";
@@ -57,7 +64,13 @@ exports.Engine = function(comms){
 	// Phases
 	var auction = new auctionjs.Auction(this, this.comms);
 
+	// Array of Strings. Identifiers which declare what set of data changed in
+	// the update
 	var changes = {};
+
+	// Incremented with each broadcast of data. Used for debugging and
+	// detecting game de-sync issues (if they arise in the future).
+	var changeSet = 0;
 
 	/**
 	 * No args needed to start the game
@@ -99,8 +112,8 @@ exports.Engine = function(comms){
 	 * At the start of the game, player order is random.
 	 */
 	this.randomizePlayerOrder = function(){
-		this.shuffle(this.playerOrder);
-		this.comms.broadcastUpdate({group: 'playerOrder', args: this.playerOrder});
+		util.shuffle(this.playerOrder);
+//		this.comms.broadcastUpdate({group: 'playerOrder', args: this.playerOrder});
 	};
 
 	/**
@@ -116,47 +129,21 @@ exports.Engine = function(comms){
 				? a.cities.length - b.cities.length
 				: a.getHighestCostPowerPlant() - b.getHighestCostPowerPlant()
 		});
-		this.comms.broadcastUpdate({group: 'playerOrder', args: this.playerOrder});
+//		this.comms.broadcastUpdate({group: 'playerOrder', args: this.playerOrder});
 	};
 
 	/**
-	 * This assumes the plants are in ascending order by cost.
+	 * This assumes the plants are already in ascending order by cost.
 	 */
 	this.setupMarket = function(){
 		this.currentMarket = this.plants.splice(0, 4);
 		this.futuresMarket = this.plants.splice(0, 4);
 		var topPlant = this.plants.splice(2, 1);
-		this.shuffle(this.plants);
+		util.shuffle(this.plants);
 		this.plants.splice(0, 0, topPlant);
 		this.plants.push(this.STEP_THREE);
 		this.comms.broadcastUpdate({group: 'actualMarket', args: this.currentMarket});
 		this.comms.broadcastUpdate({group: 'futureMarket', args: this.futuresMarket});
-	};
-
-	/**
-	 * Fisher-Yates shuffle algorithm, operates on the array in-place.
-	 *
-	 * Copied from: http://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
-	 * @param array    Array to shuffle.
-	 * @returns {*}
-	 */
-	this.shuffle = function(array){
-		var currentIndex = array.length, temporaryValue, randomIndex;
-
-		// While there remain elements to shuffle...
-		while(0 !== currentIndex){
-
-			// Pick a remaining element...
-			randomIndex = Math.floor(Math.random() * currentIndex);
-			currentIndex -= 1;
-
-			// And swap it with the current element.
-			temporaryValue = array[currentIndex];
-			array[currentIndex] = array[randomIndex];
-			array[randomIndex] = temporaryValue;
-		}
-
-		return array;
 	};
 
 	/**
@@ -178,7 +165,7 @@ exports.Engine = function(comms){
 	 *
 	 * All arguments are of the form of a CSV.
 	 *
-	 * @param data
+	 * @param data	The object which adheres to the above format.
 	 */
 	this.resolveAction = function(data){
 		var uid = data.uid;
@@ -327,6 +314,7 @@ exports.Engine = function(comms){
 
     this.broadcastScore = function() {
         var score = {};
+		changeSet += 1;
 
         // Array of UIDs
         score.playerOrder = this.playerOrder;
@@ -345,6 +333,7 @@ exports.Engine = function(comms){
             score.players[this.playerOrder[i]] = p;
         }
 
-        this.comms.broadcastUpdate({group: 'updateScore', args:{data:score, changes:changes}});
+        this.comms.broadcastUpdate({group: 'updateScore',
+			args:{data:score, changes:changes, changeSet:changeSet}});
     };
 };

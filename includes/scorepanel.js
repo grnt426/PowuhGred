@@ -1,4 +1,4 @@
-function drawScorePanel(data, ctx, ppp) {
+function drawScorePanel(dataArg, ctx, ppp) {
 
     // currently expecting, though will need to change later:
     //  data.currentPlayerIndex
@@ -10,10 +10,10 @@ function drawScorePanel(data, ctx, ppp) {
     //        .resources = {'coal': 5, 'oil': 5, 'garbage': 5, 'uranium': 5};
     //        .displayName = someJerk
 
-    if(!data) return;
+    if(!dataArg) return;
 
 	// Extract the embedded data object
-	data = data.data;
+	var data = dataArg.args.data;
 
     if(!data.playerOrder) return;
     if(!data.players)  return;

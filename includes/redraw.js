@@ -1,4 +1,4 @@
-var redraw = function(){
+var redraw = function(scorePanel){
 
 	// Fills background with white
 	ctx.fillStyle = "#EEEEEE";
