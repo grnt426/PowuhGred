@@ -57,6 +57,8 @@ exports.Engine = function(comms){
 	// Phases
 	var auction = new auctionjs.Auction(this, this.comms);
 
+	var changes = {};
+
 	/**
 	 * No args needed to start the game
 	 * @param args    Ignored.
@@ -69,13 +71,10 @@ exports.Engine = function(comms){
 		this.setupStartingResources();
 		this.randomizePlayerOrder();
 		this.currentPlayer = this.playerOrder[0];
-		this.comms.broadcastUpdate({group: 'currentPlayer', args: this.currentPlayer});
+		this.comms.broadcastUpdate({group: 'currentPlayer', args:{uid:this.currentPlayer}});
 		this.setupMarket();
 		this.currentAction = this.START_AUCTION;
 		this.comms.broadcastUpdate({group: 'currentAction', args: this.currentAction});
-
-        // debug data for testing
-        this.junkData();
 	};
 
 	this.setupStartingResources = function(){
@@ -324,7 +323,7 @@ exports.Engine = function(comms){
             this.players[this.playerOrder[i]].resources = {'coal': Math.floor((Math.random() * 10)), 'oil': Math.floor((Math.random() * 10)), 'garbage': Math.floor((Math.random() * 10)), 'uranium': Math.floor((Math.random() * 10))};
             this.players[this.playerOrder[i]].displayName = "some jerk"
         }
-    }
+    };
 
     this.broadcastScore = function() {
         var score = {};
@@ -336,15 +335,16 @@ exports.Engine = function(comms){
         // making a subset of player data, don't want whole object
         score.players = {};
         for(var i=0; i < this.playerOrder.length; i++) {
-            var p = {}
-            p.money       = this.players[this.playerOrder[i]].money;
-            p.plants      = this.players[this.playerOrder[i]].plants;
-            p.cities      = this.players[this.playerOrder[i]].cities;
-            p.resources   = this.players[this.playerOrder[i]].resources;
-            p.displayName = this.players[this.playerOrder[i]].displayName;
+            var p = {};
+			var player = this.players[this.playerOrder[i]];
+            p.money       = player.money;
+            p.plants      = player.plants;
+            p.cities      = player.cities;
+            p.resources   = player.resources;
+            p.displayName = player.displayName;
             score.players[this.playerOrder[i]] = p;
         }
 
-        this.comms.broadcastUpdate({group: 'updateScore', args: score});
+        this.comms.broadcastUpdate({group: 'updateScore', args:{data:score, changes:changes}});
     };
 };

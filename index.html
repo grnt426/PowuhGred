@@ -58,6 +58,8 @@
 		var futureMarket = [];
         var scorePanel = {};
 
+		var currentPlayer = false;
+
 		var playerData = {
 			self:{
 				ownedPlants:[]
@@ -209,7 +211,8 @@
 
         // Currently only outputs log
 		var updateCurrentPlayer = function(data){
-			log("Current Player: " + data, CONSOLE_O);
+			log("Current Player: " + data.uid, CONSOLE_O);
+			currentPlayer = data.uid;
 		};
 
         // Outputs Log, and changes actual market, data looks like power plant data

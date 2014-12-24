@@ -85,6 +85,7 @@ var resolveCommand = function(socket, data){
 		var oldName = player.displayName;
 		player.displayName = name;
 		comms.broadcastUpdate({group:'displayName', args:{uid:player.uid, oldDisplayName:oldName,displayName:name}});
+		engine.broadcastScore();
 	}
 };
 

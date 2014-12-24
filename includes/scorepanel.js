@@ -11,6 +11,10 @@ function drawScorePanel(data, ctx, ppp) {
     //        .displayName = someJerk
 
     if(!data) return;
+
+	// Extract the embedded data object
+	data = data.data;
+
     if(!data.playerOrder) return;
     if(!data.players)  return;
     if(!ppp) return;
@@ -35,14 +39,18 @@ function drawScorePanel(data, ctx, ppp) {
     var t_y = s_y1;
     for(var i=0; i < data.playerOrder.length; i++) {
         if(!data.players[data.playerOrder[i]]) return;
-        var money = data.players[data.playerOrder[i]].money;
-        var plants = data.players[data.playerOrder[i]].plants;
-        var cities = data.players[data.playerOrder[i]].cities;
-        var resources = data.players[data.playerOrder[i]].resources;
-        var name = data.players[data.playerOrder[i]].displayName;
+		var player = data.players[data.playerOrder[i]];
+        var money = player.money;
+        var plants = player.plants;
+        var cities = player.cities;
+        var resources = player.resources;
+        var name = player.displayName;
 
         // draw curved border
-        ctx.strokeStyle = "#111111";
+		if(currentPlayer == player.uid)
+			ctx.strokeStyle = "#3366FF";
+		else
+        	ctx.strokeStyle = "#111111";
         ctx.fillStyle = "#DDDDDD";
         ctx.lineWidth=6;
         ctx.beginPath();
