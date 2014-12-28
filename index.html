@@ -9,7 +9,7 @@
 
 	<input type="text" id="chatInputBox"
 		   style="position:absolute;left:800px;top:600px;width:300px;" onkeypress="handleChatInput(event)"/>
-
+	<script src="/includes/cardpositions.js"></script>
     <script>
 		var DEBUG = false;
 
@@ -117,7 +117,7 @@
 				// extract globals
 				var newData = scorePanel.args.data;
 				currentActionState = newData.currentAction;
-				currentPlayer = newData.currentPlayer;
+				currentPlayer = newData.playerOrder[newData.currentPlayerIndex];
 				resources = newData.resources;
 				actualMarket = newData.actualMarket;
 				futureMarket = newData.futuresMarket;
@@ -374,7 +374,7 @@
 	<script src="/includes/redraw.js"></script>
     <script src="/includes/sockethandlers.js"></script>
     <script src="/includes/scorepanel.js"></script>
-	<script src="/includes/cardpositions.js"></script>
+
 
 
 </html>

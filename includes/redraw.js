@@ -108,7 +108,8 @@ var redraw = function(scorePanel){
 	// Draw the player's power plants
 	var count = 0;
 	for(var p in playerData.self.ownedPlants){
-		var cost = playerData.self.ownedPlants[p];
+		var plant = playerData.self.ownedPlants[p];
+		var cost = plant.cost;
 		ctx.drawImage(plantImg, ppp[cost].x * pppWidth, ppp[cost].y * pppHeight,
 			pppWidth, pppHeight,
 				800 + count * 125, 150, pppWidth, pppHeight);
@@ -121,7 +122,8 @@ var redraw = function(scorePanel){
 	ctx.lineWidth = 1;
 	ctx.strokeRect(794, 294, 4 * 120 + 7, 125);
 	for(p in actualMarket){
-		cost = actualMarket[p];
+		plant = actualMarket[p];
+		cost = plant.cost;
 		ctx.drawImage(plantImg, ppp[cost].x * pppWidth, ppp[cost].y * pppHeight,
 			pppWidth, pppHeight,
 				800 + count * 120, 300, pppWidth, pppHeight);
@@ -133,7 +135,8 @@ var redraw = function(scorePanel){
 	ctx.strokeStyle = PINK;
 	ctx.strokeRect(794, 444, 4 * 120 + 7, 125);
 	for(p in futureMarket){
-		cost = futureMarket[p];
+		plant = futureMarket[p];
+		cost = plant.cost;
 		ctx.drawImage(plantImg, ppp[cost].x * pppWidth, ppp[cost].y * pppHeight,
 			pppWidth, pppHeight,
 				800 + count * 120, 450, pppWidth, pppHeight);

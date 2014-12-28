@@ -305,8 +305,8 @@ exports.Engine = function(comms){
 
         score.playerOrder = this.playerOrder;
         score.currentPlayerIndex = this.currentPlayerIndex;
-		score.futuresMarket = this.futureMarket;
-		score.actualMarket = this.actualMarket;
+		score.futuresMarket = this.futuresMarket;
+		score.actualMarket = this.currentMarket;
 		score.currentAction = this.currentAction;
 		score.resources = this.resources;
 
@@ -320,6 +320,7 @@ exports.Engine = function(comms){
             p.cities      = player.cities;
             p.resources   = player.resources;
             p.displayName = player.displayName;
+			p.uid		  = player.uid;
             score.players[this.playerOrder[i]] = p;
         }
 
