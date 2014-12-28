@@ -74,7 +74,6 @@ exports.Engine = function(comms){
 
 	/**
 	 * No args needed to start the game
-	 * @param args    Ignored.
 	 */
 	this.startGame = function(){
 		if(this.gameStarted){
