@@ -113,7 +113,14 @@
 		socket.on('updates', function(data){
 			if(data.group == "updateScore"){
 				scorePanel = data;
-				currentActionState = scorePanel.args.data.currentAction;
+
+				// extract globals
+				var newData = scorePanel.args.data;
+				currentActionState = newData.currentAction;
+				currentPlayer = newData.currentPlayer;
+				resources = newData.resources;
+				actualMarket = newData.actualMarket;
+				futureMarket = newData.futuresMarket;
 			}
 			else{
 				updateHandler(data);
