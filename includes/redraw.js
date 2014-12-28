@@ -144,7 +144,7 @@ var redraw = function(scorePanel){
 	ctx.fillStyle = WHITE;
 	var currentWidth = 800;
 	var bufferSpace = 5;
-	for(key in buttonArray){
+	for(var key in buttonArray){
 		var btn = buttonArray[key];
 
 		var cur = ACTIONS_FLAGS[currentActionState];

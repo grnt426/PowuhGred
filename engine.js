@@ -83,10 +83,8 @@ exports.Engine = function(comms){
 		this.setupStartingResources();
 		this.randomizePlayerOrder();
 		this.currentPlayer = this.playerOrder[0];
-		this.comms.broadcastUpdate({group: 'currentPlayer', args:{uid:this.currentPlayer}});
 		this.setupMarket();
 		this.currentAction = this.START_AUCTION;
-		this.comms.broadcastUpdate({group: 'currentAction', args: this.currentAction});
 	};
 
 	this.setupStartingResources = function(){
@@ -94,7 +92,6 @@ exports.Engine = function(comms){
 		this.resources['oil'] = 18;
 		this.resources['garbage'] = 6;
 		this.resources['uranium'] = 2;
-		this.comms.broadcastUpdate({group: 'resourcePool', args: this.resources});
 	};
 
 	this.addPlayer = function(uid, socket){
@@ -104,7 +101,6 @@ exports.Engine = function(comms){
 		this.playerOrder.push(uid);
 		this.reverseLookUp[socket.id] = player;
 		player.money = this.STARTING_MONEY;
-		player.updateMoney();
 	};
 
 	/**
@@ -112,7 +108,6 @@ exports.Engine = function(comms){
 	 */
 	this.randomizePlayerOrder = function(){
 		util.shuffle(this.playerOrder);
-//		this.comms.broadcastUpdate({group: 'playerOrder', args: this.playerOrder});
 	};
 
 	/**
@@ -128,7 +123,6 @@ exports.Engine = function(comms){
 				? a.cities.length - b.cities.length
 				: a.getHighestCostPowerPlant() - b.getHighestCostPowerPlant()
 		});
-//		this.comms.broadcastUpdate({group: 'playerOrder', args: this.playerOrder});
 	};
 
 	/**
@@ -141,8 +135,6 @@ exports.Engine = function(comms){
 		util.shuffle(this.plants);
 		this.plants.splice(0, 0, topPlant);
 		this.plants.push(this.STEP_THREE);
-		this.comms.broadcastUpdate({group: 'actualMarket', args: this.currentMarket});
-		this.comms.broadcastUpdate({group: 'futureMarket', args: this.futuresMarket});
 	};
 
 	/**
@@ -233,7 +225,6 @@ exports.Engine = function(comms){
 			this.currentPlayer = this.playerOrder[0];
 			this.nextAction();
 		}
-		this.comms.broadcastUpdate({group: 'currentPlayer', args: this.currentPlayer});
 	};
 
 	this.updatePlants = function(removedPlant){
@@ -244,8 +235,6 @@ exports.Engine = function(comms){
 		shownPlants.sort();
 		this.currentMarket = shownPlants.slice(0, 4);
 		this.futuresMarket = shownPlants.slice(0, 4);
-		this.comms.broadcastUpdate({group: 'actualMarket', args: this.currentMarket});
-		this.comms.broadcastUpdate({group: 'futureMarket', args: this.futuresMarket});
 	};
 
 	this.nextAction = function(){
@@ -255,7 +244,6 @@ exports.Engine = function(comms){
 			this.currentAction = this.BUILD;
 		else
 			this.getMoney();
-		this.comms.broadcastUpdate({group: 'currentAction', args: this.currentAction});
 	};
 
 	this.getMoney = function(){
@@ -315,9 +303,11 @@ exports.Engine = function(comms){
         var score = {};
 		changeSet += 1;
 
-        // Array of UIDs
         score.playerOrder = this.playerOrder;
         score.currentPlayerIndex = this.currentPlayerIndex;
+		score.futuresMarket = this.futureMarket;
+		score.actualMarket = this.actualMarket;
+		score.currentAction = this.currentAction;
 
         // making a subset of player data, don't want whole object
         score.players = {};
@@ -332,6 +322,9 @@ exports.Engine = function(comms){
             score.players[this.playerOrder[i]] = p;
         }
 
+		// Score is the current data
+		// Changes is an array of strings identifying what updated.
+		// ChangeSet is an Int representing the number of broadcasts sent
         this.comms.broadcastUpdate({group: 'updateScore',
 			args:{data:score, changes:changes, changeSet:changeSet}});
     };
