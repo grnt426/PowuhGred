@@ -37,15 +37,14 @@ exports.Player = function(uid, comms, socket){
 		return high;
 	};
 
+	// Deprecated in favor of broadcastScore
 	this.updateMoney = function(){
-		this.comms.broadcastUpdate({group:'money', args:{uid:this.uid, money:this.money}});
+//		this.comms.broadcastUpdate({group:'money', args:{uid:this.uid, money:this.money}});
 	};
 
 	// TODO: check for more than allowed plants and allow player to trash plants if so
 	this.awardPlant = function(plantCost, bidCost){
 		this.plants.push(plantCost);
 		this.money -= bidCost;
-		this.updateMoney();
-		this.comms.broadcastUpdate({group:'playerPlants', args:{uid:this.uid, plants:this.plants}});
 	};
 };

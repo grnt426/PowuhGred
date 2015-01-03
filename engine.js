@@ -1,5 +1,6 @@
 var playerjs = require("./player.js"),
-	auctionjs = require("./phases/auction.js");
+	auctionjs = require("./phases/auction.js"),
+	util = require("./util.js");
 
 exports.Engine = function(comms){
 
@@ -15,7 +16,7 @@ exports.Engine = function(comms){
 	// Array of PowerPlant
 	this.plants = false;
 
-	// The resources available for purchase.
+	// The resources available for purchase. String -> Int
 	this.resources = {'coal': 0, 'oil': 0, 'garbage': 0, 'uranium': 0};
 
 	// Array of UIDs
@@ -29,6 +30,8 @@ exports.Engine = function(comms){
 
 	// UID
 	this.currentPlayer = false;
+
+	// Int
 	this.currentPlayerIndex = 0;
 
 	// Current plants for Auction
@@ -38,11 +41,15 @@ exports.Engine = function(comms){
 
 	this.STARTING_MONEY = 50;
 
-	// The Step Three card
+	// The Step Three card constant, for simple comparison.
 	this.STEP_THREE = "Step3";
 
+	// Whether the game has actually begun, or if we are still waiting for
+	// players.
 	this.gameStarted = false;
 
+	// Some game specific rules and setup are performed if this is the first
+	// turn. Not relevant after the first turn.
 	this.firstTurn = true;
 
 	this.START_GAME = "startGame";
@@ -57,9 +64,16 @@ exports.Engine = function(comms){
 	// Phases
 	var auction = new auctionjs.Auction(this, this.comms);
 
+	// Array of Strings. Identifiers which declare what set of data changed in
+	// the update
+	var changes = {};
+
+	// Incremented with each broadcast of data. Used for debugging and
+	// detecting game de-sync issues (if they arise in the future).
+	var changeSet = 0;
+
 	/**
 	 * No args needed to start the game
-	 * @param args    Ignored.
 	 */
 	this.startGame = function(){
 		if(this.gameStarted){
@@ -69,13 +83,8 @@ exports.Engine = function(comms){
 		this.setupStartingResources();
 		this.randomizePlayerOrder();
 		this.currentPlayer = this.playerOrder[0];
-		this.comms.broadcastUpdate({group: 'currentPlayer', args: this.currentPlayer});
 		this.setupMarket();
 		this.currentAction = this.START_AUCTION;
-		this.comms.broadcastUpdate({group: 'currentAction', args: this.currentAction});
-
-        // debug data for testing
-        this.junkData();
 	};
 
 	this.setupStartingResources = function(){
@@ -83,7 +92,6 @@ exports.Engine = function(comms){
 		this.resources['oil'] = 18;
 		this.resources['garbage'] = 6;
 		this.resources['uranium'] = 2;
-		this.comms.broadcastUpdate({group: 'resourcePool', args: this.resources});
 	};
 
 	this.addPlayer = function(uid, socket){
@@ -93,15 +101,13 @@ exports.Engine = function(comms){
 		this.playerOrder.push(uid);
 		this.reverseLookUp[socket.id] = player;
 		player.money = this.STARTING_MONEY;
-		player.updateMoney();
 	};
 
 	/**
 	 * At the start of the game, player order is random.
 	 */
 	this.randomizePlayerOrder = function(){
-		this.shuffle(this.playerOrder);
-		this.comms.broadcastUpdate({group: 'playerOrder', args: this.playerOrder});
+		util.shuffle(this.playerOrder);
 	};
 
 	/**
@@ -117,47 +123,18 @@ exports.Engine = function(comms){
 				? a.cities.length - b.cities.length
 				: a.getHighestCostPowerPlant() - b.getHighestCostPowerPlant()
 		});
-		this.comms.broadcastUpdate({group: 'playerOrder', args: this.playerOrder});
 	};
 
 	/**
-	 * This assumes the plants are in ascending order by cost.
+	 * This assumes the plants are already in ascending order by cost.
 	 */
 	this.setupMarket = function(){
 		this.currentMarket = this.plants.splice(0, 4);
 		this.futuresMarket = this.plants.splice(0, 4);
 		var topPlant = this.plants.splice(2, 1);
-		this.shuffle(this.plants);
+		util.shuffle(this.plants);
 		this.plants.splice(0, 0, topPlant);
 		this.plants.push(this.STEP_THREE);
-		this.comms.broadcastUpdate({group: 'actualMarket', args: this.currentMarket});
-		this.comms.broadcastUpdate({group: 'futureMarket', args: this.futuresMarket});
-	};
-
-	/**
-	 * Fisher-Yates shuffle algorithm, operates on the array in-place.
-	 *
-	 * Copied from: http://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
-	 * @param array    Array to shuffle.
-	 * @returns {*}
-	 */
-	this.shuffle = function(array){
-		var currentIndex = array.length, temporaryValue, randomIndex;
-
-		// While there remain elements to shuffle...
-		while(0 !== currentIndex){
-
-			// Pick a remaining element...
-			randomIndex = Math.floor(Math.random() * currentIndex);
-			currentIndex -= 1;
-
-			// And swap it with the current element.
-			temporaryValue = array[currentIndex];
-			array[currentIndex] = array[randomIndex];
-			array[randomIndex] = temporaryValue;
-		}
-
-		return array;
 	};
 
 	/**
@@ -179,7 +156,7 @@ exports.Engine = function(comms){
 	 *
 	 * All arguments are of the form of a CSV.
 	 *
-	 * @param data
+	 * @param data	The object which adheres to the above format.
 	 */
 	this.resolveAction = function(data){
 		var uid = data.uid;
@@ -248,7 +225,6 @@ exports.Engine = function(comms){
 			this.currentPlayer = this.playerOrder[0];
 			this.nextAction();
 		}
-		this.comms.broadcastUpdate({group: 'currentPlayer', args: this.currentPlayer});
 	};
 
 	this.updatePlants = function(removedPlant){
@@ -259,8 +235,6 @@ exports.Engine = function(comms){
 		shownPlants.sort();
 		this.currentMarket = shownPlants.slice(0, 4);
 		this.futuresMarket = shownPlants.slice(0, 4);
-		this.comms.broadcastUpdate({group: 'actualMarket', args: this.currentMarket});
-		this.comms.broadcastUpdate({group: 'futureMarket', args: this.futuresMarket});
 	};
 
 	this.nextAction = function(){
@@ -270,7 +244,6 @@ exports.Engine = function(comms){
 			this.currentAction = this.BUILD;
 		else
 			this.getMoney();
-		this.comms.broadcastUpdate({group: 'currentAction', args: this.currentAction});
 	};
 
 	this.getMoney = function(){
@@ -324,27 +297,48 @@ exports.Engine = function(comms){
             this.players[this.playerOrder[i]].resources = {'coal': Math.floor((Math.random() * 10)), 'oil': Math.floor((Math.random() * 10)), 'garbage': Math.floor((Math.random() * 10)), 'uranium': Math.floor((Math.random() * 10))};
             this.players[this.playerOrder[i]].displayName = "some jerk"
         }
-    }
+    };
 
     this.broadcastScore = function() {
         var score = {};
+		changeSet += 1;
 
-        // Array of UIDs
         score.playerOrder = this.playerOrder;
         score.currentPlayerIndex = this.currentPlayerIndex;
+		score.futuresMarket = this.futuresMarket;
+		score.actualMarket = this.currentMarket;
+		score.currentAction = this.currentAction;
+		score.resources = this.resources;
 
         // making a subset of player data, don't want whole object
         score.players = {};
         for(var i=0; i < this.playerOrder.length; i++) {
-            var p = {}
-            p.money       = this.players[this.playerOrder[i]].money;
-            p.plants      = this.players[this.playerOrder[i]].plants;
-            p.cities      = this.players[this.playerOrder[i]].cities;
-            p.resources   = this.players[this.playerOrder[i]].resources;
-            p.displayName = this.players[this.playerOrder[i]].displayName;
+            var p = {};
+			var player = this.players[this.playerOrder[i]];
+            p.money       = player.money;
+            p.plants      = player.plants;
+            p.cities      = player.cities;
+            p.resources   = player.resources;
+            p.displayName = player.displayName;
+			p.uid		  = player.uid;
             score.players[this.playerOrder[i]] = p;
         }
 
-        this.comms.broadcastUpdate({group: 'updateScore', args: score});
+		// Auction Data
+		score.auction = {currentBidders:auction.currentBidders,
+			finishedBidding:auction.finishedBidding,
+			finishedAuctions:auction.finishedAuctions,
+			currentBid:auction.currentBid,
+			currentPlayerBidIndex:auction.currentPlayerBidIndex,
+			currentBidChoice:auction.currentBidChoice,
+			currentBidder:auction.currentBidder,
+			currentBidLeader:auction.currentBidLeader,
+			auctionRunning:auction.auctionRunning};
+
+		// Score is the current data
+		// Changes is an array of strings identifying what updated.
+		// ChangeSet is an Int representing the number of broadcasts sent
+        this.comms.broadcastUpdate({group: 'updateScore',
+			args:{data:score, changes:changes, changeSet:changeSet}});
     };
 };

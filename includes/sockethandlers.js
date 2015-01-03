@@ -13,12 +13,11 @@ socket.on('definecities', function(data){
 
 	// load the background image
 	bgImg.onload = function(){
-		redraw();
+		redraw(scorePanel);
 	};
 });
 
-// NOTSURE: what the data format for input is
-socket.on('updates', function(data){
+var updateHandler = function(data){
 	if(data.group == "resourcePool"){
 		updateResources(data.args);
 	}
@@ -64,14 +63,10 @@ socket.on('updates', function(data){
     else if(data.group == "playerPlants"){
         updatePlayerPlants(data.args);
     }
-    else if(data.group == "updateScore"){
-        updateScorePanel(data.args);
-    }
 	else{
 		log("'" + data.group + "' has no handler!", CONSOLE_O);
 	}
-	redraw();
-});
+};
 
 socket.on('updatechat', function(data){
 	log(data.sender + ": " + data.msg, CHAT_O);

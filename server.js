@@ -42,13 +42,14 @@ engine.plants = powerPlants.powerPlants;
 io.sockets.on('connection', function(socket) {
 
     // a user connected, send the map down
+	engine.broadcastScore();
 	var uid = 'player' + engine.currentPlayerCount;
 	socket.emit('userid', uid);
 	engine.addPlayer(uid, socket);
     socket.emit('definecities', citiesDef.cities);
 	comms.toAll(uid + " has joined the game.");
-	comms.broadcastUpdate({group:'newPlayer', args:{uid:uid}});
 	console.info(uid + " has joined the game");
+	engine.broadcastScore();
 
 	// When the client emits sendchat, this listens and executes
 	// sendchat -> String
@@ -82,9 +83,8 @@ var resolveCommand = function(socket, data){
 		var name = data.substring(data.indexOf(' ') + 1);
 		console.info("Name recevied: " + name);
 		var player = engine.reverseLookUp[socket.id];
-		var oldName = player.displayName;
 		player.displayName = name;
-		comms.broadcastUpdate({group:'displayName', args:{uid:player.uid, oldDisplayName:oldName,displayName:name}});
+		engine.broadcastScore();
 	}
 };
 

@@ -9,11 +9,11 @@
 
 	<input type="text" id="chatInputBox"
 		   style="position:absolute;left:800px;top:600px;width:300px;" onkeypress="handleChatInput(event)"/>
-
+	<script src="/includes/cardpositions.js"></script>
     <script>
 		var DEBUG = false;
 
-		var currentActionState = "unstarted";
+		var currentActionState = "startGame";
 
 		var UNSTARTED_F =	1;              //bitwise 000001
 		var AUCTION_F =		2;              //bitwise 000010
@@ -58,6 +58,8 @@
 		var futureMarket = [];
         var scorePanel = {};
 
+		var currentPlayer = false;
+
 		var playerData = {
 			self:{
 				ownedPlants:[]
@@ -96,7 +98,7 @@
 			for(var line in output.history){
 				output.text += output.history[line] + "\n";
 			}
-			redraw();
+			redraw(scorePanel);
 		};
 
         //Used to transform between external and internal coordinates (must be for map)
@@ -106,6 +108,25 @@
         var internalY = function (y) { return (y + 96) / 1.1; };
 
         var resourceGrid = {};
+
+		// NOTSURE: what the data format for input is
+		socket.on('updates', function(data){
+			if(data.group == "updateScore"){
+				scorePanel = data;
+
+				// extract globals
+				var newData = scorePanel.args.data;
+				currentActionState = newData.currentAction;
+				currentPlayer = newData.playerOrder[newData.currentPlayerIndex];
+				resources = newData.resources;
+				actualMarket = newData.actualMarket;
+				futureMarket = newData.futuresMarket;
+			}
+			else{
+				updateHandler(data);
+			}
+			redraw(scorePanel);
+		});
 
 		// V V V Talk to Kyle before changing ANYTHING V V V
         // black changed so Duplicate Vars bs wouldn't keep showing up
@@ -209,7 +230,8 @@
 
         // Currently only outputs log
 		var updateCurrentPlayer = function(data){
-			log("Current Player: " + data, CONSOLE_O);
+			log("Current Player: " + data.uid, CONSOLE_O);
+			currentPlayer = data.uid;
 		};
 
         // Outputs Log, and changes actual market, data looks like power plant data
@@ -219,7 +241,7 @@
 			for(var m in data){
 				log("Cost: " + data[m].cost + " Type: " + data[m].type
 					+ " Requires: " + data[m].requires + " Powers: " + data[m].powers, CONSOLE_O);
-				actualMarket.push(data[m].cost);
+				actualMarket.push(data[m]);
 			}
 		};
 
@@ -270,12 +292,6 @@
             log(data.uid + " must now place a bid or pass", CONSOLE_O);
         };
 
-        // sets up data for the panel of players + scores along the side,
-        // drawn by redraw.js -> scorepanel.js::drawScorePanel
-        var updateScorePanel = function(data){
-            scorePanel = data;
-        };
-
         var sqrDist = function(x1,x2,y1,y2) { return Math.pow(x1-x2,2)+Math.pow(y1-y2,2) };
 
         // Listen for clicks
@@ -298,7 +314,7 @@
 			if(x > 800 && x < 1280 && y > 300 && y < 420){
 				selectedPlant = 3-(Math.floor((1260 - x) / 114));
 				selectedCity = null;
-                redraw();
+                redraw(scorePanel);
 				return;
 			}
 
@@ -307,7 +323,7 @@
             $.each(citiesDef,function(key,city) {
                 if(sqrDist(x,city.x,y,city.y)<500) {selectedCity = city;selectedPlant = -1;}
             });
-            redraw();
+            redraw(scorePanel);
         },false);
 
 		var startGameButton = function(){
@@ -321,7 +337,7 @@
 		var startAuctionButton = function(){
 			if(selectedPlant != -1){
 				socket.emit('gameaction', {uid: playerData.self.uid, cmd: "startAuction",
-					args: {cost: actualMarket[selectedPlant], bid: selectedBid}});
+					args: {cost: actualMarket[selectedPlant].cost, bid: selectedBid}});
 			}
 			else{
 				log("Select a power plant first.", CONSOLE_O);
@@ -358,7 +374,7 @@
 	<script src="/includes/redraw.js"></script>
     <script src="/includes/sockethandlers.js"></script>
     <script src="/includes/scorepanel.js"></script>
-	<script src="/includes/cardpositions.js"></script>
+
 
 
 </html>
