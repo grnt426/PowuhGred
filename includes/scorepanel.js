@@ -13,7 +13,7 @@ function drawScorePanel(dataArg, ctx, ppp){
 	if(!dataArg) return;
 
 	// Extract the embedded data object
-	var data = dataArg.args.data;
+	var data = dataArg;
 
 	if(!data.playerOrder) return;
 	if(!data.players)  return;

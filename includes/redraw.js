@@ -1,5 +1,7 @@
 var redraw = function(scorePanel){
 
+	scorePanel = scorePanel.args.data;
+
 	// Fills background with white
 	ctx.fillStyle = "#EEEEEE";
 	ctx.fillRect(0, 0, 1680, 1050);
@@ -80,18 +82,6 @@ var redraw = function(scorePanel){
 		ctx.stroke();
 	}
 
-	// draws a selection box on a plant if it's selected (not selected = -1)
-	if(selectedPlant >= 0){
-		ctx.strokeStyle = ORANGE;
-		ctx.lineWidth = 5;
-		ctx.beginPath();
-		x = (800 + (selectedPlant * 120)); //Changed 114 => 120 to account for spaces
-		y = 300;
-		ctx.strokeRect(x, y, 114, 114);
-		ctx.stroke();
-		ctx.stroke();
-	}
-
 	// console output
 	ctx.fillStyle = BLACK;
 	ctx.font = "10px Arial";
@@ -123,6 +113,7 @@ var redraw = function(scorePanel){
 	ctx.strokeRect(794, 294, 4 * 120 + 7, 125);
 	for(p in actualMarket){
 		plant = actualMarket[p];
+		plant.drawnPosition = count;
 		cost = plant.cost;
 		ctx.drawImage(plantImg, ppp[cost].x * pppWidth, ppp[cost].y * pppHeight,
 			pppWidth, pppHeight,
@@ -141,6 +132,29 @@ var redraw = function(scorePanel){
 			pppWidth, pppHeight,
 				800 + count * 120, 450, pppWidth, pppHeight);
 		count += 1;
+	}
+
+	// draws a selection box on a plant if it's selected (not selected = -1)
+	if(selectedPlant >= 0 || scorePanel.auction.auctionRunning){
+		ctx.strokeStyle = ORANGE;
+		ctx.lineWidth = 5;
+		ctx.beginPath();
+		var highlightPlant;
+		if(scorePanel.auction.auctionRunning){
+			for(var actualP in actualMarket){
+				if(actualMarket[actualP].cost == scorePanel.auction.currentBidChoice){
+					highlightPlant = actualMarket[actualP].drawnPosition;
+				}
+			}
+		}
+		else{
+			highlightPlant = selectedPlant;
+		}
+		x = (800 + (highlightPlant * 120)); //Changed 114 => 120 to account for spaces
+		y = 300;
+		ctx.strokeRect(x, y, 114, 114);
+		ctx.stroke();
+		ctx.stroke();
 	}
 
 	// draw buttons
@@ -177,6 +191,9 @@ var redraw = function(scorePanel){
 		ctx.strokeStyle = GREEN;
 		ctx.font = "14px monospace";
 		ctx.fillText("Current Bid: " + selectedBid, 800, 30);
-		ctx.fillText("Highest Bid: N/A", 925, 30);
+		if(scorePanel.auction.currentBid != 0){
+			ctx.fillText("Highest Bid: " + scorePanel.auction.currentBid, 925, 30);
+			ctx.fillText("Highest Bidder: " + scorePanel.auction.currentBidLeader, 1050, 30);
+		}
 	}
 };

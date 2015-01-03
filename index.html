@@ -241,7 +241,7 @@
 			for(var m in data){
 				log("Cost: " + data[m].cost + " Type: " + data[m].type
 					+ " Requires: " + data[m].requires + " Powers: " + data[m].powers, CONSOLE_O);
-				actualMarket.push(data[m].cost);
+				actualMarket.push(data[m]);
 			}
 		};
 
@@ -337,7 +337,7 @@
 		var startAuctionButton = function(){
 			if(selectedPlant != -1){
 				socket.emit('gameaction', {uid: playerData.self.uid, cmd: "startAuction",
-					args: {cost: actualMarket[selectedPlant], bid: selectedBid}});
+					args: {cost: actualMarket[selectedPlant].cost, bid: selectedBid}});
 			}
 			else{
 				log("Select a power plant first.", CONSOLE_O);

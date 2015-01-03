@@ -92,7 +92,8 @@ exports.Auction = function(engine, comms){
 			this.currentAction = engine.BID;
 
 			for(var key in engine.players){
-				console.info("Eligible? " + this.finishedBidding.indexOf(engine.players[key].uid));
+				console.info(engine.players[key].uid + " Eligible? "
+					+ (this.finishedBidding.indexOf(engine.players[key].uid) == -1 ? "yes" : "no"));
 				if(this.finishedBidding.indexOf(engine.players[key].uid) == -1)
 					this.currentBidders.push(engine.players[key].uid);
 			}
