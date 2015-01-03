@@ -11,8 +11,6 @@ function drawScorePanel(dataArg, ctx, ppp){
 	//        .displayName = someJerk
 
 	if(!dataArg) return;
-
-	// Extract the embedded data object
 	var data = dataArg;
 
 	if(!data.playerOrder) return;
@@ -50,6 +48,8 @@ function drawScorePanel(dataArg, ctx, ppp){
 		// draw curved border
 		if(currentPlayer == player.uid)
 			ctx.strokeStyle = "#3366FF";
+		else if(currentPlayer != player.uid && data.auction.currentBidder == player.uid)
+			ctx.strokeStyle = "#336633";
 		else
 			ctx.strokeStyle = "#111111";
 		ctx.fillStyle = "#DDDDDD";
