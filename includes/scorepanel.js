@@ -1,10 +1,10 @@
 function min(a,b) {
-    if (a>b) return b
+    if (a>b) return b;
     return a
 }
 
 function max(a,b) {
-    if (a<b) return b
+    if (a<b) return b;
     return a
 }
 
@@ -67,17 +67,18 @@ function drawScorePanel(data, ctx, ppp) {
     var t_y = s_y1;
     for(var i=0; i < data.playerOrder.length; i++) {
 
-        t_x = s_x1
+        t_x = s_x1;
 
         if(!data.players[data.playerOrder[i]]) return;
-        var money = data.players[data.playerOrder[i]].money;
-        var plants = data.players[data.playerOrder[i]].plants;
-        var cities = data.players[data.playerOrder[i]].cities;
-        var resources = data.players[data.playerOrder[i]].resources;
-        var name = data.players[data.playerOrder[i]].displayName;
+        var player = data.players[data.playerOrder[i]];
+        var money = player.money;
+        var plants = player.plants;
+        var cities = player.cities;
+        var resources = player.resources;
+        var name = player.displayName;
 
-        var p=data.anim.progress;
-        var p1,p2,p3,p4,p5
+        var p=anim.progress;
+        var p1,p2,p3,p4,p5;
         p1=tween(p,0,.35);
         p2=tween(p,.35,.4);
         p3=tween(p,.4,.6);
@@ -88,7 +89,12 @@ function drawScorePanel(data, ctx, ppp) {
         // name = p1.toFixed(2) + " " + p2.toFixed(2) + " " + p3.toFixed(2) + " " + p4.toFixed(2) + " " + p5.toFixed(2)
 
         // draw curved border
-        ctx.strokeStyle = "#111111";
+        if(currentPlayer == player.uid)
+            ctx.strokeStyle = "#3366FF";
+        else if(currentPlayer != player.uid && data.auction.currentBidder == player.uid)
+            ctx.strokeStyle = "#336633";
+        else
+            ctx.strokeStyle = "#111111";
         ctx.fillStyle = "#DDDDDD";
         ctx.lineWidth=6;
         ctx.beginPath();
@@ -101,7 +107,7 @@ function drawScorePanel(data, ctx, ppp) {
 
         ctx.stroke();
 
-        t_x = s_x2 - ((s_x2 - s_x1)*tween(p,.2,.8))
+        t_x = s_x2 - ((s_x2 - s_x1)*tween(p,.2,.8));
 
 
         // draw a house

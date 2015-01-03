@@ -113,8 +113,6 @@
 		socket.on('updates', function(data){
 			if(data.group == "updateScore"){
 				scorePanel = data;
-				scorePanel.anim = {};
-				scorePanel.anim.progress = 0;
 
 				// extract globals
 				var newData = scorePanel.args.data;
@@ -123,6 +121,12 @@
 				resources = newData.resources;
 				actualMarket = newData.actualMarket;
 				futureMarket = newData.futuresMarket;
+
+				for(var change in scorePanel.args.changes){
+					if(scorePanel.args.changes[change] == "startGame"){
+						animStartGame();
+					}
+				}
 			}
 			else{
 				updateHandler(data);

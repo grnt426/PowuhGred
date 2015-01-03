@@ -66,7 +66,7 @@ exports.Engine = function(comms){
 
 	// Array of Strings. Identifiers which declare what set of data changed in
 	// the update
-	var changes = {};
+	this.changes = [];
 
 	// Incremented with each broadcast of data. Used for debugging and
 	// detecting game de-sync issues (if they arise in the future).
@@ -79,6 +79,7 @@ exports.Engine = function(comms){
 		if(this.gameStarted){
 			return;
 		}
+		this.changes.push(this.START_GAME);
 		this.gameStarted = true;
 		this.setupStartingResources();
 		this.randomizePlayerOrder();
@@ -339,6 +340,7 @@ exports.Engine = function(comms){
 		// Changes is an array of strings identifying what updated.
 		// ChangeSet is an Int representing the number of broadcasts sent
         this.comms.broadcastUpdate({group: 'updateScore',
-			args:{data:score, changes:changes, changeSet:changeSet}});
+			args:{data:score, changes:this.changes, changeSet:changeSet}});
+		this.changes = [];
     };
 };
