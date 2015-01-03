@@ -46,7 +46,5 @@ exports.Player = function(uid, comms, socket){
 	this.awardPlant = function(plantCost, bidCost){
 		this.plants.push(plantCost);
 		this.money -= bidCost;
-		this.updateMoney();
-		this.comms.broadcastUpdate({group:'playerPlants', args:{uid:this.uid, plants:this.plants}});
 	};
 };

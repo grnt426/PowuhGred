@@ -27,6 +27,9 @@ exports.Auction = function(engine, comms){
 	// UID
 	this.currentBidLeader = false;
 
+	// Boolean
+	this.auctionRunning = false;
+
 	// TODO use a different order
 	this.nextBidder = function(pass){
 
@@ -36,8 +39,6 @@ exports.Auction = function(engine, comms){
 			var bidWinner = this.currentBidLeader;
 			this.finishedAuctions.push(bidWinner);
 			this.finishedBidding.push(bidWinner);
-			var displayName = engine.players[bidWinner].displayName;
-			this.comms.broadcastUpdate({group: 'bidWinner', args: {uid: bidWinner, name: displayName}});
 			var player = engine.players[bidWinner];
 			player.awardPlant(this.currentBidChoice, this.currentBid);
 			engine.updatePlants(this.currentBidChoice);
@@ -47,7 +48,6 @@ exports.Auction = function(engine, comms){
 			this.currentPlayerBidIndex = (this.currentPlayerBidIndex + 1) % this.currentBidders.length;
 			this.currentBidder = this.currentBidders[this.currentPlayerBidIndex];
 			console.info(this.currentBidder + " index: " + this.currentPlayerBidIndex);
-			this.comms.broadcastUpdate({group: 'currentBidder', args: {uid: this.currentBidder}});
 		}
 	};
 
@@ -97,8 +97,7 @@ exports.Auction = function(engine, comms){
 					this.currentBidders.push(engine.players[key].uid);
 			}
 			this.currentPlayerBidIndex = this.currentBidders.indexOf(player.uid);
-			this.comms.broadcastUpdate({group: 'auctionStart',
-				args: {uid: player.uid, cost: plant, bid: bid}});
+			this.auctionRunning = true;
 			this.nextBidder(false);
 		}
 	};
@@ -125,7 +124,6 @@ exports.Auction = function(engine, comms){
 
 		this.currentBid = bid;
 		this.currentBidLeader = player.uid;
-		this.comms.broadcastUpdate({group: 'bid', args: {uid: player.uid, bid: bid}});
 		this.nextBidder(false);
 	};
 };

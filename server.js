@@ -83,9 +83,7 @@ var resolveCommand = function(socket, data){
 		var name = data.substring(data.indexOf(' ') + 1);
 		console.info("Name recevied: " + name);
 		var player = engine.reverseLookUp[socket.id];
-		var oldName = player.displayName;
 		player.displayName = name;
-		comms.broadcastUpdate({group:'displayName', args:{uid:player.uid, oldDisplayName:oldName,displayName:name}});
 		engine.broadcastScore();
 	}
 };

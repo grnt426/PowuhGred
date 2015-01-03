@@ -324,6 +324,17 @@ exports.Engine = function(comms){
             score.players[this.playerOrder[i]] = p;
         }
 
+		// Auction Data
+		score.auction = {currentBidders:auction.currentBidders,
+			finishedBidding:auction.finishedBidding,
+			finishedAuctions:auction.finishedAuctions,
+			currentBid:auction.currentBid,
+			currentPlayerBidIndex:auction.currentPlayerBidIndex,
+			currentBidChoice:auction.currentBidChoice,
+			currentBidder:auction.currentBidder,
+			currentBidLeader:auction.currentBidLeader,
+			auctionRunning:auction.auctionRunning};
+
 		// Score is the current data
 		// Changes is an array of strings identifying what updated.
 		// ChangeSet is an Int representing the number of broadcasts sent
