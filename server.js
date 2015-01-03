@@ -89,4 +89,4 @@ var resolveCommand = function(socket, data){
 };
 
 // All setup is finished, start listening for connections.
-server.listen(3000);
+server.listen(process.env.PORT || 3000);
