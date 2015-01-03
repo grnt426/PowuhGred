@@ -1,3 +1,32 @@
+function min(a,b) {
+    if (a>b) return b
+    return a
+}
+
+function max(a,b) {
+    if (a<b) return b
+    return a
+}
+
+// given a prior bound/range, normalize the variable to a range 0-1
+function norm(x,preBound) {
+    return x / preBound
+}
+
+// given a a master timeline input from 0-1 and a range within that input,
+// gets the sub-progress within that range
+//   ex: getting the sub-progress of the second forth of the timeline
+//     tween(.1,.25,.5) -> 0
+//     tween(.2,.25,.5) -> 0
+//     tween(.3,.25,.5) -> .2
+//     tween(.4,.25,.5) -> .6
+//     tween(.5,.25,.5) -> 1
+//     tween(.6,.25,.5) -> 1
+function tween(x,start,end) {
+    var diff = end-start
+    return norm(min(max(x -start,0),diff),diff)
+}
+
 function drawScorePanel(data, ctx, ppp) {
 
     // currently expecting, though will need to change later:
@@ -9,6 +38,9 @@ function drawScorePanel(data, ctx, ppp) {
     //        .cities = ["Berlin","some other place","Frankfurt-d"];
     //        .resources = {'coal': 5, 'oil': 5, 'garbage': 5, 'uranium': 5};
     //        .displayName = someJerk
+    //  data.anim.progress = 0-1
+    //           .activePlayer = i
+    //           .activeWidth = #
 
     if(!data) return;
     if(!data.playerOrder) return;
@@ -20,13 +52,13 @@ function drawScorePanel(data, ctx, ppp) {
     var s_x2 = 1680;
 
     var b_x = s_x2 - s_x1;
-    var p_x = b_x/4
+    var p_x = b_x/4;
     var b_y = b_x/2.61;
     var p_y = b_y - p_x-20;
 
     var arc = 20;
     var y_pad = 20;
-    var h = p_x*.6
+    var h = p_x*.6;
     ctx.strokeStyle = "#111111";
     ctx.fillStyle = "#DDDDDD";
     ctx.lineWidth=6;
@@ -34,6 +66,9 @@ function drawScorePanel(data, ctx, ppp) {
     var t_x = s_x1;
     var t_y = s_y1;
     for(var i=0; i < data.playerOrder.length; i++) {
+
+        t_x = s_x1
+
         if(!data.players[data.playerOrder[i]]) return;
         var money = data.players[data.playerOrder[i]].money;
         var plants = data.players[data.playerOrder[i]].plants;
@@ -41,18 +76,33 @@ function drawScorePanel(data, ctx, ppp) {
         var resources = data.players[data.playerOrder[i]].resources;
         var name = data.players[data.playerOrder[i]].displayName;
 
+        var p=data.anim.progress;
+        var p1,p2,p3,p4,p5
+        p1=tween(p,0,.35);
+        p2=tween(p,.35,.4);
+        p3=tween(p,.4,.6);
+        p4=tween(p,.6,.65);
+        p5=tween(p,.65,1);
+
+        // debug anim progress output
+        // name = p1.toFixed(2) + " " + p2.toFixed(2) + " " + p3.toFixed(2) + " " + p4.toFixed(2) + " " + p5.toFixed(2)
+
         // draw curved border
         ctx.strokeStyle = "#111111";
         ctx.fillStyle = "#DDDDDD";
         ctx.lineWidth=6;
         ctx.beginPath();
         ctx.moveTo(t_x+b_x,t_y);
-        ctx.lineTo(t_x+arc,t_y);
-        ctx.arc(t_x+arc,t_y+arc,arc,1.5*Math.PI,Math.PI,true)
-        ctx.lineTo(t_x,t_y+b_y-arc);
-        ctx.arc(t_x+arc,t_y+b_y-arc,arc,Math.PI,.5*Math.PI,true)
-        ctx.lineTo(t_x+b_x,t_y+b_y);
+        if (p1>0) ctx.lineTo(t_x+arc+b_x-(b_x*p1),t_y);
+        if (p2>0) ctx.arc(t_x+arc,t_y+arc,arc,1.5*Math.PI,(1.5 - (.5*p2))*Math.PI,true);
+        if (p3>0) ctx.lineTo(t_x,t_y+arc+(b_y-arc-arc)*p3);
+        if (p4>0) ctx.arc(t_x+arc,t_y+b_y-arc,arc,Math.PI,(1 - (.5*p4))*Math.PI,true);
+        if (p5>0) ctx.lineTo(t_x+arc+((b_x-arc)*p5),t_y+b_y);
+
         ctx.stroke();
+
+        t_x = s_x2 - ((s_x2 - s_x1)*tween(p,.2,.8))
+
 
         // draw a house
         ctx.strokeStyle = "#BBBBBB";
