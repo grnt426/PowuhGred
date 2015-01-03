@@ -113,6 +113,8 @@
 		socket.on('updates', function(data){
 			if(data.group == "updateScore"){
 				scorePanel = data;
+				scorePanel.anim = {};
+				scorePanel.anim.progress = 0;
 
 				// extract globals
 				var newData = scorePanel.args.data;
@@ -328,6 +330,7 @@
 
 		var startGameButton = function(){
 			socket.emit('gameaction', {uid:playerData.self.uid, cmd:"startGame", args:{}});
+            animStartGame();
 		};
 
 		var passButton = function(){

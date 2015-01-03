@@ -1,11 +1,39 @@
-var redraw = function(scorePanel){
+var animationFlags = []
 
-	scorePanel = scorePanel.args.data;
+var animationTickLoop = function(){
+    if (animationFlags["start_game"]) {
+        animationFlags["start_game_p"] += .03
+        if(animationFlags["start_game_p"] > 1) {
+            animationFlags["start_game_p"] = 1
+            animationFlags["start_game"]=false
+        }
 
-	// Fills background with white
-	ctx.fillStyle = "#EEEEEE";
-	ctx.fillRect(0, 0, 1680, 1050);
-	ctx.drawImage(bgImg, 0, 0);
+        scorePanel.anim.progress = animationFlags["start_game_p"]
+        clearRect(1300,0,380,1050)
+        drawScorePanel(scorePanel, ctx, ppp)
+    }
+}
+
+// about 30 FPS
+setInterval(animationTickLoop,1000/30);
+
+var animStartGame = function() {
+    animationFlags["start_game"] = true
+    animationFlags["start_game_p"] = 0
+}
+
+
+var clearRect = function(x,y,w,h) {
+
+    // Fills background with white
+    ctx.fillStyle = "#EEEEEE"
+    ctx.fillRect(x,y,w,h)
+    ctx.drawImage(bgImg, 0, 0)
+}
+
+var redraw = function(){
+
+    clearRect(0,0,1680,1050);
 
 	// draw internal city map
 	$.each(citiesDef, function(key, city){
