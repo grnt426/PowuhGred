@@ -13,6 +13,16 @@ your utility.  Resources are purchased in a market where prices are dominated by
 supply and demand.  Players build out their connections to more cities in a
 network like fashion and earn money for the number of cities powered.
 
+Setup
+-----
+
+Download germany.jpg, plants.jpg, and plants_t.jpg from someone who has them
+and place them, exactly as they were named, into the data/ folder.
+
+Install NodeJS.
+
+Download dependencies.
+
 Starting the Game
 -----------------
 
