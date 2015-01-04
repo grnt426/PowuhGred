@@ -41,6 +41,11 @@ engine.plants = powerPlants.powerPlants;
 
 io.sockets.on('connection', function(socket) {
 
+	if(engine.gameStarted){
+		console.info("A player tried to join after the game started!?");
+		return;
+	}
+
     // a user connected, send the map down
 	engine.broadcastScore();
 	var uid = 'player' + engine.currentPlayerCount;

@@ -193,7 +193,7 @@ exports.Engine = function(comms){
 				auction.startAuction(data.args);
 			}
 			else if(this.BID == action){
-				this.placeBid(data.args);
+				auction.placeBid(data.args);
 			}
 			else if(this.BUY == action){
 				this.buyResources(data.args);
@@ -226,16 +226,6 @@ exports.Engine = function(comms){
 			this.currentPlayer = this.playerOrder[0];
 			this.nextAction();
 		}
-	};
-
-	this.updatePlants = function(removedPlant){
-		this.currentMarket.slice(this.currentMarket.indexOf(removedPlant), 1);
-		var shownPlants = this.currentMarket;
-		shownPlants.concat(this.futuresMarket);
-		shownPlants.push(this.plants.slice(0, 1));
-		shownPlants.sort();
-		this.currentMarket = shownPlants.slice(0, 4);
-		this.futuresMarket = shownPlants.slice(0, 4);
 	};
 
 	this.nextAction = function(){
@@ -306,8 +296,8 @@ exports.Engine = function(comms){
 
         score.playerOrder = this.playerOrder;
         score.currentPlayerIndex = this.currentPlayerIndex;
-		score.futuresMarket = this.futuresMarket;
 		score.actualMarket = this.currentMarket;
+		score.futuresMarket = this.futuresMarket;
 		score.currentAction = this.currentAction;
 		score.resources = this.resources;
 

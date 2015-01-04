@@ -7,7 +7,7 @@ exports.Player = function(uid, comms, socket){
 	// Used only by comms to talk to that player directly.
 	this.socket = socket;
 
-	this.plants = {};
+	this.plants = [];
 	this.money = 0;
 	this.cities = [];
     this.resources = {'coal': 0, 'oil': 0, 'garbage': 0, 'uranium': 0};

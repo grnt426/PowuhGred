@@ -41,7 +41,7 @@ exports.Auction = function(engine, comms){
 			this.finishedBidding.push(bidWinner);
 			var player = engine.players[bidWinner];
 			player.awardPlant(this.currentBidChoice, this.currentBid);
-			engine.updatePlants(this.currentBidChoice);
+			this.updateMarket();
 		}
 		else{
 			console.info(this.currentBidder + " index: " + this.currentPlayerBidIndex);
@@ -89,7 +89,7 @@ exports.Auction = function(engine, comms){
 			this.currentBid = bid;
 			this.currentBidChoice = plant;
 			this.currentBidLeader = player.uid;
-			this.currentAction = engine.BID;
+			engine.currentAction = engine.BID;
 
 			for(var key in engine.players){
 				console.info(engine.players[key].uid + " Eligible? "
@@ -126,5 +126,23 @@ exports.Auction = function(engine, comms){
 		this.currentBid = bid;
 		this.currentBidLeader = player.uid;
 		this.nextBidder(false);
+	};
+
+	// TODO: Check for Step 3 card (and handle step 3 specifics).
+	this.updateMarket = function(){
+		var index = 0;
+		for(plant in engine.currentMarket){
+			if(engine.currentMarket[plant].cost == this.currentBidChoice){
+				break;
+			}
+			index += 1;
+		}
+		engine.currentMarket.splice(index, 1);
+		var newPlant = engine.plants.splice(0, 1);
+		var unsortedPlants = engine.currentMarket.concat(engine.futuresMarket);
+		unsortedPlants = unsortedPlants.concat(newPlant[0]);
+		unsortedPlants.sort();
+		engine.currentMarket = unsortedPlants.splice(0, 4);
+		engine.futuresMarket = unsortedPlants.splice(0, 4);
 	};
 };
