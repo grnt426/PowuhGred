@@ -6,7 +6,7 @@ exports.Auction = function(engine, comms){
 	// Array of UIDs
 	this.currentBidders = [];
 
-	// No longer can bid
+	// No longer can bid (does this need to be separate from finishedAuctions?)
 	this.finishedBidding = [];
 
 	// No longer can start auctions
@@ -33,8 +33,9 @@ exports.Auction = function(engine, comms){
 	// TODO use a different order
 	this.nextBidder = function(pass){
 
-		// award the power plant
-		if(this.currentBidders.length == 2 && pass){
+		// award the power plant if the last bidder passed, or if there is only
+		// one bidder at the start of the bid.
+		if((this.currentBidders.length == 2 && pass) || this.currentBidders.length == 1){
 			this.currentBidders.slice(this.currentPlayerBidIndex, 1);
 			var bidWinner = this.currentBidLeader;
 			this.finishedAuctions.push(bidWinner);
@@ -42,6 +43,7 @@ exports.Auction = function(engine, comms){
 			var player = engine.players[bidWinner];
 			player.awardPlant(this.currentBidChoice, this.currentBid);
 			this.updateMarket();
+			this.cleanAuctionState();
 		}
 		else{
 			console.info(this.currentBidder + " index: " + this.currentPlayerBidIndex);
@@ -59,8 +61,6 @@ exports.Auction = function(engine, comms){
 	 * @param data
 	 */
 	this.startAuction = function(data){
-
-		// TODO: clean up previous auction to ensure no weird bugs
 
 		if(data === "pass"){
 			this.finishedBidding.push(engine.currentPlayer);
@@ -128,7 +128,7 @@ exports.Auction = function(engine, comms){
 		this.nextBidder(false);
 	};
 
-	// TODO: Check for Step 3 card (and handle step 3 specifics).
+	// TODO: Check for Step 3 card (and handle step 2 and 3 specifics).
 	this.updateMarket = function(){
 		var index = 0;
 		for(plant in engine.currentMarket){
@@ -144,5 +144,28 @@ exports.Auction = function(engine, comms){
 		unsortedPlants.sort();
 		engine.currentMarket = unsortedPlants.splice(0, 4);
 		engine.futuresMarket = unsortedPlants.splice(0, 4);
+	};
+
+	this.cleanAuctionState = function(){
+		engine.currentAction = engine.START_AUCTION;
+		this.currentBid = 0;
+		this.currentPlayerBidIndex = -1;
+		this.currentBidChoice = -1;
+		this.currentBidder = false;
+		this.currentBidLeader = false;
+		this.auctionRunning = false;
+		this.currentBidders = [];
+
+		// If the current player lost the auction, they get to start the auction
+		// once more.
+		if(this.finishedAuctions.indexOf(engine.currentPlayer) == -1){
+			return;
+		}
+
+		// Otherwise we keep progressing to the next player in this phase
+		// until we find one that has not finished their auction phase.
+		do{
+			engine.nextPlayer();
+		}while(this.finishedAuctions.indexOf(engine.currentPlayer) != -1 && this.currentBidders.length != 0)
 	};
 };

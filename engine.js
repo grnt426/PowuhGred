@@ -24,6 +24,7 @@ exports.Engine = function(comms){
 
 	// UID -> Player
 	this.players = {};
+	this.playersLength = 0;
 
 	// Socket -> Player
 	this.reverseLookUp = [];
@@ -99,6 +100,7 @@ exports.Engine = function(comms){
 		this.currentPlayerCount++;
 		var player = new playerjs.Player(uid, this.comms, socket);
 		this.players[uid] = player;
+		this.playersLength += 1;
 		this.playerOrder.push(uid);
 		this.reverseLookUp[socket.id] = player;
 		player.money = this.STARTING_MONEY;
@@ -115,15 +117,26 @@ exports.Engine = function(comms){
 	 * Determines player order based on number of cities, with the cost of
 	 * power plants as tie-breakers. The first player has the fewest
 	 * cities, or the lowest cost power plant.
+	 *
+	 * I am so sorry this is the world's ugliest hack. Please blame closures,
+	 * and my incompetence.
 	 */
 	this.resolveTurnOrder = function(){
-		this.playerOrder.sort(function(a, b){
-			var aCityCount = a.cities !== undefined ? a.cities.length : 0;
-			var bCityCount = b.cities !== undefined ? b.cities.length : 0;
+		var sortablePlayers = [];
+		for(p in this.players){
+			sortablePlayers.push(this.players[p]);
+		}
+		sortablePlayers.sort(function(playerA, playerB){
+			var aCityCount = playerA.cities !== undefined ? playerA.cities.length : 0;
+			var bCityCount = playerB.cities !== undefined ? playerB.cities.length : 0;
 			return aCityCount != bCityCount
-				? a.cities.length - b.cities.length
-				: a.getHighestCostPowerPlant() - b.getHighestCostPowerPlant()
+				? playerA.cities.length - playerB.cities.length
+				: playerA.getHighestCostPowerPlant() - playerB.getHighestCostPowerPlant();
 		});
+		this.playerOrder = [];
+		for(p in sortablePlayers){
+			this.playerOrder.push(sortablePlayers[p].uid);
+		}
 	};
 
 	/**
@@ -214,11 +227,11 @@ exports.Engine = function(comms){
 			turnOrder = 1;
 
 		this.currentPlayerIndex = this.currentPlayerIndex + turnOrder;
-		if(this.currentPlayerIndex < this.players.length){
+		if(this.currentPlayerIndex < this.playersLength){
 			this.currentPlayer = this.playerOrder[this.currentPlayerIndex];
 		}
 		else{
-			this.currentPlayerIndex = this.players.length;
+			this.currentPlayerIndex = this.players.length; // Why do this?
 			if(this.firstTurn){
 				this.resolveTurnOrder();
 				this.firstTurn = false;
