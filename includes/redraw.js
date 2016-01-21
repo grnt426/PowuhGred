@@ -223,7 +223,7 @@ var redraw = function(scorePanel){
 		ctx.fillText("Current Bid: " + selectedBid, 800, 30);
 		if(scorePanel.auction.currentBid != 0){
 			ctx.fillText("Highest Bid: " + scorePanel.auction.currentBid, 925, 30);
-			ctx.fillText("Highest Bidder: " + scorePanel.auction.currentBidLeader, 1050, 30);
+			ctx.fillText("Highest Bidder: " + scorePanel.players[scorePanel.auction.currentBidLeader].displayName, 1050, 30);
 		}
 	}
 };
