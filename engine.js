@@ -1,6 +1,8 @@
-var playerjs = require("./player.js"),
+var playerjs = require("./State/Player.js"),
 	auctionjs = require("./phases/auction.js"),
-	util = require("./util.js");
+	util = require("./util.js"),
+    res = require("./State/Resources.js"),
+    marketState = require("./State/MarketState.js");
 
 exports.Engine = function(comms){
 
@@ -15,9 +17,6 @@ exports.Engine = function(comms){
 
 	// Array of PowerPlant
 	this.plants = false;
-
-	// The resources available for purchase. String -> Int
-	this.resources = {'coal': 0, 'oil': 0, 'garbage': 0, 'uranium': 0};
 
 	// Array of UIDs
 	this.playerOrder = [];
@@ -34,6 +33,9 @@ exports.Engine = function(comms){
 
 	// Int
 	this.currentPlayerIndex = 0;
+
+    // MarketState Object
+    this.market = new marketState.MarketState();
 
 	// Current plants for Auction
 	// Array of PowerPlant
@@ -53,6 +55,7 @@ exports.Engine = function(comms){
 	// turn. Not relevant after the first turn.
 	this.firstTurn = true;
 
+    // Action Enums
 	this.START_GAME = "startGame";
 	this.START_AUCTION = "startAuction";
 	this.BID = "bid";
@@ -82,18 +85,11 @@ exports.Engine = function(comms){
 		}
 		this.changes.push(this.START_GAME);
 		this.gameStarted = true;
-		this.setupStartingResources();
+		this.market.setupStartingResources();
 		this.randomizePlayerOrder();
 		this.currentPlayer = this.playerOrder[0];
 		this.setupMarket();
 		this.currentAction = this.START_AUCTION;
-	};
-
-	this.setupStartingResources = function(){
-		this.resources['coal'] = 24;
-		this.resources['oil'] = 18;
-		this.resources['garbage'] = 6;
-		this.resources['uranium'] = 2;
 	};
 
 	this.addPlayer = function(uid, socket){
@@ -312,7 +308,7 @@ exports.Engine = function(comms){
 		score.actualMarket = this.currentMarket;
 		score.futuresMarket = this.futuresMarket;
 		score.currentAction = this.currentAction;
-		score.resources = this.resources;
+		score.resources = this.market.resources;
 
         // making a subset of player data, don't want whole object
         score.players = {};
