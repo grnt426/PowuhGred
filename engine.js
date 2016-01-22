@@ -1,4 +1,4 @@
-var playerjs = require("./State/Player.js"),
+var playerjs = require("./includes/Player.js"),
 	auctionjs = require("./phases/auction.js"),
 	util = require("./util.js"),
     res = require("./State/Resources.js"),
