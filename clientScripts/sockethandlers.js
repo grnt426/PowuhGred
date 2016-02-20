@@ -1,3 +1,5 @@
+var socket = io();
+
 // store user id
 socket.on('userid', function(data){
 	playerData.self.uid = data
@@ -15,6 +17,31 @@ socket.on('definecities', function(data){
 	bgImg.onload = function(){
 		redraw(scorePanel);
 	};
+});
+
+// NOTSURE: what the data format for input is
+socket.on('updates', function(data){
+    if(data.group == "updateScore"){
+        scorePanel = data;
+
+        // extract globals
+        var newData = scorePanel.args.data;
+        currentActionState = newData.currentAction;
+        currentPlayer = newData.playerOrder[newData.currentPlayerIndex];
+        resources = newData.resources;
+        actualMarket = newData.actualMarket;
+        futureMarket = newData.futuresMarket;
+
+        for(var change in scorePanel.args.changes){
+            if(scorePanel.args.changes[change] == "startGame"){
+                animStartGame();
+            }
+        }
+    }
+    else{
+        updateHandler(data);
+    }
+    redraw(scorePanel);
 });
 
 var updateHandler = function(data){
