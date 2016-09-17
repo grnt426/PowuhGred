@@ -1,12 +1,19 @@
+// handles server -> client communications: initialization, game updates, chat
+
 var socket = io();
 
+var SOCKET_USERID = 'userid';              // server -> client
+var SOCKET_DEFINECITIES = 'definecities';  // server -> client
+var SOCKET_UPDATES = 'updates';            // server -> client
+var SOCKET_CHAT = 'updatechat';            // server -> client
+
 // store user id
-socket.on('userid', function(data){
+socket.on(SOCKET_USERID, function(data){
 	playerData.self.uid = data
 });
 
 // load up the city map right after connecting
-socket.on('definecities', function(data){
+socket.on(SOCKET_DEFINECITIES, function(data){
 
 	// get the dictionary of city.js objects (taken from cities.js)
 	$.each(data, function(key, value){
@@ -20,8 +27,8 @@ socket.on('definecities', function(data){
 });
 
 // NOTSURE: what the data format for input is
-socket.on('updates', function(data){
-    if(data.group == "updateScore"){
+socket.on(SOCKET_UPDATES, function(data){
+    if(data.group == "updateGameState"){
         scorePanel = data;
 
         // extract globals
@@ -95,6 +102,6 @@ var updateHandler = function(data){
 	}
 };
 
-socket.on('updatechat', function(data){
+socket.on(SOCKET_CHAT, function(data){
 	log(data.sender + ": " + data.msg, CHAT_O);
 });

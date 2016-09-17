@@ -21,11 +21,12 @@ var log = function(str, output) {
     redraw(scorePanel);
 };
 
+var SOCKET_SENDCHAT = 'sendchat';  // client -> server
 var handleChatInput = function(event){
     var key= event.keyCode || event.which;
     if(key == 13) {
         var input = document.getElementById('chatInputBox').value;
-        socket.emit('sendchat', input);
+        socket.emit(SOCKET_SENDCHAT, input);
         document.getElementById('chatInputBox').value = "";
     }
 };

@@ -2,6 +2,7 @@
 // solely for buttons at top of window (start game, bidding, etc.)
 var buttonArray = {};
 
+var SOCKET_GAMEACTION = 'gameaction';  // client -> server
 
 var currentActionState = "startGame";
 
@@ -42,17 +43,17 @@ var createButton = function(disp,listener,flags) {
 
 
 var startGameButton = function(){
-    socket.emit('gameaction', {uid:playerData.self.uid, cmd:"startGame", args:{}});
+    socket.emit(SOCKET_GAMEACTION, {uid:playerData.self.uid, cmd:"startGame", args:{}});
     animStartGame();
 };
 
 var passButton = function(){
-    socket.emit('gameaction', {uid:playerData.self.uid, cmd:currentActionState, args:"pass"});
+    socket.emit(SOCKET_GAMEACTION, {uid:playerData.self.uid, cmd:currentActionState, args:"pass"});
 };
 
 var startAuctionButton = function(){
     if(selectedPlant != -1){
-        socket.emit('gameaction', {uid: playerData.self.uid, cmd: "startAuction",
+        socket.emit(SOCKET_GAMEACTION, {uid: playerData.self.uid, cmd: "startAuction",
             args: {cost: actualMarket[selectedPlant].cost, bid: selectedBid}});
     }
     else{
@@ -74,7 +75,7 @@ var bidDownButton = function(){
 };
 
 var confirmBidButton = function(){
-    socket.emit('gameaction', {uid:playerData.self.uid, cmd:"bid", args:{bid:selectedBid}});
+    socket.emit(SOCKET_GAMEACTION, {uid:playerData.self.uid, cmd:"bid", args:{bid:selectedBid}});
 };
 
 // createButton( Display String, listener, buttons flags);
