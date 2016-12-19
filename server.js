@@ -35,9 +35,7 @@ citiesDef.parseCities("data/germany_connections.txt");
 var powerPlants = new powerplantjs.PowerPlants();
 powerPlants.parsePowerPlants("data/power_plants.txt");
 
-var engine = new enginejs.Engine(comms);
-engine.cities = citiesDef;
-engine.plants = powerPlants.powerPlants;
+var engine = new enginejs.Engine(comms, citiesDef, powerPlants.powerPlants);
 
 io.sockets.on('connection', function(socket) {
 

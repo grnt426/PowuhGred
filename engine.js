@@ -4,7 +4,7 @@ var playerjs = require("./includes/Player.js"),
     res = require("./State/Resources.js"),
     marketState = require("./State/MarketState.js");
 
-exports.Engine = function(comms){
+exports.Engine = function(comms, cities, plants){
 
 	// Int
 	this.currentPlayerCount = 0;
@@ -13,10 +13,10 @@ exports.Engine = function(comms){
 	this.comms = comms;
 
 	// City Name -> City
-	this.cities = false;
+	this.cities = cities;
 
 	// Array of PowerPlant
-	this.plants = false;
+	this.plants = plants;
 
 	// Array of UIDs
 	this.playerOrder = [];
@@ -80,9 +80,11 @@ exports.Engine = function(comms){
 	 * No args needed to start the game
 	 */
 	this.startGame = function(){
-		if(this.gameStarted){
+		if(this.gameStarted) {
+            comms.debug("Trying to start after already started?");
 			return;
 		}
+
 		this.changes.push(this.START_GAME);
 		this.gameStarted = true;
 		this.market.setupStartingResources();

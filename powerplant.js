@@ -2,6 +2,7 @@ var fs = require("fs");
 
 exports.PowerPlants = function(){
 
+    // JSONArray => {cost:int, type:type, requires:requires, powers:powers}
 	this.powerPlants = [];
 
 	this.parsePowerPlants = function(filename){

@@ -1,9 +1,14 @@
 {
-	"name": "chat_node",
-	"description": "example chat application with node.js and socket.io",
-	"version": "0.0.1",
-	"dependencies": {
-		"express": "4.x",
-		"socket.io": "1.1.0"
-	}
+  "name": "PowuhGred",
+  "description": "Boardgame Clone",
+  "version": "0.0.1",
+  "dependencies": {
+    "express": "4.x",
+    "socket.io": "1.1.0",
+    "mocha": "3.2.0",
+    "sinon": "1.17.6"
+  },
+  "scripts:": {
+    "test": "mocha"
+  }
 }
