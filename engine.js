@@ -213,7 +213,7 @@ exports.Engine = function(comms, cities, plants){
 				this.buildCities(data.args);
 			}
 		}
-        this.broadcastScore();
+        this.broadcastGameState();
 	};
 
 	/**
@@ -301,7 +301,7 @@ exports.Engine = function(comms, cities, plants){
         }
     };
 
-    this.broadcastScore = function() {
+    this.broadcastGameState = function() {
         var score = {};
 		changeSet += 1;
 
@@ -340,7 +340,7 @@ exports.Engine = function(comms, cities, plants){
 		// Score is the current data
 		// Changes is an array of strings identifying what updated.
 		// ChangeSet is an Int representing the number of broadcasts sent
-        this.comms.broadcastUpdate({group: 'updateScore',
+        this.comms.broadcastUpdate({group: 'updateGameState',
 			args:{data:score, changes:this.changes, changeSet:changeSet}});
 		this.changes = [];
     };

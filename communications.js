@@ -4,11 +4,21 @@ exports.Communications = function(io){
 	// Used to broadcast to channels
 	this.io = io;
 
+    // Init sequence
+    this.SOCKET_CONNECTION = 'connection';      // client -> server
+    this.SOCKET_USERID = 'userid';              // server -> client
+    this.SOCKET_DEFINECITIES = 'definecities';  // server -> client
+
 	// Channels
-	this.CHAT = 'updatechat';
+	this.SOCKET_CHAT = 'updatechat';   // server -> client
+    this.SOCKET_SENDCHAT = 'sendchat'; // client -> server
 
 	// Game commands
-	this.UPDATES = "updates";
+	this.SOCKET_UPDATES = 'updates';       // server -> client
+    this.SOCKET_GAMEACTION = 'gameaction';  // client -> server
+
+    // Tear down
+    this.SOCKET_DISCONNECT = 'disconnect';  // client -> server
 
 	// Names of "hosts" sending the messages
 	this.SERVER = 'SERVER';
@@ -19,16 +29,16 @@ exports.Communications = function(io){
 	this.CHAT_ALL_OFF = false;
 
 	/**
-	 * Broadcasts a message on CHAT channel to all players in the game, from
+	 * Broadcasts a message on SOCKET_CHAT channel to all players in the game, from
 	 * the SERVER.
 	 * @param msg    The message to broadcast.
 	 */
 	this.toAll = function(msg){
-		io.sockets.emit(this.CHAT, {sender:this.SERVER, msg:msg});
+		io.sockets.emit(this.SOCKET_CHAT, {sender:this.SERVER, msg:msg});
 	};
 
 	/**
-	 * Sends a msg on CHAT channel only to the current player taking their turn
+	 * Sends a msg on SOCKET_CHAT channel only to the current player taking their turn
 	 * (not the player resolving an action or card, but the player whose turn it
 	 * is) from SERVER.
 	 *
@@ -41,24 +51,24 @@ exports.Communications = function(io){
 	};
 
 	/**
-	 * Sends a message on CHAT channel from SERVER to the player.
+	 * Sends a message on SOCKET_CHAT channel from SERVER to the player.
 	 *
 	 * @param {Player} player	Player username to send message to.
 	 * @param {String} msg		The message to send.
 	 */
 	this.toPlayer = function(player, msg){
-		player.socket.emit(this.CHAT, {sender:this.SERVER, msg:msg});
+		player.socket.emit(this.SOCKET_CHAT, {sender:this.SERVER, msg:msg});
 	};
 
 	/**
-	 * Broadcasts a msg on CHAT channel from a player.
+	 * Broadcasts a msg on SOCKET_CHAT channel from a player.
 	 *
 	 * @param from    The username of the player sending the message.
 	 * @param msg    The message to broadcast.
 	 */
 	this.toAllFrom = function(from, msg){
 		console.info(from.uid + " " + from.displayName);
-		io.sockets.emit(this.CHAT, {sender:from.displayName, msg:msg});
+		io.sockets.emit(this.SOCKET_CHAT, {sender:from.displayName, msg:msg});
 	};
 
 	/**
@@ -73,11 +83,11 @@ exports.Communications = function(io){
 	this.toPrivate = function(to, from, msg){
 //		var toPlayer = gamestate.getPlayer(to);
 //		if(!toPlayer){
-//			from.socket.emit(this.CHAT, this.SERVER,
+//			from.socket.emit(this.SOCKET_CHAT, this.SERVER,
 //					"'" + to + "' player doesn't exist.");
 //		}
 //		else{
-//			toPlayer.socket.emit(this.CHAT, from.username, msg);
+//			toPlayer.socket.emit(this.SOCKET_CHAT, from.username, msg);
 //		}
 	};
 
@@ -95,7 +105,7 @@ exports.Communications = function(io){
 	};
 
 	/**
-	 * Broadcasts on CHAT channel from DEBUG the message given, only if
+	 * Broadcasts on SOCKET_CHAT channel from DEBUG the message given, only if
 	 * CHAT_ALL_OFF is false and toPrint is true.
 	 *
 	 * This allows the caller to indefinitely leave their debug messages in
@@ -110,7 +120,7 @@ exports.Communications = function(io){
 		this.debug(toPrint, msg);
 
 		if(!this.CHAT_ALL_OFF && toPrint){
-			io.sockets.emit(this.CHAT, this.DEBUG, msg);
+			io.sockets.emit(this.SOCKET_CHAT, this.DEBUG, msg);
 		}
 	};
 
@@ -133,11 +143,10 @@ exports.Communications = function(io){
 	/**
 	 * Broadcasts an update to all players.
 	 *
-	 * @param command	The command to update with.
-	 * @param msg		THe message contents for the client.
+	 * @param dataObj   the data object to update the client with
 	 */
 	this.broadcastUpdate = function(dataObj){
-		io.sockets.emit(this.UPDATES, dataObj);
+		io.sockets.emit(this.SOCKET_UPDATES, dataObj);
 	};
 };
 
