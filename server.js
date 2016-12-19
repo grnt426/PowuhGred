@@ -8,7 +8,8 @@ var express = require('express'),
 	communicationsjs = require('./communications.js'),
     citiesjs = require('./cities.js'),
 	powerplantjs = require('./powerplant.js'),
-	enginejs = require('./engine.js');
+	enginejs = require('./engine.js'),
+    util = require('./util.js');
 
 // routing
 app.get("/", function(req, res) { res.sendFile(__dirname + '/index.html'); });
@@ -49,7 +50,7 @@ io.sockets.on(comms.SOCKET_CONNECTION, function(socket) {
 
     // a user connected, send the map down
     engine.broadcastGameState();
-	var uid = 'player' + engine.currentPlayerCount;
+	var uid = 'player' + util.olen(engine.players);
 	socket.emit(comms.SOCKET_USERID, uid);
 	engine.addPlayer(uid, socket);
     socket.emit(comms.SOCKET_DEFINECITIES, citiesDef.cities);

@@ -6,9 +6,6 @@ var playerjs = require("./includes/Player.js"),
 
 exports.Engine = function(comms, cities, plants){
 
-	// Int
-	this.currentPlayerCount = 0;
-
 	// Communications
 	this.comms = comms;
 
@@ -23,7 +20,6 @@ exports.Engine = function(comms, cities, plants){
 
 	// UID -> Player
 	this.players = {};
-	this.playersLength = 0;
 
 	// Socket -> Player
 	this.reverseLookUp = [];
@@ -95,10 +91,8 @@ exports.Engine = function(comms, cities, plants){
 	};
 
 	this.addPlayer = function(uid, socket){
-		this.currentPlayerCount++;
 		var player = new playerjs.Player(uid, this.comms, socket);
 		this.players[uid] = player;
-		this.playersLength += 1;
 		this.playerOrder.push(uid);
 		this.reverseLookUp[socket.id] = player;
 		player.money = this.STARTING_MONEY;
@@ -113,11 +107,8 @@ exports.Engine = function(comms, cities, plants){
 
 	/**
 	 * Determines player order based on number of cities, with the cost of
-	 * power plants as tie-breakers. The first player has the fewest
-	 * cities, or the lowest cost power plant.
-	 *
-	 * I am so sorry this is the world's ugliest hack. Please blame closures,
-	 * and my incompetence.
+	 * power plants as tie-breakers. The first player (index zero) has the most
+	 * cities, or the highest cost power plant.
 	 */
 	this.resolveTurnOrder = function(){
 		var sortablePlayers = [];
@@ -128,8 +119,8 @@ exports.Engine = function(comms, cities, plants){
 			var aCityCount = playerA.cities !== undefined ? playerA.cities.length : 0;
 			var bCityCount = playerB.cities !== undefined ? playerB.cities.length : 0;
 			return aCityCount != bCityCount
-				? playerA.cities.length - playerB.cities.length
-				: playerA.getHighestCostPowerPlant() - playerB.getHighestCostPowerPlant();
+				? playerB.cities.length - playerA.cities.length
+				: playerB.getHighestCostPowerPlant() - playerA.getHighestCostPowerPlant();
 		});
 		this.playerOrder = [];
 		for(p in sortablePlayers){
@@ -225,11 +216,11 @@ exports.Engine = function(comms, cities, plants){
 			turnOrder = 1;
 
 		this.currentPlayerIndex = this.currentPlayerIndex + turnOrder;
-		if(this.currentPlayerIndex < this.playersLength){
+		if(this.currentPlayerIndex < util.olen(this.players)){
 			this.currentPlayer = this.playerOrder[this.currentPlayerIndex];
 		}
 		else{
-			this.currentPlayerIndex = this.players.length; // Why do this?
+			this.currentPlayerIndex = util.olen(this.players); // Why do this?
 			if(this.firstTurn){
 				this.resolveTurnOrder();
 				this.firstTurn = false;
