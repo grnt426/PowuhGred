@@ -54,6 +54,7 @@ nurnberg regensburg 12
 dresden leipzig 13
 essen dusseldorf 2
 essen duisburg 0
+essen dortmund 4
 koln dusseldorf 4
 koln aachen 7
 koln trier 20

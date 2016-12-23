@@ -37,4 +37,10 @@ exports.Player = function(uid, comms, socket){
         this.plants.push(plantCost);
         this.money -= bidCost;
     };
+
+    this.addResources = function(addedResources){
+        addedResources.foreach(function(amt, type){
+            this.resources[type] += amt;
+        });
+    }
 };

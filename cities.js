@@ -17,38 +17,47 @@ exports.Cities = function(){
 		var cheapestRoutes = [];
 		var neighbors = start.connections;
 		var visited = [];
-		visited[start] = 0;
+        var shortest = undefined;
+		visited[start.name.toLowerCase()] = 0;
 
 		// Add all our neighbors
 		for(var city in neighbors){
 			cheapestRoutes.push({
-				path : [neighbors[city].neighbor],
-				cost : neighbors[city].conn
+				path : [city],
+				cost : neighbors[city].connection
 			});
-			visited[neighbors[city]] = neighbors[city].conn;
+			visited[city] = neighbors[city].connection;
 		}
 
 		while(cheapestRoutes.length > 0){
-			cheapestRoutes.sort(function(a,b){a.cost - b.cost});
-			var shortest = cheapestRoutes[0];
-			if(shortest.name = end.name)
-				break;
-			neighbors = shortest.connections;
-			var min_cost = -1;
-			var min_city = false;
+			cheapestRoutes.sort(function(a,b){return a.cost - b.cost});
+			shortest = cheapestRoutes.shift();
+            var lastCity = shortest.path[shortest.path.length-1];
+            var endName = end.name.toLowerCase();
+            if(lastCity == endName)
+                break;
+			neighbors = this.cities[lastCity].connections;
 
 			// Find lowest cost connection from currently shortest path
 			for(city in neighbors){
-				if(!min_city || neighbors[city].conn < min_cost){
-					min_cost = neighbors[city].conn;
-					min_city = neighbors[city];
-				}
-			}
 
-			shortest.path.push(min_city);
-			shortest.cost = shortest.cost + min_cost;
+                var cost = neighbors[city].connection + shortest.cost;
+
+                // If we already visited this city, and we got to it cheaper, then we want to terminate searching on
+                // this path; and kill cycles.
+                if(visited[city] <= cost) {
+                    continue;
+                }
+
+                // Make a copy of the previous path that got us here
+                var newPath = JSON.parse(JSON.stringify(shortest.path));
+                newPath.push(city);
+
+                cheapestRoutes.push({path:newPath, cost:cost});
+                visited[city] = cost;
+			}
 		}
-		return cheapestRoutes[0];
+		return shortest;
 	};
 
 	/**
@@ -66,6 +75,7 @@ exports.Cities = function(){
 			var conn = cityArgs[1];
 			var startCity = this.cities[name];
 			startCity.connections[conn] = {connection:cost};
+            this.cities[conn].connections[name] = {connection:cost};
 		}
 	};
 

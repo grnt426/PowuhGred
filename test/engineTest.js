@@ -25,27 +25,27 @@ describe('#startGame()', function () {
         engine.startGame();
 
         assert(engine.comms.debug.called, "Expected a debug message to be emitted.");
-        assert.equal(0, engine.changes.length, "Expected the changes log to be empty.")
+        assert.equal(engine.changes.length, 0, "Expected the changes log to be empty.")
     });
 
     it('Starts the game with two players', function () {
         engine.playerOrder = [1, 2];
         engine.market.setupStartingResources = sinon.spy();
         engine.randomizePlayerOrder = sinon.spy();
-        engine.setupMarket = sinon.spy();
+        engine.setupAuction = sinon.spy();
 
         engine.startGame();
 
-        assert.equal(1, engine.changes.length);
-        assert.equal(engine.START_GAME, engine.changes[0]);
+        assert.equal(engine.changes.length, 1);
+        assert.equal(engine.changes[0], engine.START_GAME);
         assert(engine.gameStarted);
 
         assert(engine.market.setupStartingResources.calledOnce);
         assert(engine.randomizePlayerOrder.calledOnce);
-        assert(engine.setupMarket.calledOnce);
+        assert(engine.setupAuction.calledOnce);
 
-        assert.equal(1, engine.currentPlayer, "Expected Player1 to be first.");
-        assert.equal(engine.START_AUCTION, engine.currentAction);
+        assert.equal(engine.currentPlayer, 1, "Expected Player1 to be first.");
+        assert.equal(engine.currentAction, engine.START_AUCTION);
     });
 });
 
@@ -54,10 +54,10 @@ describe('#addPlayer()', function () {
     it('Should add one player', function () {
         engine.addPlayer(1, mockSocket(1));
 
-        assert.equal(1, util.olen(engine.players));
-        assert.notEqual(null, engine.players[1]);
-        assert.notEqual(null, engine.reverseLookUp[1]);
-        assert.equal(engine.STARTING_MONEY, engine.players[1].money);
+        assert.equal(util.olen(engine.players), 1);
+        assert.notEqual(engine.players[1], undefined);
+        assert.notEqual(engine.reverseLookUp[1], undefined);
+        assert.equal(engine.players[1].money, engine.STARTING_MONEY);
     });
 
     it('Should add three players', function () {
@@ -69,7 +69,7 @@ describe('#addPlayer()', function () {
         for (i = 1; i < 4; i++) {
             assert.notEqual(null, engine.players[i]);
             assert.notEqual(null, engine.reverseLookUp[i]);
-            assert.equal(engine.STARTING_MONEY, engine.players[i].money);
+            assert.equal(engine.players[i].money, engine.STARTING_MONEY);
         }
     });
 
@@ -84,9 +84,9 @@ describe ('#resolveTurnOrder()', function() {
         engine.resolveTurnOrder();
 
         assert.notEqual(undefined, engine.playerOrder, "playerOrder should not be undefined.");
-        assert.equal(2, engine.playerOrder.length, "Should be two players in this array.");
-        assert.equal("1", engine.playerOrder[0]);
-        assert.equal("2", engine.playerOrder[1]);
+        assert.equal(engine.playerOrder.length, 2, "Should be two players in this array.");
+        assert.equal(engine.playerOrder[0], "1");
+        assert.equal(engine.playerOrder[1], "2");
     });
 
     it('Should sort two players. P1 has 1 city and 5 cost plant, P2 has 1 city and 4 cost plant. P1 is first and P2 second', function(){
@@ -97,10 +97,10 @@ describe ('#resolveTurnOrder()', function() {
 
         engine.resolveTurnOrder();
 
-        assert.notEqual(undefined, engine.playerOrder, "playerOrder should not be undefined.");
-        assert.equal(2, engine.playerOrder.length, "Should be two players in this array.");
-        assert.equal("1", engine.playerOrder[0]);
-        assert.equal("2", engine.playerOrder[1]);
+        assert.notEqual(engine.playerOrder, undefined, "playerOrder should not be undefined.");
+        assert.equal(engine.playerOrder.length, 2, "Should be two players in this array.");
+        assert.equal(engine.playerOrder[0], "1");
+        assert.equal(engine.playerOrder[1], "2");
     });
 });
 

@@ -2,14 +2,15 @@ var playerjs = require("./includes/Player.js"),
 	auctionjs = require("./phases/auction.js"),
 	util = require("./util.js"),
     res = require("./State/Resources.js"),
-    marketState = require("./State/MarketState.js");
+    marketjs = require("./phases/market.js"),
+    buildingjs = require("./phases/building.js");
 
 exports.Engine = function(comms, cities, plants){
 
 	// Communications
 	this.comms = comms;
 
-	// City Name -> City
+	// {Object} of type Cities
 	this.cities = cities;
 
 	// Array of PowerPlant
@@ -29,9 +30,6 @@ exports.Engine = function(comms, cities, plants){
 
 	// Int
 	this.currentPlayerIndex = 0;
-
-    // MarketState Object
-    this.market = new marketState.MarketState();
 
 	// Current plants for Auction
 	// Array of PowerPlant
@@ -62,7 +60,9 @@ exports.Engine = function(comms, cities, plants){
 	this.currentAction = this.START_GAME;
 
 	// Phases
-	var auction = new auctionjs.Auction(this, this.comms);
+	this.auction = new auctionjs.Auction(this, this.comms);
+    this.market = new marketjs.Market(this, this.comms);
+    this.building = new buildingjs.Building(this, this.comms);
 
 	// Array of Strings. Identifiers which declare what set of data changed in
 	// the update
@@ -86,7 +86,7 @@ exports.Engine = function(comms, cities, plants){
 		this.market.setupStartingResources();
 		this.randomizePlayerOrder();
 		this.currentPlayer = this.playerOrder[0];
-		this.setupMarket();
+		this.setupAuction();
 		this.currentAction = this.START_AUCTION;
 	};
 
@@ -130,8 +130,10 @@ exports.Engine = function(comms, cities, plants){
 
 	/**
 	 * This assumes the plants are already in ascending order by cost.
+     *
+     * TODO: move this to the auction phase class.
 	 */
-	this.setupMarket = function(){
+	this.setupAuction = function(){
 		this.currentMarket = this.plants.splice(0, 4);
 		this.futuresMarket = this.plants.splice(0, 4);
 		var topPlant = this.plants.splice(2, 1);
@@ -192,13 +194,13 @@ exports.Engine = function(comms, cities, plants){
 				this.startGame();
 			}
 			else if(this.START_AUCTION == action){
-				auction.startAuction(data.args);
+				this.auction.startAuction(data.args);
 			}
 			else if(this.BID == action){
-				auction.placeBid(data.args);
+                this.auction.placeBid(data.args);
 			}
 			else if(this.BUY == action){
-				this.buyResources(data.args);
+                this.market.buyResources(data.args);
 			}
 			else if(this.BUILD == action){
 				this.buildCities(data.args);
@@ -211,22 +213,38 @@ exports.Engine = function(comms, cities, plants){
 	 * Progresses to the next player, or starts the next Action.
 	 */
 	this.nextPlayer = function(){
+
+        // Controls the direction of player turn order. Negative means we are advancing to the first player, starting
+        // with the last. Positive means we are advancing to the last player starting from the first.
 		var turnOrder = -1;
 		if(this.currentAction == this.START_AUCTION)
 			turnOrder = 1;
 
 		this.currentPlayerIndex = this.currentPlayerIndex + turnOrder;
-		if(this.currentPlayerIndex < util.olen(this.players)){
+		if(this.currentPlayerIndex >= 0 && this.currentPlayerIndex < util.olen(this.players)){
 			this.currentPlayer = this.playerOrder[this.currentPlayerIndex];
 		}
+
+        // Once we have iterated through all players, we reset the index
 		else{
 			this.currentPlayerIndex = util.olen(this.players); // Why do this?
+
+            // The first turn is special, as player order is initially chosen at random. Once all players have
+            // purchased power plants, the turn order must be correct.
 			if(this.firstTurn){
 				this.resolveTurnOrder();
 				this.firstTurn = false;
 			}
-			this.currentPlayer = this.playerOrder[0];
+
+            this.currentPlayer = this.playerOrder[util.olen(this.players)];
 			this.nextAction();
+
+            // Once we advance past to the "START_AUCTION" phase again, we must recompute turn order and point to
+            // player position 1, as the first player must now start the auction first.
+            if(this.currentAction == this.START_AUCTION){
+                this.resolveTurnOrder();
+                this.currentPlayer = this.playerOrder[0];
+            }
 		}
 	};
 
@@ -235,8 +253,16 @@ exports.Engine = function(comms, cities, plants){
 			this.currentAction = this.BUY;
 		else if(this.currentAction == this.BUY)
 			this.currentAction = this.BUILD;
-		else
+		else if(this.currentAction == this.BUILD){
+
+            // The Bureaucracy phase requires no player input, so we can just move through it without advancing the
+            // action phase to it. Likewise, computing the winner can be done without advancing the state.
 			this.getMoney();
+
+            // TODO: If someone wins, halt game
+            this.currentAction = this.START_AUCTION;
+        }
+
 	};
 
 	this.getMoney = function(){
@@ -318,15 +344,15 @@ exports.Engine = function(comms, cities, plants){
         }
 
 		// Auction Data
-		score.auction = {currentBidders:auction.currentBidders,
-			finishedBidding:auction.finishedBidding,
-			finishedAuctions:auction.finishedAuctions,
-			currentBid:auction.currentBid,
-			currentPlayerBidIndex:auction.currentPlayerBidIndex,
-			currentBidChoice:auction.currentBidChoice,
-			currentBidder:auction.currentBidder,
-			currentBidLeader:auction.currentBidLeader,
-			auctionRunning:auction.auctionRunning};
+		score.auction = {currentBidders:this.auction.currentBidders,
+			finishedBidding:this.auction.finishedBidding,
+			finishedAuctions:this.auction.finishedAuctions,
+			currentBid:this.auction.currentBid,
+			currentPlayerBidIndex:this.auction.currentPlayerBidIndex,
+			currentBidChoice:this.auction.currentBidChoice,
+			currentBidder:this.auction.currentBidder,
+			currentBidLeader:this.auction.currentBidLeader,
+			auctionRunning:this.auction.auctionRunning};
 
 		// Score is the current data
 		// Changes is an array of strings identifying what updated.
