@@ -30,15 +30,23 @@ exports.Cities = function(){
 		}
 
 		while(cheapestRoutes.length > 0){
+
+            // We continuously re-evaluate which paths to look at by only looking at the currently cheapest path
 			cheapestRoutes.sort(function(a,b){return a.cost - b.cost});
 			shortest = cheapestRoutes.shift();
             var lastCity = shortest.path[shortest.path.length-1];
             var endName = end.name.toLowerCase();
+
+            // We only want to terminate searching *after* the path we found is returned to us as the shortest path.
+            // We don't want to terminate as soon as we find the end city anywhere, which is why we wait to terminate
+            // until this if-statement.
             if(lastCity == endName)
                 break;
+
+            // Otherwise, we have to continue searching.
 			neighbors = this.cities[lastCity].connections;
 
-			// Find lowest cost connection from currently shortest path
+			// Iterate through all the neighbors of this new path
 			for(city in neighbors){
 
                 var cost = neighbors[city].connection + shortest.cost;
@@ -49,10 +57,10 @@ exports.Cities = function(){
                     continue;
                 }
 
-                // Make a copy of the previous path that got us here
+                // Make a copy of the previous path that got us here, add the neighbor we just visited, and add this
+                // for consideration later.
                 var newPath = JSON.parse(JSON.stringify(shortest.path));
                 newPath.push(city);
-
                 cheapestRoutes.push({path:newPath, cost:cost});
                 visited[city] = cost;
 			}
