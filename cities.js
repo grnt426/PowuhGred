@@ -1,5 +1,7 @@
 var fs = require("fs"),
-	cityjs = require("./city.js");
+    allcombinations = require('allcombinations'),
+	cityjs = require("./city.js"),
+    util = require("./util.js");
 
 exports.Cities = function(){
 
@@ -13,6 +15,15 @@ exports.Cities = function(){
 		this.cities[city.name.toLowerCase()] = city;
 	};
 
+    /**
+     * Computes the lowest cost route from start to end. Note: does NOT account for the cost of buying the city.
+     *
+     * TODO: Memoization could help us here.
+     *
+     * @param start City name to start from
+     * @param end   City name to go to
+     * @returns {Object}    The shortest route and its cost
+     */
 	this.findCheapestRoute = function(start, end){
 		var cheapestRoutes = [];
 		var neighbors = start.connections;
@@ -59,7 +70,7 @@ exports.Cities = function(){
 
                 // Make a copy of the previous path that got us here, add the neighbor we just visited, and add this
                 // for consideration later.
-                var newPath = JSON.parse(JSON.stringify(shortest.path));
+                var newPath = util.deepCopy(shortest.path);
                 newPath.push(city);
                 cheapestRoutes.push({path:newPath, cost:cost});
                 visited[city] = cost;
@@ -67,6 +78,63 @@ exports.Cities = function(){
 		}
 		return shortest;
 	};
+
+    /**
+     * Finds the cheapest route from any of a player's cities to the destination city.
+     *
+     * TODO: Memoization would help us greatly here.
+     *
+     * @param cities    List of cities to try starting from
+     * @param dest  City to path to
+     * @returns {number}    The lowest cost found.
+     */
+    this.findArbitraryCheapestToDest = function(cities, dest){
+        var lowestCost = 999;
+        for(i in cities){
+            var cost = this.findCheapestRoute(cities[i], dest).cost;
+            if(cost < lowestCost)
+                lowestCost = cost;
+        }
+        return lowestCost;
+    };
+
+    /**
+     * Given a list of owned player cities and a list of destination cities, determine which ordering of purchases is
+     * the most optimal so as to minimize cost.
+     * @param cities    Cities owned by the player.
+     * @param dests Destinations to purchase
+     * @returns {number}    The cost to pay for connections to the given destinations.
+     */
+    this.findOptimalPurchaseCostOrderOfCities = function(cities, dests){
+        var totalCost = 999;
+        var possibleOrderings = allcombinations(dests);
+        var next;
+        while(!(next = possibleOrderings.next()).done){
+            var cost = 0;
+            var tempCities = util.deepCopy(cities);
+            var comb = next.value;
+            for(var i in comb){
+
+                // Find the cheapest cost for this city given the cities we already have
+                cost += this.findArbitraryCheapestToDest(this.convertToCityObjects(tempCities), comb[i]);
+
+                // Then, add this city to cities we "have", so we recompute the next cheapest as this city a part of our
+                // network.
+                tempCities.push(comb[i].name);
+            }
+            if(cost < totalCost)
+                totalCost = cost;
+        }
+        return totalCost;
+    };
+
+    this.convertToCityObjects = function(cities){
+        var citiesO = [];
+        for(var i in cities){
+            citiesO.push(this.cities[cities[i].toLowerCase()]);
+        }
+        return citiesO;
+    };
 
 	/**
 	 * Adds connections to the cities. Assumes that all cities have already been
@@ -109,4 +177,28 @@ exports.Cities = function(){
             }
         }
     };
+
+    /**
+     * @param city  Name of city to buy.
+     * @param player    UID of Player
+     */
+    this.purchaseCity = function(city, player){
+        this.cities[city.toLowerCase()].buildForPlayer(player);
+    };
+
+    /**
+     * @param city  Name of city to check
+     * @returns {boolean}
+     */
+    this.isCityAvailableForPurchase = function(city){
+        return this.cities[city.toLowerCase()].canBuild();
+    };
+
+    /**
+     * @param city  Name of city to check
+     * @returns {number}    Cost to build there.
+     */
+    this.costToBuildOnCity = function(city){
+        return this.cities[city.toLowerCase()].costToBuild();
+    }
 };

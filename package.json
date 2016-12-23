@@ -3,10 +3,12 @@
   "description": "Boardgame Clone",
   "version": "0.0.1",
   "dependencies": {
+    "allcombinations": "^1.1.1",
     "express": "4.x",
-    "socket.io": "1.1.0",
     "mocha": "3.2.0",
-    "sinon": "1.17.6"
+    "sinon": "1.17.6",
+    "socket.io": "1.1.0",
+    "allcombinations": "1.1.1"
   },
   "scripts:": {
     "test": "mocha"

@@ -28,7 +28,9 @@ exports.olen = function(obj) {
     if(typeof obj == "object"){
         return Object.keys(obj).length;
     }
-    else{
-        return 0;
-    }
+    return 0;
+};
+
+exports.deepCopy = function(obj){
+    return JSON.parse(JSON.stringify(obj));
 };

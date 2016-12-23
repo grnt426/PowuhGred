@@ -72,6 +72,10 @@ exports.Engine = function(comms, cities, plants){
 	// detecting game de-sync issues (if they arise in the future).
 	var changeSet = 0;
 
+    this.getCurrentPlayer = function(){
+        return this.players[this.currentPlayerIndex];
+    };
+
 	/**
 	 * No args needed to start the game
 	 */

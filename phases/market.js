@@ -37,12 +37,12 @@ exports.Market = function (engine, comms) {
         // Otherwise, the player has requested resources
         else {
             var cost = this.computeTotalCost(data);
-            var currentPlayer = this.engine.currentPlayer;
+            var currentPlayer = this.engine.getCurrentPlayer();
 
             // This first condition should never happen, as the client wouldn't let someone chose more resources
             // than they have. It is a stop-gap in case something weird happens (or someone is spoofing messages...)
             if (!this.validatePurchase(data) || currentPlayer.money < cost) {
-                console.info("Invalid purchase. Money: " + this.engine.currentPlayer.money + ". Request: " + data);
+                console.info("Invalid purchase. Money: " + currentPlayer.money + ". Request: " + data);
             }
             else {
                 currentPlayer.money -= cost;
