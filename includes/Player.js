@@ -13,6 +13,11 @@ exports.Player = function(uid, comms, socket){
     this.money = 0;
     this.cities = [];
     this.resources = {};
+    this.resources[res.COAL] = 0;
+    this.resources[res.OIL] = 0;
+    this.resources[res.GARBAGE] = 0;
+    this.resources[res.URANIUM] = 0;
+
 
     this.buildOnCity = function(city){
         this.cities.push(city.name);
@@ -26,8 +31,8 @@ exports.Player = function(uid, comms, socket){
     this.getHighestCostPowerPlant = function(){
         var high = 0;
         for(var key in this.plants){
-            if(this.plants[key].cost > high)
-                high = this.plants[key].cost;
+            if(key > high)
+                high = key;
         }
         return high;
     };
@@ -39,8 +44,8 @@ exports.Player = function(uid, comms, socket){
     };
 
     this.addResources = function(addedResources){
-        addedResources.foreach(function(amt, type){
-            this.resources[type] += amt;
-        });
+        for(var type in addedResources){
+            this.resources[type] += addedResources[type];
+        }
     }
 };

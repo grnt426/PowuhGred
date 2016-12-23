@@ -19,9 +19,8 @@ Setup
 Download germany.jpg, plants.jpg, and plants_t.jpg from someone who has them
 and place them, exactly as they were named, into the data/ folder.
 
-Install NodeJS.
-
-Download dependencies.
+NodeJS https://nodejs.org/en/
+Mocha https://mochajs.org/#installation
 
 Starting the Game
 -----------------
@@ -35,4 +34,13 @@ Connect to the server
 	http://localhost:3000/
 	
 And start playing!	
-	
+
+
+Development
+------------
+
+If in IntelliJ, define a run configuration (top bar, left of the Green Arrow).
+Choose to create a new NodeJS run profile, and just select server.js as the target.
+
+To run tests, repeat, but instead create a new Mocha profile and then point at the test/ directory. You will need to
+pass --recursive to the "Extra mocha options" field.
