@@ -22,6 +22,8 @@ and place them, exactly as they were named, into the data/ folder.
 NodeJS https://nodejs.org/en/
 Mocha https://mochajs.org/#installation
 
+	npm install
+
 Starting the Game
 -----------------
 
@@ -44,3 +46,5 @@ Choose to create a new NodeJS run profile, and just select server.js as the targ
 
 To run tests, repeat, but instead create a new Mocha profile and then point at the test/ directory. You will need to
 pass --recursive to the "Extra mocha options" field.
+
+	mocha

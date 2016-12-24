@@ -1,3 +1,4 @@
+
 var fs = require("fs"),
     allcombinations = require('allcombinations'),
 	cityjs = require("./city.js"),
@@ -6,10 +7,16 @@ var fs = require("fs"),
 exports.Cities = function(){
 
 	/**
-	 * String -> City
-	 * @type {Array}
+	 * String (name of city) -> City
+	 * @type {Object<string, City>}
 	 */
 	this.cities = {};
+	
+	/**
+	 * String (name of city A) + String (name of city B) -> Distance
+	 * @type {Object<string, Object<string, number>>}
+	 */
+    this.cityDistDict = {};
 
 	this.addCity = function(city){
 		this.cities[city.name.toLowerCase()] = city;
@@ -18,13 +25,22 @@ exports.Cities = function(){
     /**
      * Computes the lowest cost route from start to end. Note: does NOT account for the cost of buying the city.
      *
-     * TODO: Memoization could help us here.
-     *
-     * @param start City name to start from
-     * @param end   City name to go to
+     * @param start City to start from
+     * @param end   City to go to
      * @returns {Object}    The shortest route and its cost
      */
 	this.findCheapestRoute = function(start, end){
+	    
+	    var startDict = this.cityDistDict[start.name.toLowerCase()];
+	    if(startDict === undefined) 
+	    { 
+	        startDict = this.cityDistDict[start.name.toLowerCase()] = {};
+	    }
+	    if(startDict[end.name.toLowerCase()] !== undefined) 
+	    {
+	        return startDict[end.name.toLowerCase()];
+	    }
+	    
 		var cheapestRoutes = [];
 		var neighbors = start.connections;
 		var visited = [];
@@ -76,6 +92,7 @@ exports.Cities = function(){
                 visited[city] = cost;
 			}
 		}
+	    startDict[end.name.toLowerCase()] = shortest;
 		return shortest;
 	};
 
@@ -89,7 +106,7 @@ exports.Cities = function(){
      * @returns {number}    The lowest cost found.
      */
     this.findArbitraryCheapestToDest = function(cities, dest){
-        var lowestCost = 999;
+        var lowestCost = 999, i;
         for(i in cities){
             var cost = this.findCheapestRoute(cities[i], dest).cost;
             if(cost < lowestCost)
@@ -161,7 +178,7 @@ exports.Cities = function(){
 	 */
     this.parseCityList = function(filename){
         if (!filename) filename = "data/germany_cities.txt";
-        var fs = require('fs');
+        var fs = require('fs'), i;
         var array = fs.readFileSync(filename).toString().split("\n");
         for(i in array) {
             if(array[i]){
