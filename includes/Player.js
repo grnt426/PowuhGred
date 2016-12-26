@@ -12,15 +12,9 @@ exports.Player = function(uid, comms, socket){
     this.plants = [];
     this.money = 0;
     this.cities = [];
-    this.resources = {};
-    this.resources[res.COAL] = 0;
-    this.resources[res.OIL] = 0;
-    this.resources[res.GARBAGE] = 0;
-    this.resources[res.URANIUM] = 0;
-
 
     this.buildOnCity = function(city){
-        this.cities.push(city.name);
+        this.cities.push(city);
     };
 
     this.replacePowerPlant = function(newPlant, oldPlant){
@@ -37,15 +31,8 @@ exports.Player = function(uid, comms, socket){
         return high;
     };
 
-    // TODO: check for more than allowed plants and allow player to trash plants if so
-    this.awardPlant = function(plantCost, bidCost){
-        this.plants.push(plantCost);
+    this.awardPlant = function(plant, bidCost){
+        this.plants[plant.cost] = plant;
         this.money -= bidCost;
     };
-
-    this.addResources = function(addedResources){
-        for(var type in addedResources){
-            this.resources[type] += addedResources[type];
-        }
-    }
 };

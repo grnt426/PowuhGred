@@ -145,6 +145,19 @@ exports.Cities = function(){
         return totalCost;
     };
 
+    /**
+     * Computes the total cost to just build the cities, but not its path from/to anywhere.
+     * @param cities    The cities to purchase
+     * @returns {number}    The cost to build.
+     */
+    this.getTotalCostToBuild = function(cities){
+        var cost = 0;
+        for(var i in cities){
+            cost += this.costToBuildOnCity(cities[i]);
+        }
+        return cost;
+    };
+
     this.convertToCityObjects = function(cities){
         var citiesO = [];
         for(var i in cities){
@@ -207,8 +220,8 @@ exports.Cities = function(){
      * @param city  Name of city to check
      * @returns {boolean}
      */
-    this.isCityAvailableForPurchase = function(city){
-        return this.cities[city.toLowerCase()].canBuild();
+    this.isCityAvailableForPurchase = function(city, playerId){
+        return this.cities[city.toLowerCase()].canBuild(playerId);
     };
 
     /**

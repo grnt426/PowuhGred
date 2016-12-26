@@ -7,7 +7,7 @@ var express = require('express'),
 	io = require('socket.io').listen(server),
 	communicationsjs = require('./communications.js'),
     citiesjs = require('./cities.js'),
-	powerplantjs = require('./powerplant.js'),
+	powerplantjs = require('./powerplantreader.js'),
 	enginejs = require('./engine.js'),
     util = require('./util.js');
 
@@ -36,7 +36,7 @@ var initGameDefs = function(citiesDef, powerPlants, engine, cityFile, plantsFile
 };
 
 var citiesDef = new citiesjs.Cities();
-var powerPlants = new powerplantjs.PowerPlants();
+var powerPlants = new powerplantjs.PowerPlantReader();
 var engine = new enginejs.Engine(comms);
 initGameDefs(citiesDef, powerPlants, engine, "data/germany_connections.txt", "data/power_plants.txt");
 

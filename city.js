@@ -17,8 +17,8 @@ exports.City = function(name){
         return 10 + (5 * this.players.length);
     };
 
-    this.canBuild = function(){
-        return this.players.length != 3;
+    this.canBuild = function(playerId){
+        return this.players.length != 3 && this.players.indexOf(playerId) == -1;
     };
 
     this.buildForPlayer = function(player){

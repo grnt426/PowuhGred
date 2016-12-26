@@ -30,20 +30,22 @@ exports.Building = function (engine, comms, cities) {
             else{
                 for(i in data){
                     this.cities.purchaseCity(data[i], currentPlayer.uid);
+                    currentPlayer.buildOnCity(data[i]);
                 }
                 currentPlayer.money -= totalCost;
             }
         }
     };
 
-    this.computeCost = function(cities){
-
+    this.computeCost = function(requestedCities){
+        return this.cities.findOptimalPurchaseCostOrderOfCities(this.engine.getCurrentPlayer().cities, requestedCities) +
+                this.cities.getTotalCostToBuild(requestedCities);
     };
 
     this.isValid = function(cities){
         var valid = true;
         for(i in cities){
-            valid &= this.cities.isCityAvailableForPurchase(cities[i]);
+            valid &= this.cities.isCityAvailableForPurchase(cities[i], this.engine.getCurrentPlayer());
         }
         return valid;
     };
