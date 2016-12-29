@@ -39,8 +39,7 @@ exports.Market = function (engine, comms) {
             var cost = this.computeTotalCost(data);
             var currentPlayer = this.engine.getCurrentPlayer();
 
-            // This first condition should never happen, as the client wouldn't let someone chose more resources
-            // than they have. It is a stop-gap in case something weird happens (or someone is spoofing messages...)
+            // Both conditions shouldn't be possible unless the UI has a bug or the player is spoofing messages.
             if (!this.validatePurchase(data) || currentPlayer.money < cost) {
                 console.info("Invalid purchase. Money: " + currentPlayer.money + ". Request: " + data);
             }
@@ -59,13 +58,14 @@ exports.Market = function (engine, comms) {
      * @returns {boolean} True if those resources are available.
      */
     this.validatePurchase = function (data) {
-        var valid = false;
-        data.foreach(function (amt, type) {
-            valid &= resources[type] >= amt;
-            if (type != res.COAL || type != res.GARBAGE || type != res.OIL || type != res.URANIUM) {
+        var valid = true;
+        for(var type in data) {
+            var amt = data[type];
+            valid &= this.resources[type] >= amt;
+            if (type != res.COAL && type != res.OIL && type != res.GARBAGE && type != res.URANIUM) {
                 valid = false;
             }
-        });
+        }
         return valid;
     };
 
@@ -76,9 +76,9 @@ exports.Market = function (engine, comms) {
      */
     this.computeTotalCost = function (data) {
         var cost = 0;
-        data.foreach(function (amt, type) {
-            cost += this.computeCost(amt, type);
-        });
+        for(var type in data) {
+            cost += this.computeCost(data[type], type);
+        }
         return cost;
     };
 
@@ -90,8 +90,8 @@ exports.Market = function (engine, comms) {
      */
     this.computeCost = function (amt, type) {
         var cost = 0;
-        var available = resources[type];
-        for (i = amt; i > 0; i--) {
+        for (var i = amt; i > 0; i--) {
+            var available = this.resources[type];
             if (type == res.URANIUM) {
                 if (available < 5) {
                     cost += 10 + 2 * (4 - available);
@@ -104,7 +104,7 @@ exports.Market = function (engine, comms) {
                 cost += 9 - Math.ceil(available / 3);
             }
 
-            resources[type] -= 1;
+            this.resources[type] -= 1;
         }
         return cost;
     };
