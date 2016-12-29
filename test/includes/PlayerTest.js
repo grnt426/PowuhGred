@@ -32,29 +32,6 @@ describe('Player', function() {
             assert.equal(player.getHighestCostPowerPlant(), 5);
         });
     });
-
-    describe('#addResources()', function(){
-
-        it('With no resources, adds 1 of each type.', function(){
-            var resources = generateResources(1, 1, 1, 1);
-            player.addResources(resources);
-            assert.notDeepEqual(player.resources, {});
-            assert.equal(player.resources[res.COAL], 1);
-            assert.equal(player.resources[res.OIL], 1);
-            assert.equal(player.resources[res.GARBAGE], 1);
-            assert.equal(player.resources[res.URANIUM], 1);
-        });
-
-        it('With a mix of resources, adds 2 oil and 2 coal.', function(){
-            player.resources = generateResources(3, 2, 4, 1);
-            player.addResources(generateResources(2, 2, 0, 0));
-            assert.notDeepEqual(player.resources, {});
-            assert.equal(player.resources[res.COAL], 5);
-            assert.equal(player.resources[res.OIL], 4);
-            assert.equal(player.resources[res.GARBAGE], 4);
-            assert.equal(player.resources[res.URANIUM], 1);
-        });
-    });
 });
 
 function generateResources(coal, oil, garbage, uranium){

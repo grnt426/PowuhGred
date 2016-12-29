@@ -43,6 +43,8 @@ exports.Auction = function(engine, comms){
 			var player = this.engine.players[bidWinner];
 			player.awardPlant(this.currentBidChoice, this.currentBid);
 			this.updateMarket();
+
+            // TODO is it appropriate to clean the auction state here?
 			this.cleanAuctionState();
 		}
 		else{
@@ -68,6 +70,9 @@ exports.Auction = function(engine, comms){
 			this.engine.nextPlayer();
 		}
 		else{
+
+            // TODO: should verify plant to prevent message spoofing
+
 			console.info(data);
 			var player = this.engine.players[this.engine.currentPlayer];
 			var plant = data.cost;
@@ -146,6 +151,9 @@ exports.Auction = function(engine, comms){
 		this.engine.futuresMarket = unsortedPlants.splice(0, 4);
 	};
 
+    /**
+     * Prepares for another round of auctions within the same phase.
+     */
 	this.cleanAuctionState = function(){
 		this.engine.currentAction = this.engine.START_AUCTION;
 		this.currentBid = 0;
