@@ -20,10 +20,10 @@ exports.Building = function (engine, comms, cities) {
             var currentPlayer = this.engine.getCurrentPlayer();
 
             if(!this.isValid(data)){
-                // alert player invalid selection
+                // TODO: alert player invalid selection
             }
             else if(totalCost > currentPlayer.money){
-                // alert player their selection is too expensive
+                // TODO: alert player their selection is too expensive
             }
 
             // Otherwise, all good! Reserve the city slots and subtract the cost
@@ -33,6 +33,7 @@ exports.Building = function (engine, comms, cities) {
                     currentPlayer.buildOnCity(data[i]);
                 }
                 currentPlayer.money -= totalCost;
+                engine.nextPlayer();
             }
         }
     };
