@@ -1,3 +1,10 @@
+/**
+ * A simple holder for a city on the map. Will ensure that players can't build more than three times, or twice for
+ * one player.
+ * @param name {string}
+ * @constructor
+ * @this {City}
+ */
 exports.City = function(name){
 
 	this.connections = [];

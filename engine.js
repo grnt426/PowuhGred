@@ -5,6 +5,14 @@ var playerjs = require("./includes/Player.js"),
     marketjs = require("./phases/market.js"),
     buildingjs = require("./phases/building.js");
 
+/**
+ * Primary entry point for the game, which manages game creation, phase transition, and action verification.
+ * @param comms {Communications}
+ * @param cities
+ * @param plants
+ * @constructor
+ * @this {Engine}
+ */
 exports.Engine = function(comms, cities, plants){
 
 	// Communications

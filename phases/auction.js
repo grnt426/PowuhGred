@@ -1,33 +1,73 @@
+/**
+ *
+ * @param {Engine} engine
+ * @param {Communications} comms
+ * @constructor
+ * @this {Auction}
+ */
 exports.Auction = function(engine, comms){
 
+    /**
+     * @type {Engine}
+     */
 	this.engine = engine;
+
+    /**
+     * @type {Communications}
+     */
 	this.comms = comms;
 
-	// Array of UIDs
+    /**
+     * @type {String[]}
+     */
 	this.currentBidders = [];
 
-	// No longer can bid (does this need to be separate from finishedAuctions?)
+    /**
+     * No longer can bid (does this need to be separate from finishedAuctions?)
+     * @type {String[]}
+     */
 	this.finishedBidding = [];
 
-	// No longer can start auctions
+    /**
+     * No longer can start auctions
+     * @type {String[]}
+     */
 	this.finishedAuctions = [];
 
-	// Int
+    /**
+     * The highest bid currently recorded for the plant under auction.
+     * @type {number}
+     */
 	this.currentBid = 0;
 
-	// Int
+    /**
+     * The index to the player who must either pass or bid on a plant under auction.
+     * @type {number}
+     */
 	this.currentPlayerBidIndex = -1;
 
-	// Int
+    /**
+     * The plant cost of the plant currently under auction.
+     * @type {number}
+     */
 	this.currentBidChoice = -1;
 
-	// UID
+	/**
+     * @type {boolean|number}
+	 */
 	this.currentBidder = false;
 
-	// UID
+    /**
+     * The UID of the player currently in the lead.
+     * @type {boolean|string}
+     */
 	this.currentBidLeader = false;
 
-	// Boolean
+    /**
+     * Used to track if the auction has started for a power plant, or if we are still awaiting a player to bring a power
+     * plant to auction.
+     * @type {boolean}
+     */
 	this.auctionRunning = false;
 
 	// TODO use a different order

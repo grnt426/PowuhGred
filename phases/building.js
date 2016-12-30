@@ -1,11 +1,29 @@
+/**
+ * Handles the Build phase of the game, where players purchase slots on cities.
+ * @param {Engine} engine
+ * @param {Communications} comms
+ * @param {Cities} cities
+ * @constructor
+ * @this {Building}
+ */
 exports.Building = function (engine, comms, cities) {
 
+    /**
+     * @type {Engine}
+     */
     this.engine = engine;
+
+    /**
+     * @type {Communications}
+     */
     this.comms = comms;
+
+    /**
+     * @type {Cities}
+     */
     this.cities = cities;
 
     /**
-     *
      * @param {Object} data either pass, or [cityname, cityname2, ...]
      */
     this.buildCities = function(data){

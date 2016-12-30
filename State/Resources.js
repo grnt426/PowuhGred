@@ -1,3 +1,7 @@
+/**
+ * @enum {string}
+ * @readonly
+ */
 (function() {
     exports.COAL = "coal";
     exports.OIL = "oil";

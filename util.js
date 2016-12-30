@@ -24,6 +24,11 @@ exports.shuffle = function(array){
 	return array;
 };
 
+/**
+ * Will return the length of an object by the number of keys it has.
+ * @param {Object} obj To determine the length of
+ * @returns {number} The number of keys (length) in the object
+ */
 exports.olen = function(obj) {
     if(typeof obj == "object"){
         return Object.keys(obj).length;
@@ -31,6 +36,11 @@ exports.olen = function(obj) {
     return 0;
 };
 
+/**
+ * A convenience function for performing a deep-copy of an object.
+ * @param {Object} obj The object to deep-copy
+ * @returns {Object} A deep-copy of the object,
+ */
 exports.deepCopy = function(obj){
     return JSON.parse(JSON.stringify(obj));
 };

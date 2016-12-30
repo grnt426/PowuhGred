@@ -1,6 +1,11 @@
 var fs = require("fs"),
     powerPlant = require("./includes/PowerPlant.js");
 
+/**
+ *
+ * @constructor
+ * @this {PowerPlantReader}
+ */
 exports.PowerPlantReader = function(){
 
     // JSONArray => {cost:int, type:type, requires:requires, powers:powers, resources:resources}

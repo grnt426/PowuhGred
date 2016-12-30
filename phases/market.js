@@ -1,5 +1,12 @@
 var res = require("../State/Resources.js");
 
+/**
+ * Handles the market phase of the game, where players purchase resources to add to their power plants.
+ * @param {Engine} engine
+ * @param {Communications} comms
+ * @constructor
+ * @this {Market}
+ */
 exports.Market = function (engine, comms) {
 
     this.engine = engine;

@@ -1,9 +1,13 @@
-
 var fs = require("fs"),
     allcombinations = require('allcombinations'),
 	cityjs = require("./city.js"),
     util = require("./util.js");
 
+/**
+ * Manages the cities of the game, including searching to determine optimal costs of building new cities.
+ * @constructor
+ * @this {Cities}
+ */
 exports.Cities = function(){
 
 	/**

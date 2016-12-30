@@ -1,4 +1,9 @@
-
+/**
+ *
+ * @param io
+ * @constructor
+ * @this {Communications}
+ */
 exports.Communications = function(io){
 
 	// Used to broadcast to channels
@@ -34,7 +39,7 @@ exports.Communications = function(io){
 	 * @param msg    The message to broadcast.
 	 */
 	this.toAll = function(msg){
-		io.sockets.emit(this.SOCKET_CHAT, {sender:this.SERVER, msg:msg});
+		this.io.sockets.emit(this.SOCKET_CHAT, {sender:this.SERVER, msg:msg});
 	};
 
 	/**
@@ -68,7 +73,7 @@ exports.Communications = function(io){
 	 */
 	this.toAllFrom = function(from, msg){
 		console.info(from.uid + " " + from.displayName);
-		io.sockets.emit(this.SOCKET_CHAT, {sender:from.displayName, msg:msg});
+		this.io.sockets.emit(this.SOCKET_CHAT, {sender:from.displayName, msg:msg});
 	};
 
 	/**
@@ -120,7 +125,7 @@ exports.Communications = function(io){
 		this.debug(toPrint, msg);
 
 		if(!this.CHAT_ALL_OFF && toPrint){
-			io.sockets.emit(this.SOCKET_CHAT, this.DEBUG, msg);
+			this.io.sockets.emit(this.SOCKET_CHAT, this.DEBUG, msg);
 		}
 	};
 
@@ -146,7 +151,7 @@ exports.Communications = function(io){
 	 * @param dataObj   the data object to update the client with
 	 */
 	this.broadcastUpdate = function(dataObj){
-		io.sockets.emit(this.SOCKET_UPDATES, dataObj);
+		this.io.sockets.emit(this.SOCKET_UPDATES, dataObj);
 	};
 };
 

@@ -1,5 +1,13 @@
 var res = require("./../State/Resources.js");
 
+/**
+ *
+ * @param uid {string}
+ * @param comms {Communications}
+ * @param socket {Socket}
+ * @constructor
+ * @this {Player}
+ */
 exports.Player = function(uid, comms, socket){
 
     this.uid = uid;

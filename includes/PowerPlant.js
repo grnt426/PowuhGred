@@ -1,5 +1,14 @@
 var res = require("./../State/Resources.js");
 
+/**
+ *
+ * @param cost {number}
+ * @param type {string}
+ * @param requires {number}
+ * @param powers {number}
+ * @constructor
+ * @this {PowerPlant}
+ */
 exports.PowerPlant = function(cost, type, requires, powers){
 
     this.cost = cost;

@@ -1,3 +1,10 @@
+/**
+ * The Power (Bureaucracy) phase of the game.
+ * @param engine {Engine}
+ * @param comms {Communications}
+ * @constructor
+ * @this {Power}
+ */
 exports.Power = function (engine, comms) {
 
     this.engine = engine;
@@ -7,12 +14,12 @@ exports.Power = function (engine, comms) {
     this.payTable = [10, 22, 33, 44, 54, 64, 73, 82, 90, 98, 105, 112, 118, 124, 129, 134, 138, 142, 145, 148, 150];
 
     /**
-     *
-     * @param player {Player} The player that requested what power plants to activate
-     * @param data {Object} Cost of plants to activate
+     * Players indicate which power plants to activate, their plants burn resources, and the player gets the money.
+     * @param {Player} player The player that requested what power plants to activate
+     * @param {PowerPlant[]} data Cost of plants to activate
      */
     this.powerCities = function (player, data) {
-        if(this.playersPaid.indexOf(player) != -1){
+        if(this.playersPaid.indexOf(player.uid) != -1){
             // Alert player they can't make change their choice afterwards
         }
         else{
@@ -29,12 +36,17 @@ exports.Power = function (engine, comms) {
                 }
 
                 // Players only get money for the number of actual cities they own and can power
-                powerableCities = Math.min(this.player.cities.length, powerableCities);
+                powerableCities = Math.min(player.cities.length, powerableCities);
                 player.money += this.payTable[powerableCities];
             }
         }
     };
 
+    /**
+     *
+     * @param {PowerPlant[]} plants
+     * @returns {boolean}
+     */
     this.canActivateAll = function(plants){
         var activateAll = true;
         for(var p in plants){
