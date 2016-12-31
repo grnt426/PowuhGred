@@ -27,7 +27,9 @@ exports.Engine = function(comms, cities, plants){
 	// Array of UIDs
 	this.playerOrder = [];
 
-	// UID -> Player
+    /**
+     * @type {Player[]}
+     */
 	this.players = {};
 
 	// Socket -> Player
@@ -80,6 +82,9 @@ exports.Engine = function(comms, cities, plants){
 	// detecting game de-sync issues (if they arise in the future).
 	var changeSet = 0;
 
+    /**
+     * @returns {Player}
+     */
     this.getCurrentPlayer = function(){
         return this.players[this.currentPlayerIndex];
     };

@@ -10,15 +10,42 @@ var res = require("./../State/Resources.js");
  */
 exports.Player = function(uid, comms, socket){
 
+    /**
+     * Used for binding a player uniquely.
+     * @type {string}
+     */
     this.uid = uid;
+
+    /**
+     * @type {Communications}
+     */
     this.comms = comms;
+
+    /**
+     * Name shown to all players in chats and in public.
+     * @type {string}
+     */
     this.displayName = uid;
 
-    // Used only by comms to talk to that player directly.
+    /**
+     * @type {Socket}
+     */
     this.socket = socket;
 
+    /**
+     *
+     * @type {PowerPlant[]}
+     */
     this.plants = [];
+
+    /**
+     * @type {number}
+     */
     this.money = 0;
+
+    /**
+     * @type {City[]}
+     */
     this.cities = [];
 
     this.buildOnCity = function(city){

@@ -3,15 +3,16 @@ var assert = require('assert'),
     util = require('../../util.js');
     powerjs = require('../../phases/power.js');
 
-/**
- * @type {Power}
- */
 var power;
 var player,
     PLAYER_ID = "1";
 
 var coalPlant = sinon.spy(),
     oilPlant = sinon.spy();
+var powerPlants = [];
+powerPlants[1] = coalPlant;
+powerPlants[2] = oilPlant;
+powerPlants[3] = sinon.spy();
 
 beforeEach(function () {
     var engine = sinon.spy(),
@@ -23,7 +24,7 @@ beforeEach(function () {
     engine.nextPlayer = sinon.spy();
     engine.getCurrentPlayer = sinon.stub().returns(player);
 
-    power = new powerjs.Power(engine, comms);
+    power = new powerjs.Power(engine, comms, powerPlants);
 
     coalPlant.activate = sinon.stub().returns(3);
     oilPlant.activate = sinon.stub().returns(2);
@@ -63,8 +64,10 @@ describe('Phase/power', function() {
             player.money = 100;
             player.cities = ["halle", "essen", "dortmund"];
             power.canActivateAll = sinon.stub().returns(true);
+            power.ownsAllPlants = sinon.stub().returns(true);
+            power.convertDataToPowerPlants = sinon.stub().returns({1:coalPlant, 2:oilPlant});
 
-            power.powerCities(player, [coalPlant, oilPlant]);
+            power.powerCities(player, [1, 2]);
 
             assert.equal(player.money, 100 + power.payTable[3]);
         });
@@ -73,8 +76,10 @@ describe('Phase/power', function() {
             player.money = 100;
             player.cities = ["halle", "essen", "dortmund", "frankfurt-m", "frankfurt-d"];
             power.canActivateAll = sinon.stub().returns(true);
+            power.ownsAllPlants = sinon.stub().returns(true);
+            power.convertDataToPowerPlants = sinon.stub().returns({1:coalPlant});
 
-            power.powerCities(player, [coalPlant]);
+            power.powerCities(player, [1]);
 
             assert.equal(player.money, 100 + power.payTable[3]);
         });

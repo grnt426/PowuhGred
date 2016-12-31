@@ -11,10 +11,34 @@ var res = require("./../State/Resources.js");
  */
 exports.PowerPlant = function(cost, type, requires, powers){
 
+    /**
+     * Minimum cost to buy this power plant.
+     * @type {number}
+     */
     this.cost = cost;
+
+    /**
+     * What kind of resources does this plant burn.
+     * @type {string}
+     */
     this.type = type;
+
+    /**
+     * The number of resources this plant consumes to activate.
+     * @type {number}
+     */
     this.requires = requires;
+
+    /**
+     * The number of cities this power plant can activate for.
+     * @type {number}
+     */
     this.powers = powers;
+
+    /**
+     * The amount of resources available for consumption on this power plant.
+     * @type {Object<String, number>}
+     */
     this.resources = {};
     this.resources[res.COAL] = 0;
     this.resources[res.OIL] = 0;
@@ -50,15 +74,19 @@ exports.PowerPlant = function(cost, type, requires, powers){
         return true;
     };
 
-
+    /**
+     * Determines if this plant has the resources available to activate.
+     * @returns {boolean}   True if sufficient resources are available to activate, otherwise false.
+     */
     this.canActivate = function(){
 
         // Free power plants can always be activated
         if(this.type == "free")
             return true;
-
-
-        return false;
+        else if(this.type == "both"){
+            return this.resources[res.COAL] + this.resources[res.OIL] >= this.requires;
+        }
+        return this.resources[this.type] >= this.requires;
     };
 
     /**
