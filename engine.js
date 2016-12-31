@@ -1,85 +1,140 @@
 var playerjs = require("./includes/Player.js"),
 	auctionjs = require("./phases/auction.js"),
 	util = require("./util.js"),
-    res = require("./State/Resources.js"),
     marketjs = require("./phases/market.js"),
-    buildingjs = require("./phases/building.js");
+    buildingjs = require("./phases/building.js"),
+    powerjs = require("./phase/power.js");
 
 /**
  * Primary entry point for the game, which manages game creation, phase transition, and action verification.
- * @param comms {Communications}
- * @param cities
- * @param plants
+ * @param {Communications} comms
+ * @param {Cities} cities
+ * @param {PowerPlant[]} plants
  * @constructor
  * @this {Engine}
  */
 exports.Engine = function(comms, cities, plants){
 
-	// Communications
+    this.STARTING_MONEY = 50;
+
+    // The Step Three card constant, for simple comparison.
+    this.STEP_THREE = "Step3";
+
+    // Action Enums
+    this.START_GAME = "startGame";
+    this.START_AUCTION = "startAuction";
+    this.BID = "bid";
+    this.BUY = "buy";
+    this.BUILD = "build";
+    this.POWER = "power";
+
+    /**
+     * @type {Communications}
+     */
 	this.comms = comms;
 
-	// {Object} of type Cities
+    /**
+     * @type {Cities}
+     */
 	this.cities = cities;
 
-	// Array of PowerPlant
+    /**
+     * @type {PowerPlant[]}
+     */
 	this.plants = plants;
 
-	// Array of UIDs
+    /**
+     * A list of player UIDs, whose ordering is very strict.
+     * @type {string[]}
+     */
 	this.playerOrder = [];
 
     /**
+     * Simple list of all the players. Ordering irrelevant.
      * @type {Player[]}
      */
 	this.players = {};
 
-	// Socket -> Player
+    /**
+     * @type {Object<Socket, Player>}
+     */
 	this.reverseLookUp = [];
 
-	// UID
+    /**
+     * If there is a current player, this is a string of the player's UID. Otherwise, this is false.
+     * @type {boolean|string}
+     */
 	this.currentPlayer = false;
 
-	// Int
+    /**
+     * The index of the current player, which is used with this.playerOrder.
+     * @type {number}
+     */
 	this.currentPlayerIndex = 0;
 
-	// Current plants for Auction
-	// Array of PowerPlant
+    /**
+     * This is the visible list of power plants currently available to start an auction with, whose order is ascending
+     * on the power plant cost.
+     * @type {PowerPlant[]}
+     */
 	this.currentMarket = [];
+
+    /**
+     * This is the visible list of power plants available in the future, whose order is ascending on the power plant cost.
+     * @type {PowerPlant[]}
+     */
 	this.futuresMarket = [];
 
-	this.STARTING_MONEY = 50;
-
-	// The Step Three card constant, for simple comparison.
-	this.STEP_THREE = "Step3";
-
-	// Whether the game has actually begun, or if we are still waiting for
-	// players.
+    /**
+     * Whether the game has actually begun, or if we are still waiting for players.
+     * @type {boolean}
+     */
 	this.gameStarted = false;
 
-	// Some game specific rules and setup are performed if this is the first
-	// turn. Not relevant after the first turn.
+    /**
+     * Some game specific rules and setup are performed if this is the first turn. Not relevant after the first turn.
+     * @type {boolean}
+     */
 	this.firstTurn = true;
 
-    // Action Enums
-	this.START_GAME = "startGame";
-	this.START_AUCTION = "startAuction";
-	this.BID = "bid";
-	this.BUY = "buy";
-	this.BUILD = "build";
-
-	// String
+    /**
+     * This determines the current state of the game. Only actions relevant to this state are permitted.
+     * @type {string}
+     */
 	this.currentAction = this.START_GAME;
 
-	// Phases
+    /**
+     * @type {Auction}
+     */
 	this.auction = new auctionjs.Auction(this, this.comms);
-    this.market = new marketjs.Market(this, this.comms);
-    this.building = new buildingjs.Building(this, this.comms);
 
-	// Array of Strings. Identifiers which declare what set of data changed in
-	// the update
+    /**
+     * @type {Market}
+     */
+    this.market = new marketjs.Market(this, this.comms, this.plants);
+
+    /**
+     * @type {Building}
+     */
+    this.building = new buildingjs.Building(this, this.comms, this.cities);
+
+    /**
+     * @type {Power}
+     */
+    this.power = new powerjs.Power(this, this.comms, this.plants);
+
+    /**
+     * Identifiers which declare what set of data changed in the update.
+     * @TODO: not updated completely with all states.
+     *
+     * @type {string[]}
+     */
 	this.changes = [];
 
-	// Incremented with each broadcast of data. Used for debugging and
-	// detecting game de-sync issues (if they arise in the future).
+    /**
+     * Incremented with each broadcast of data. Used for debugging and detecting game de-sync issues (if they arise in the future).
+     * @type {number}
+     */
 	var changeSet = 0;
 
     /**
@@ -89,12 +144,9 @@ exports.Engine = function(comms, cities, plants){
         return this.players[this.currentPlayerIndex];
     };
 
-	/**
-	 * No args needed to start the game
-	 */
 	this.startGame = function(){
 		if(this.gameStarted) {
-            comms.debug("Trying to start after already started?");
+            comms.debug(true, "Trying to start after already started?");
 			return;
 		}
 
@@ -189,12 +241,12 @@ exports.Engine = function(comms, cities, plants){
 		console.info(uid + ", action: " + action + ", args: " + JSON.stringify(args));
 
 		// TODO: compress the boolean logic
-		if(this.currentPlayer !== false && uid !== this.currentPlayer && this.currentAction != this.BID){
+		if(this.currentPlayer !== false && uid !== this.currentPlayer && this.currentAction != this.BID && this.currentAction != this.POWER){
 			// for now, we only support listening to the current player
 			console.info(uid + " tried taking their turn when not theirs!");
 			this.comms.toPlayer(player, "Not your turn.");
 		}
-		else if(this.currentAction == this.BID && uid != auction.currentBidder){
+		else if(this.currentAction == this.BID && uid != this.auction.currentBidder){
 			// for now, we only support listening to the current player
 			console.info(uid + " tried taking their turn when not theirs!");
 			this.comms.toPlayer(player, "Not your turn.");
@@ -220,8 +272,12 @@ exports.Engine = function(comms, cities, plants){
                 this.market.buyResources(data.args);
 			}
 			else if(this.BUILD == action){
-				this.buildCities(data.args);
+				this.building.buildCities(data.args);
 			}
+            else if(this.POWER == action){
+                this.power.powerCities(player, data.args);
+            }
+
 		}
         this.broadcastGameState();
 	};
@@ -271,10 +327,10 @@ exports.Engine = function(comms, cities, plants){
 		else if(this.currentAction == this.BUY)
 			this.currentAction = this.BUILD;
 		else if(this.currentAction == this.BUILD){
-
-            // The Bureaucracy phase requires no player input, so we can just move through it without advancing the
-            // action phase to it. Likewise, computing the winner can be done without advancing the state.
-			this.getMoney();
+            this.resolveTurnOrder();
+            this.currentAction = this.START_AUCTION;
+            this.currentPlayerIndex = 0;
+            this.currentPlayer = this.playerOrder[this.currentPlayerIndex];
 
             // TODO: If someone wins, halt game
             this.currentAction = this.START_AUCTION;
@@ -282,59 +338,10 @@ exports.Engine = function(comms, cities, plants){
 
 	};
 
-	this.getMoney = function(){
-
-		// Give out money
-
-		this.resolveTurnOrder();
-
-		// Handle Step 2
-
-		// Handle Step 3
-
-		// Start the next auction
-		this.currentAction = this.START_AUCTION;
-		this.currentPlayerIndex = 0;
-		this.currentPlayer = this.playerOrder[this.currentPlayerIndex];
-	};
-
-
-
-	this.buyResources = function(data){
-		var args = data.split(",");
-		if(args.length != 3 && args.length != 1){
-			// sanity error
-			return;
-		}
-		if(args[0] === "pass"){
-			this.nextPlayer();
-		}
-	};
-
-	this.buildCities = function(data){
-		var args = data.split(",");
-		if(args.length != 1){
-			// sanity error
-			return;
-		}
-		if(args[0] === "pass"){
-			this.nextPlayer();
-		}
-	};
-
-    // junk data for testing
-    this.junkData = function() {
-        for(var i=0; i < this.playerOrder.length; i++) {
-            this.players[this.playerOrder[i]].money = Math.floor((Math.random() * 100) + 1);
-            this.players[this.playerOrder[i]].plants = [Math.floor((Math.random() * 30) + 1),Math.floor((Math.random() * 30) + 1),Math.floor((Math.random() * 30) + 1)];
-            this.players[this.playerOrder[i]].cities = ["Berlin","some other place","Frankfurt-d"];
-            var citylen = Math.floor(Math.random()*12);
-            for(var k = 0; k < citylen; k++) { this.players[this.playerOrder[i]].cities.push("another city"); }
-            this.players[this.playerOrder[i]].resources = {'coal': Math.floor((Math.random() * 10)), 'oil': Math.floor((Math.random() * 10)), 'garbage': Math.floor((Math.random() * 10)), 'uranium': Math.floor((Math.random() * 10))};
-            this.players[this.playerOrder[i]].displayName = "some jerk"
-        }
-    };
-
+    /**
+     * Bundles up all relevant game state to be sent to all players. Each broadcast is numbered with a strictly
+     * monotonically increasing value, and loosely notes what values were changed.
+     */
     this.broadcastGameState = function() {
         var score = {};
 		changeSet += 1;
@@ -377,5 +384,18 @@ exports.Engine = function(comms, cities, plants){
         this.comms.broadcastUpdate({group: 'updateGameState',
 			args:{data:score, changes:this.changes, changeSet:changeSet}});
 		this.changes = [];
+    };
+
+    // junk data for testing
+    this.junkData = function() {
+        for(var i=0; i < this.playerOrder.length; i++) {
+            this.players[this.playerOrder[i]].money = Math.floor((Math.random() * 100) + 1);
+            this.players[this.playerOrder[i]].plants = [Math.floor((Math.random() * 30) + 1),Math.floor((Math.random() * 30) + 1),Math.floor((Math.random() * 30) + 1)];
+            this.players[this.playerOrder[i]].cities = ["Berlin","some other place","Frankfurt-d"];
+            var citylen = Math.floor(Math.random()*12);
+            for(var k = 0; k < citylen; k++) { this.players[this.playerOrder[i]].cities.push("another city"); }
+            this.players[this.playerOrder[i]].resources = {'coal': Math.floor((Math.random() * 10)), 'oil': Math.floor((Math.random() * 10)), 'garbage': Math.floor((Math.random() * 10)), 'uranium': Math.floor((Math.random() * 10))};
+            this.players[this.playerOrder[i]].displayName = "some jerk"
+        }
     };
 };

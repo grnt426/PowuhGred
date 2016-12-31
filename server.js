@@ -72,6 +72,7 @@ io.sockets.on(comms.SOCKET_CONNECTION, function(socket) {
 	// When the player does any action
 	// gameaction -> JsonObject
 	socket.on(comms.SOCKET_GAMEACTION, function(data){
+        data.uid = socket.id;
 		engine.resolveAction(data);
 	});
 
