@@ -123,6 +123,6 @@ function stubGetHighestCostPowerPlant(player, val) {
 
 function mockSocket(id) {
     var socket = sinon.spy();
-    socket.id = id;
+    socket.uid = id;
     return socket;
 }

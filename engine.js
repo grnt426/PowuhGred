@@ -166,7 +166,7 @@ exports.Engine = function(comms, cities, plants){
 		var player = new playerjs.Player(uid, this.comms, socket);
 		this.players[uid] = player;
 		this.playerOrder.push(uid);
-		this.reverseLookUp[socket.id] = player;
+		this.reverseLookUp[socket.uid] = player;
 		player.money = this.STARTING_MONEY;
 	};
 
@@ -214,8 +214,11 @@ exports.Engine = function(comms, cities, plants){
 		delete this.plantCosts[3]; delete this.plantCosts[4]; delete this.plantCosts[5]; delete this.plantCosts[6];
         delete this.plantCosts[7]; delete this.plantCosts[8]; delete this.plantCosts[9]; delete this.plantCosts[10];
         delete this.plantCosts[13];
+        this.plantCosts = this.plantCosts.filter(function(n){return n != undefined});
         util.shuffle(this.plantCosts);
-		this.plantCosts.splice(0, 0, this.plants[13]);
+
+        // The 13 cost (wind turbine) power plant is always on top of the deck
+		this.plantCosts.splice(0, 0, 13);
 		this.plantCosts.push(this.STEP_THREE);
 	};
 

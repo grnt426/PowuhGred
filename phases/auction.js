@@ -183,10 +183,11 @@ exports.Auction = function(engine, comms){
 			index += 1;
 		}
 		this.engine.currentMarket.splice(index, 1);
-		var newPlant = this.engine.plants[this.engine.plantCosts.splice(0, 1)];
+        var nextCost = this.engine.plantCosts.splice(0, 1);
+		var newPlant = this.engine.plants[nextCost];
 		var unsortedPlants = this.engine.currentMarket.concat(this.engine.futuresMarket);
-		unsortedPlants = unsortedPlants.concat(newPlant[0]);
-		unsortedPlants.sort(function(plantA, plantB){return plantA.cost - plantB.cost});
+		unsortedPlants = unsortedPlants.concat(newPlant);
+		unsortedPlants.sort(function(plantA, plantB){if(plantA == "Step3") return 100; else return plantA.cost - plantB.cost});
 		this.engine.currentMarket = unsortedPlants.splice(0, 4);
 		this.engine.futuresMarket = unsortedPlants.splice(0, 4);
 	};

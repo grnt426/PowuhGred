@@ -51,11 +51,12 @@ io.sockets.on(comms.SOCKET_CONNECTION, function(socket) {
     // a user connected, send the map down
     engine.broadcastGameState();
 	var uid = 'player' + util.olen(engine.players);
+    socket.uid = uid;
 	socket.emit(comms.SOCKET_USERID, uid);
 	engine.addPlayer(uid, socket);
     socket.emit(comms.SOCKET_DEFINECITIES, citiesDef.cities);
 	comms.toAll(uid + " has joined the game.");
-	console.info(uid + " has joined the game");
+	console.info(uid + " [" + socket.uid + "] has joined the game");
 
 	// When the client emits sendchat, this listens and executes
 	// sendchat -> String
@@ -65,21 +66,21 @@ io.sockets.on(comms.SOCKET_CONNECTION, function(socket) {
 		}
 		else{
 			console.info("Chat message: " + data);
-			comms.toAllFrom(engine.reverseLookUp[socket.id], data);
+			comms.toAllFrom(engine.reverseLookUp[socket.uid], data);
 		}
 	});
 
 	// When the player does any action
 	// gameaction -> JsonObject
 	socket.on(comms.SOCKET_GAMEACTION, function(data){
-        data.uid = socket.id;
+        data.uid = socket.uid;
 		engine.resolveAction(data);
 	});
 
 	// when the user disconnects
 	socket.on(comms.SOCKET_DISCONNECT, function() {
 		// TODO handle players leaving.
-		comms.toAll(engine.reverseLookUp[socket.id].displayName + " has left the game.");
+		comms.toAll(engine.reverseLookUp[socket.uid].displayName + " has left the game.");
 	});
 });
 
@@ -90,7 +91,7 @@ var resolveCommand = function(socket, data){
 	if(command == "/name"){
 		var name = data.substring(data.indexOf(' ') + 1);
 		console.info("Name received: " + name);
-		var player = engine.reverseLookUp[socket.id];
+		var player = engine.reverseLookUp[socket.uid];
 		player.displayName = name;
 		engine.broadcastGameState();
 	}
