@@ -3,7 +3,7 @@ var playerjs = require("./includes/Player.js"),
 	util = require("./util.js"),
     marketjs = require("./phases/market.js"),
     buildingjs = require("./phases/building.js"),
-    powerjs = require("./phase/power.js");
+    powerjs = require("./phases/power.js");
 
 /**
  * Primary entry point for the game, which manages game creation, phase transition, and action verification.
@@ -42,6 +42,7 @@ exports.Engine = function(comms, cities, plants){
      * @type {PowerPlant[]}
      */
 	this.plants = plants;
+    this.plantCosts = [];
 
     /**
      * A list of player UIDs, whose ordering is very strict.
@@ -75,6 +76,8 @@ exports.Engine = function(comms, cities, plants){
     /**
      * This is the visible list of power plants currently available to start an auction with, whose order is ascending
      * on the power plant cost.
+     *
+     * TODO: May be better to simply combine the current/future and instead use an index offset.
      * @type {PowerPlant[]}
      */
 	this.currentMarket = [];
@@ -203,12 +206,17 @@ exports.Engine = function(comms, cities, plants){
      * TODO: move this to the auction phase class.
 	 */
 	this.setupAuction = function(){
-		this.currentMarket = this.plants.splice(0, 4);
-		this.futuresMarket = this.plants.splice(0, 4);
-		var topPlant = this.plants.splice(2, 1);
-		util.shuffle(this.plants);
-		this.plants.splice(0, 0, topPlant);
-		this.plants.push(this.STEP_THREE);
+        for(p in this.plants){
+            this.plantCosts.push(this.plants[p].cost);
+        }
+		this.currentMarket = [this.plants[3], this.plants[4], this.plants[5], this.plants[6]];
+		this.futuresMarket = [this.plants[7], this.plants[8], this.plants[9], this.plants[10]];
+		delete this.plantCosts[3]; delete this.plantCosts[4]; delete this.plantCosts[5]; delete this.plantCosts[6];
+        delete this.plantCosts[7]; delete this.plantCosts[8]; delete this.plantCosts[9]; delete this.plantCosts[10];
+        delete this.plantCosts[13];
+        util.shuffle(this.plantCosts);
+		this.plantCosts.splice(0, 0, this.plants[13]);
+		this.plantCosts.push(this.STEP_THREE);
 	};
 
 	/**

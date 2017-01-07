@@ -14,7 +14,7 @@ exports.PowerPlantReader = function(){
     // Requires: The amount required to activate this plant.
     // Powers: The number of cities this can power when activated.
     // Resources: The number of resources currently on it. => {Type:Quantity, Type2:Quantity2}
-	this.powerPlants = [];
+	this.powerPlants = {};
 
 	this.parsePowerPlants = function(filename){
 		var data = fs.readFileSync(filename).toString().split('\n');
