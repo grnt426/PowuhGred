@@ -36,7 +36,7 @@ exports.Player = function(uid, comms, socket){
      *
      * @type {PowerPlant[]}
      */
-    this.plants = [];
+    this.plants = {};
 
     /**
      * @type {number}
@@ -50,6 +50,14 @@ exports.Player = function(uid, comms, socket){
 
     this.buildOnCity = function(city){
         this.cities.push(city);
+    };
+
+    this.getPowerPlantCosts = function(){
+        var costs = [];
+        for(p in this.plants){
+            costs.push(this.plants[p].cost);
+        }
+        return costs;
     };
 
     this.replacePowerPlant = function(newPlant, oldPlant){

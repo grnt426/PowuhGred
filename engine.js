@@ -370,7 +370,7 @@ exports.Engine = function(comms, cities, plants){
             var p = {};
 			var player = this.players[this.playerOrder[i]];
             p.money       = player.money;
-            p.plants      = player.plants;
+            p.plants      = player.getPowerPlantCosts();
             p.cities      = player.cities;
             p.resources   = player.resources;
             p.displayName = player.displayName;
@@ -394,6 +394,7 @@ exports.Engine = function(comms, cities, plants){
 		// ChangeSet is an Int representing the number of broadcasts sent
         this.comms.broadcastUpdate({group: 'updateGameState',
 			args:{data:score, changes:this.changes, changeSet:changeSet}});
+        console.info(JSON.stringify(score));
 		this.changes = [];
     };
 

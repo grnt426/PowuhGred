@@ -81,7 +81,7 @@ exports.Auction = function(engine, comms){
 			this.finishedAuctions.push(bidWinner);
 			this.finishedBidding.push(bidWinner);
 			var player = this.engine.players[bidWinner];
-			player.awardPlant(this.currentBidChoice, this.currentBid);
+			player.awardPlant(this.engine.plants[this.currentBidChoice], this.currentBid);
 			this.updateMarket();
 
             // TODO is it appropriate to clean the auction state here?
