@@ -6,12 +6,13 @@ var animationTickLoop = function(){
         animationFlags["start_game_p"] += .03;
         if(animationFlags["start_game_p"] > 1) {
             animationFlags["start_game_p"] = 1;
-            animationFlags["start_game"]=false
+            animationFlags["start_game"]=false;
         }
 
         anim.progress = animationFlags["start_game_p"];
         clearRect(1300,0,380,1050);
         drawScorePanel(scorePanel.args.data, ctx, ppp)
+        redraw(scorePanel);
     }
 };
 
