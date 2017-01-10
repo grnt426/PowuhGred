@@ -75,8 +75,13 @@ var bidDownButton = function(){
 };
 
 var resourceMore = function(type){
-    selectedResources[type] += 1;
-    log(selectedResources[type] + " " + type, CONSOLE_O);
+    if(selectedResources[type] + 1 > resources[type]){
+        log("Not enough " + type + " to buy more", CONSOLE_O);
+    }
+    else {
+        selectedResources[type] += 1;
+        log(selectedResources[type] + " " + type, CONSOLE_O);
+    }
 };
 
 var resourceLess = function(type){
