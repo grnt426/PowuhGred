@@ -20,6 +20,12 @@ var selectedCity;
 var selectedBid = 0;
 var selectedPlant = -1;
 
+var selectedResources = [];
+selectedResources['coal'] = 0;
+selectedResources['oil'] = 0;
+selectedResources['garbage'] = 0;
+selectedResources['uranium'] = 0;
+
 var currentPlayer = false;
 
 var playerData = {

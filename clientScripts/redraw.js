@@ -192,21 +192,32 @@ var redraw = function(scorePanel){
 	ctx.fillStyle = WHITE;
 	var currentWidth = 800;
 	var bufferSpace = 5;
+    var buttonsDrawn = 0;
 	for(var key in buttonArray){
 		var btn = buttonArray[key];
 
 		var cur = ACTIONS_FLAGS[currentActionState];
 		var flag = btn.flags;
 		if((cur & flag) > 0){
+            buttonsDrawn += 1;
 			ctx.fillStyle = GREEN;
 			ctx.strokeStyle = GREEN;
 			ctx.lineWidth = 1;
-			var pos = currentWidth;
-			btn.x = pos;
-			btn.y = 5;
-			ctx.strokeRect(pos, 5, btn.width, btn.height);
+            if(buttonsDrawn == 7) {
+                currentWidth = 800;
+            }
+            if(buttonsDrawn >= 7){
+                btn.y = 30;
+            }
+            else{
+                btn.y = 5;
+            }
+
+            var pos = currentWidth;
+            btn.x = pos;
+			ctx.strokeRect(pos, btn.y, btn.width, btn.height);
 			ctx.font = "12px monospace";
-			ctx.fillText(btn.disp, pos + 5, 15);
+			ctx.fillText(btn.disp, pos + 5, btn.y + 10);
 			currentWidth = pos + btn.width + bufferSpace;
 		}
 		else{
@@ -227,4 +238,15 @@ var redraw = function(scorePanel){
 			ctx.fillText("Highest Bidder: " + scorePanel.players[scorePanel.auction.currentBidLeader].displayName, 1050, 30);
 		}
 	}
+
+    // Draw resource purchase amounts boxes
+    else if((ACTIONS_FLAGS[currentActionState] & BUY_F) > 0){
+        ctx.strokeStyle = GREEN;
+        ctx.font = "14px monospace";
+        var offset = 0;
+        for(type in selectedResources){
+            ctx.fillText(selectedResources[type] + " " + type, 800, 60 + (offset * 20));
+            offset += 1;
+        }
+    }
 };
