@@ -152,6 +152,14 @@ function drawScorePanel(data, ctx, ppp) {
             if(!ppp[cost]) return;
             ctx.drawImage(plantImg, ppp[cost].x * pppWidth, ppp[cost].y * pppHeight, pppWidth, pppHeight,
                 t_x+(p_x*count), t_y+p_y+16, p_x, p_x);
+            if(ppp[cost].selected){
+                ctx.strokeStyle = GREEN;
+                ctx.lineWidth = 6;
+                ctx.strokeRect(t_x+(p_x*count), t_y+p_y+16, p_x, p_x);
+            }
+            ppp[cost].curX = t_x+(p_x*count);
+            ppp[cost].curY = t_y+p_y+16;
+            ppp[cost].length = p_x;
             count+=1;
         }
 

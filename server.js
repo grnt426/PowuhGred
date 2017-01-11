@@ -41,6 +41,7 @@ var engine = new enginejs.Engine(comms);
 initGameDefs(citiesDef, powerPlants, engine, "data/germany_connections.txt", "data/power_plants.txt");
 
 // connect to a player, listen
+// TODO: There seems to be an issue with a player joining, but the tab not gaining focus in FF, and the player not initializing the game correctly.
 io.sockets.on(comms.SOCKET_CONNECTION, function(socket) {
 
 	if(engine.gameStarted){
