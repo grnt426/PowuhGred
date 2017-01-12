@@ -75,23 +75,45 @@ var bidDownButton = function(){
 };
 
 var resourceMore = function(type){
-    if(selectedResources[type] + 1 > resources[type]){
+
+    // Don't increment if nothing is selected
+    if(selectedOwnedPlant == undefined){
+        return;
+    }
+
+    var newAmt = selectedOwnedPlant.resources[type] + 1;
+    if(newAmt > resources[type]){
         log("Not enough " + type + " to buy more", CONSOLE_O);
     }
     else {
-        selectedResources[type] += 1;
-        log(selectedResources[type] + " " + type, CONSOLE_O);
+        selectedOwnedPlant.resources[type] = newAmt;
+        log(newAmt + " " + type, CONSOLE_O);
     }
 };
 
 var resourceLess = function(type){
-    if(selectedResources[type] > 0)
-        selectedResources[type] -= 1;
-    log(selectedResources[type] + " " + type, CONSOLE_O);
+
+    // Don't decrement if nothing is selected
+    if(selectedOwnedPlant == undefined){
+        return;
+    }
+
+    if(selectedOwnedPlant.resources[type] != undefined && selectedOwnedPlant.resources[type] > 0)
+        selectedOwnedPlant.resources[type] -= 1;
+    log(selectedOwnedPlant.resources[type] + " " + type, CONSOLE_O);
 };
 
 var confirmBidButton = function(){
     socket.emit(SOCKET_GAMEACTION, {uid:playerData.self.uid, cmd:"bid", args:{bid:selectedBid}});
+};
+
+var confirmResourcePurchase = function(){
+    var playerOwnedPlantCosts = scorePanel.args.data.players[playerData.self.uid].plants;
+    var resourceSelection = {};
+    for(i in playerOwnedPlantCosts){
+        resourceSelection[parseInt(playerOwnedPlantCosts[i])] = ppp[playerOwnedPlantCosts[i]].resources;
+    }
+    socket.emit(SOCKET_GAMEACTION, {uid:playerData.self.uid, cmd:"buy", args:resourceSelection});
 };
 
 // createButton( Display String, listener, buttons flags);
@@ -100,9 +122,10 @@ createButton("Pass", passButton, AUCTION_F | BID_F | BUY_F | BUILD_F | POWER_F);
 createButton("Start Auction", startAuctionButton, AUCTION_F);
 createButton("Bid Up", bidUpButton, AUCTION_F | BID_F);
 createButton("Bid Down", bidDownButton, AUCTION_F | BID_F);
-createButton("Confirm", confirmBidButton, AUCTION_F | BID_F | BUY_F | BUILD_F | POWER_F);
+createButton("Confirm", confirmBidButton, AUCTION_F | BID_F);
 
 // The below is awful, but a good enough placeholder
+createButton("Confirm", confirmResourcePurchase, BUY_F);
 createButton("Coal +", function(){resourceMore('coal');}, BUY_F);
 createButton("Coal -", function(){resourceLess('coal');}, BUY_F);
 createButton("Oil +", function(){resourceMore('oil');}, BUY_F);

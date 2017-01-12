@@ -57,9 +57,11 @@ exports.Market = function (engine, comms, powerPlants) {
                 console.info("Invalid purchase. Money: " + currentPlayer.money + ". Request: " + data);
             }
             else {
+                console.info(currentPlayer.uid + " purchasing resources, at " + cost + " money");
                 currentPlayer.money -= cost;
                 for(plant in data){
                     this.powerPlants[plant].addResources(data[plant]);
+                    this.subtractResources(data[plant]);
                 }
                 engine.nextPlayer();
             }
@@ -73,7 +75,14 @@ exports.Market = function (engine, comms, powerPlants) {
 
     };
 
+    this.subtractResources = function(resources){
+        for(type in resources){
+            this.resources[type] -= resources[type];
+        }
+    };
+
     this.validateRequest = function(data){
+        this.comms.debug(true, JSON.stringify(data));
         return this.validatePurchase(data) && this.checkPowerPlantsCanStoreResources(data)
             && this.checkPlayerOwnsPlants(data);
     };
@@ -117,7 +126,7 @@ exports.Market = function (engine, comms, powerPlants) {
             var currentPlayer = this.engine.getCurrentPlayer();
 
             // Check if they own the power plant.
-            if (currentPlayer.plants.indexOf(plant) == -1) {
+            if (currentPlayer.plants[plant] == undefined) {
                 return false;
             }
         }
@@ -131,8 +140,10 @@ exports.Market = function (engine, comms, powerPlants) {
      */
     this.computeTotalCost = function (data) {
         var cost = 0;
-        for(var type in data) {
-            cost += this.computeCost(data[type], type);
+        for(var plantCost in data) {
+            for(type in data[plantCost]) {
+                cost += this.computeCost(data[plantCost][type], type);
+            }
         }
         return cost;
     };

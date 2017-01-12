@@ -144,7 +144,7 @@ exports.Engine = function(comms, cities, plants){
      * @returns {Player}
      */
     this.getCurrentPlayer = function(){
-        return this.players[this.currentPlayerIndex];
+        return this.players[this.currentPlayer];
     };
 
 	this.startGame = function(){
@@ -254,7 +254,7 @@ exports.Engine = function(comms, cities, plants){
 		// TODO: compress the boolean logic
 		if(this.currentPlayer !== false && uid !== this.currentPlayer && this.currentAction != this.BID && this.currentAction != this.POWER){
 			// for now, we only support listening to the current player
-			console.info(uid + " tried taking their turn when not theirs!");
+			console.info(uid + " tried taking their turn when not theirs! Currently, it is " + this.getCurrentPlayer().uid + "'s turn.");
 			this.comms.toPlayer(player, "Not your turn.");
 		}
 		else if(this.currentAction == this.BID && uid != this.auction.currentBidder){
@@ -305,7 +305,7 @@ exports.Engine = function(comms, cities, plants){
 			turnOrder = 1;
 
 		this.currentPlayerIndex = this.currentPlayerIndex + turnOrder;
-		if(this.currentPlayerIndex >= 0 && this.currentPlayerIndex < util.olen(this.players)){
+		if(this.currentPlayerIndex >= 0 && this.currentPlayerIndex < util.olen(this.players) - 1){
 			this.currentPlayer = this.playerOrder[this.currentPlayerIndex];
 		}
 
@@ -320,7 +320,7 @@ exports.Engine = function(comms, cities, plants){
 				this.firstTurn = false;
 			}
 
-            this.currentPlayer = this.playerOrder[util.olen(this.players)];
+            this.currentPlayer = this.playerOrder[util.olen(this.players) - 1];
 			this.nextAction();
 
             // Once we advance past to the "START_AUCTION" phase again, we must recompute turn order and point to

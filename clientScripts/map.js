@@ -59,10 +59,13 @@ mapCanvas.addEventListener('click', function(event) {
             var plant = ppp[p];
             if(plant.curX <= x && plant.curX + plant.length >= x && plant.curY <= y && plant.curY + plant.length >= y){
                 console.log("Clicked on a power plant...");
+
                 // Now that we found a plant that matches the click location, only select this plant if we own it
+                // TODO: this is awful
                 if(scorePanel.args.data.players[playerData.self.uid].plants.indexOf(parseInt(p)) != -1){
                     console.log("Clicked on an owned power plant.");
                     plant.selected = true;
+                    selectedOwnedPlant = plant;
                 }
             }
         }
@@ -74,6 +77,7 @@ mapCanvas.addEventListener('click', function(event) {
         for(p in ppp){
             ppp[p].selected = false;
         }
+        selectedOwnedPlant = undefined;
     }
 
     // Otherwise, check if a city was clicked

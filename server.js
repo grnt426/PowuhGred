@@ -27,18 +27,13 @@ app.use('/data', express.static(__dirname+'/data'));
 
 comms = new communicationsjs.Communications(io);
 
-var initGameDefs = function(citiesDef, powerPlants, engine, cityFile, plantsFile) {
-    citiesDef.parseCityList();
-    citiesDef.parseCities(cityFile);
-    powerPlants.parsePowerPlants(plantsFile);
-    engine.cities = citiesDef;
-    engine.plants = powerPlants.powerPlants;
-};
-
 var citiesDef = new citiesjs.Cities();
+citiesDef.parseCityList();
+citiesDef.parseCities("data/germany_connections.txt");
 var powerPlants = new powerplantjs.PowerPlantReader();
-var engine = new enginejs.Engine(comms);
-initGameDefs(citiesDef, powerPlants, engine, "data/germany_connections.txt", "data/power_plants.txt");
+powerPlants.parsePowerPlants("data/power_plants.txt");
+
+var engine = new enginejs.Engine(comms, citiesDef.cities, powerPlants.powerPlants);
 
 // connect to a player, listen
 // TODO: There seems to be an issue with a player joining, but the tab not gaining focus in FF, and the player not initializing the game correctly.

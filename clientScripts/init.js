@@ -26,6 +26,12 @@ selectedResources['oil'] = 0;
 selectedResources['garbage'] = 0;
 selectedResources['uranium'] = 0;
 
+/**
+ * The power plant that is currently selected by the player
+ * @type {Object}
+ */
+var selectedOwnedPlant = undefined;
+
 var currentPlayer = false;
 
 var playerData = {

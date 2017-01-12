@@ -244,8 +244,38 @@ var redraw = function(scorePanel){
         ctx.strokeStyle = GREEN;
         ctx.font = "14px monospace";
         var offset = 0;
-        for(type in selectedResources){
-            ctx.fillText(selectedResources[type] + " " + type, 800, 60 + (offset * 20));
+
+        var playerPlants = [];
+        var playerOwnedPlantCosts = scorePanel.players[playerData.self.uid].plants;
+
+        // TODO: Really should make the below a function....
+        for(i in playerOwnedPlantCosts){
+            playerPlants.push(ppp[playerOwnedPlantCosts[i]]);
+        }
+
+        // draw the resource count of the currently selected plant, so the player can change the amount to purchase
+        if(selectedOwnedPlant != undefined) {
+            for (type in selectedOwnedPlant.resources) {
+                ctx.fillText(selectedOwnedPlant.resources[type] + " " + type, 800, 65 + (offset * 20));
+                offset += 1;
+            }
+        }
+
+        // Then, draw the total number of resources requested across all plants
+        var totalResources = {'coal':0,'oil':0,'garbage':0,'uranium':0};
+        for(index in playerPlants){
+            var plant = playerPlants[index];
+            if(plant.resources == undefined)
+                continue;
+            for(type in plant.resources){
+                totalResources[type] += plant.resources[type];
+            }
+        }
+
+        offset = 0;
+        ctx.fillText("Total Requested", 800, 150);
+        for(type in totalResources){
+            ctx.fillText(totalResources[type] + " " + type, 800 + (80 * offset), 175);
             offset += 1;
         }
     }
