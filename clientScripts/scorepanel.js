@@ -79,6 +79,26 @@ function drawScorePanel(data, ctx, ppp) {
         var resources = player.resources;
         var name = player.displayName;
 
+        var playerColorCode;
+        if(player.color == "red"){
+            playerColorCode = RED;
+        }
+        else if(player.color == "blue"){
+            playerColorCode = BLUE;
+        }
+        else if(player.color == "green"){
+            playerColorCode = GREEN;
+        }
+        else if(player.color == "yellow"){
+            playerColorCode = DKYELLOW;
+        }
+        else if(player.color == "purple"){
+            playerColorCode = PURPLE;
+        }
+        else if(player.color == "black"){
+            playerColorCode = BLACK;
+        }
+
         var p=anim.progress;
         var p1,p2,p3,p4,p5;
         p1=tween(p,0,.35);
@@ -89,6 +109,10 @@ function drawScorePanel(data, ctx, ppp) {
 
         // debug anim progress output
         // name = p1.toFixed(2) + " " + p2.toFixed(2) + " " + p3.toFixed(2) + " " + p4.toFixed(2) + " " + p5.toFixed(2)
+
+        // Draw player position on turn track
+        ctx.fillStyle = playerColorCode;
+        ctx.fillRect(74 + (27 * data.playerOrder.indexOf(player.uid) * 1.01), 25, 13, 13);
 
         // draw curved border
         if(currentPlayer == player.uid)
@@ -113,7 +137,7 @@ function drawScorePanel(data, ctx, ppp) {
 
 
         // draw a house
-        ctx.strokeStyle = "#BBBBBB";
+        ctx.strokeStyle = playerColorCode;
         ctx.lineWidth=3;
         var h1 = t_x+p_x/2-arc/2+8;
         var h2 = t_y+p_x/2-arc/2+8;

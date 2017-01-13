@@ -48,6 +48,12 @@ exports.Player = function(uid, comms, socket){
      */
     this.cities = [];
 
+    /**
+     * What color the player is in the game.
+     * @type {string}
+     */
+    this.color = undefined;
+
     this.buildOnCity = function(city){
         this.cities.push(city);
     };

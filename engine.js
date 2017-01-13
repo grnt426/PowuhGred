@@ -141,6 +141,13 @@ exports.Engine = function(comms, cities, plants){
 	var changeSet = 0;
 
     /**
+     * Player colors available for use.
+     * @type {string[]}
+     */
+    this.colorsAvailable = ['red', 'blue', 'green', 'yellow', 'purple', 'black'];
+    util.shuffle(this.colorsAvailable);
+
+    /**
      * @returns {Player}
      */
     this.getCurrentPlayer = function(){
@@ -168,6 +175,7 @@ exports.Engine = function(comms, cities, plants){
 		this.playerOrder.push(uid);
 		this.reverseLookUp[socket.uid] = player;
 		player.money = this.STARTING_MONEY;
+        player.color = this.colorsAvailable.pop();
 	};
 
 	/**
@@ -375,6 +383,7 @@ exports.Engine = function(comms, cities, plants){
             p.resources   = player.resources;
             p.displayName = player.displayName;
 			p.uid		  = player.uid;
+            p.color       = player.color;
             score.players[this.playerOrder[i]] = p;
         }
 

@@ -10,9 +10,11 @@ var LTBLUE =    "#00B8E6";
 var GREEN =     "#009900";
 var LTGREEN =   "#00CC00";
 var YELLOW =    "#FFFF19";
+var DKYELLOW =  "#D1CD03";
 var PINK =      "#FF6699";
 var ORANGE =    "#DD6622";
 var RED =		"#E62E2E";
+var PURPLE =    "#AF02C3";
 
 var citiesDef = {};
 var selectedCity;
