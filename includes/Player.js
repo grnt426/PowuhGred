@@ -34,7 +34,7 @@ exports.Player = function(uid, comms, socket){
 
     /**
      *
-     * @type {PowerPlant[]}
+     * @type {Object<number, PowerPlant>}
      */
     this.plants = {};
 

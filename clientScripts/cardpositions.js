@@ -1,7 +1,7 @@
 // Card positions
 var pppWidth = 114;
 var pppHeight = 114;
-var ppp = [];
+var ppp = {};
 ppp[3] = {x: 0, y: 1};
 ppp[4] = {x: 0, y: 0};
 ppp[5] = {x: 0, y: 2};

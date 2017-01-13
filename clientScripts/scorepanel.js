@@ -148,8 +148,15 @@ function drawScorePanel(data, ctx, ppp) {
         //draw power plants
         var count = 1;
         for(p in plants){
-            cost = plants[p];
-            if(!ppp[cost]) return;
+            var plant = plants[p];
+            var cost = parseInt(plant.cost);
+            console.log(JSON.stringify(plant));
+            if(!ppp[cost]) {
+                console.log("ERROR: Can't find plant '" + cost + "'!?");
+                return;
+            }
+
+            // Draw the power plant card
             ctx.drawImage(plantImg, ppp[cost].x * pppWidth, ppp[cost].y * pppHeight, pppWidth, pppHeight,
                 t_x+(p_x*count), t_y+p_y+16, p_x, p_x);
             if(ppp[cost].selected){
@@ -157,9 +164,39 @@ function drawScorePanel(data, ctx, ppp) {
                 ctx.lineWidth = 6;
                 ctx.strokeRect(t_x+(p_x*count), t_y+p_y+16, p_x, p_x);
             }
+
+            // This is for setting up the click region for the card
             ppp[cost].curX = t_x+(p_x*count);
             ppp[cost].curY = t_y+p_y+16;
             ppp[cost].length = p_x;
+
+            // Draw the resources on the card
+            var availableResources = plant.resources;
+            var drawn = 0;
+            for(type in availableResources){
+                for(var j = 0; j < availableResources[type]; j++){
+
+                    // TODO: this was copied from elsewhere. Make a utility class.
+                    if(type === "coal"){
+                        ctx.fillStyle = BROWN;
+                    }
+                    else if(type === "oil"){
+                        ctx.fillStyle = BLACK;
+                    }
+                    else if(type === "garbage"){
+                        ctx.fillStyle = YELLOW;
+                    }
+                    else if(type === "uranium"){
+                        ctx.fillStyle = RED;
+                    }
+                    ctx.fillRect(ppp[cost].curX + 15 + (20 * (drawn % 3)),
+                        ppp[cost].curY + 55 - (20 * Math.floor(drawn / 3)),
+                        10, 10);
+
+                    drawn += 1;
+                }
+            }
+
             count+=1;
         }
 

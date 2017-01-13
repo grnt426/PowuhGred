@@ -62,7 +62,7 @@ mapCanvas.addEventListener('click', function(event) {
 
                 // Now that we found a plant that matches the click location, only select this plant if we own it
                 // TODO: this is awful
-                if(scorePanel.args.data.players[playerData.self.uid].plants.indexOf(parseInt(p)) != -1){
+                if(scorePanel.args.data.players[playerData.self.uid].plants[parseInt(p)] != undefined){
                     console.log("Clicked on an owned power plant.");
                     plant.selected = true;
                     selectedOwnedPlant = plant;

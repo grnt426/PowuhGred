@@ -250,7 +250,7 @@ var redraw = function(scorePanel){
 
         // TODO: Really should make the below a function....
         for(i in playerOwnedPlantCosts){
-            playerPlants.push(ppp[playerOwnedPlantCosts[i]]);
+            playerPlants.push(ppp[parseInt(i)]);
         }
 
         // draw the resource count of the currently selected plant, so the player can change the amount to purchase
