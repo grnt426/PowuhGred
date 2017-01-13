@@ -83,13 +83,24 @@ exports.Market = function (engine, comms, powerPlants) {
 
     this.validateRequest = function(data){
         this.comms.debug(true, JSON.stringify(data));
-        return this.validatePurchase(data) && this.checkPowerPlantsCanStoreResources(data)
-            && this.checkPlayerOwnsPlants(data);
+        if(!this.validatePurchase(data)){
+            this.comms.debug(true, "Not enough resources, or incorrect type of resource requested.");
+            return false;
+        }
+        else if(!this.checkPowerPlantsCanStoreResources(data)){
+            this.comms.debug(true, "Can not store requested resources.");
+            return false;
+        }
+        else if(!this.checkPlayerOwnsPlants(data)){
+            this.comms.debug(true, "...you don't own the power plant?");
+            return false;
+        }
+        return true;
     };
 
     /**
-     * Validates there are enough resources available to make the purchase, and that the target power plant can accept
-     * the resources requested.
+     * Validates there are enough resources available to make the purchase, and that the kind of resource requested
+     * is valid.
      *
      * @param data {Object} of type {P1:{coal:W, oil:X, garbage:Y, uranium:Z}, P2:{coal:W2, oil:X2, garbage:Y2, uranium:Z2}, ...}
      * @returns {boolean} True if those resources are available.
@@ -101,11 +112,11 @@ exports.Market = function (engine, comms, powerPlants) {
             // Check if the requested resources exist and are available to buy in quantities asked
             var resources = data[plant];
             for(var type in resources) {
-                var amt = resources[type];
-                valid &= this.resources[type] >= amt;
                 if (type != res.COAL && type != res.OIL && type != res.GARBAGE && type != res.URANIUM) {
                     return false;
                 }
+                var amt = resources[type];
+                valid &= this.resources[type] >= amt;
             }
         }
         return valid;

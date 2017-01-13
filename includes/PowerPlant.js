@@ -57,12 +57,10 @@ exports.PowerPlant = function(cost, type, requires, powers){
         if(this.type == "free")
             return false;
 
-        // Some power plants can burn both coal and oil, which we can handle as a special
+        // Some power plants can burn both coal and oil, which we can handle as a special case
         if(this.type == "both"){
-            if(resources.indexOf(res.COAL) != -1 && resources.indexOf(res.OIL) != -1){
-                return resources[res.COAL] + resources[res.OIL] +
-                    this.resources[res.COAL] + this.resources[res.OIL] <= this.resources * 2;
-            }
+            return resources[res.COAL] + resources[res.OIL] +
+                this.resources[res.COAL] + this.resources[res.OIL] <= this.requires * 2;
         }
 
         // TODO: Should only check the only resource we can have on this power plant
