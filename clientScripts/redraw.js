@@ -140,7 +140,10 @@ var redraw = function(scorePanel){
 	// Draw the actual market
 	count = 0;
 	ctx.strokeStyle = LTBLUE;
+    ctx.fillStyle = LTBLUE;
 	ctx.lineWidth = 1;
+    ctx.font = "12px Arial";
+    ctx.fillText("Actual Market", 794, 284);
 	ctx.strokeRect(794, 294, 4 * 120 + 7, 125);
 	for(p in actualMarket){
 		plant = actualMarket[p];
@@ -155,6 +158,9 @@ var redraw = function(scorePanel){
 	// Draw the future market
 	count = 0;
 	ctx.strokeStyle = PINK;
+    ctx.fillStyle = PINK;
+    ctx.font = "12px Arial";
+    ctx.fillText("Future Market", 794, 434);
 	ctx.strokeRect(794, 444, 4 * 120 + 7, 125);
 	for(p in futureMarket){
 		plant = futureMarket[p];
