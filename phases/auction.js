@@ -1,3 +1,5 @@
+var util = require("../util.js");
+
 /**
  *
  * @param {Engine} engine
@@ -77,9 +79,13 @@ exports.Auction = function(engine, comms){
 			this.updateMarket();
 			this.cleanAuctionState();
 		}
+        else if(pass){
+            this.currentBidders.splice(this.currentPlayerBidIndex, 1);
+            this.currentPlayerBidIndex = this.currentPlayerBidIndex % this.currentBidders.length;
+            this.currentBidder = this.currentBidders[this.currentPlayerBidIndex];
+        }
 		else{
 			console.info(this.currentBidder + " index: " + this.currentPlayerBidIndex);
-            this.currentBidders.slice(this.currentPlayerBidIndex, 1);
 			this.currentPlayerBidIndex = (this.currentPlayerBidIndex + 1) % this.currentBidders.length;
 			this.currentBidder = this.currentBidders[this.currentPlayerBidIndex];
 			console.info(this.currentBidder + " index: " + this.currentPlayerBidIndex);
@@ -205,6 +211,7 @@ exports.Auction = function(engine, comms){
 		// until we find one that has not finished their auction phase.
 		do{
 			this.engine.nextPlayer();
-		}while(this.finishedAuctions.indexOf(this.engine.currentPlayer) != -1 && this.currentBidders.length != 0)
+		}while(this.finishedAuctions.indexOf(this.engine.currentPlayer) != -1
+            && this.finishedAuctions.length < util.olen(this.engine.players));
 	};
 };

@@ -1,5 +1,3 @@
-var res = require("./../State/Resources.js");
-
 /**
  *
  * @param uid {string}

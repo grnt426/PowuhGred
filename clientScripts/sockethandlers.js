@@ -39,6 +39,16 @@ socket.on(SOCKET_UPDATES, function(data){
         actualMarket = newData.actualMarket;
         futureMarket = newData.futuresMarket;
 
+        // Change the title of the browser window so the player knows it is their turn
+        if(currentActionState != "startGame"
+            && (currentActionState == "bid" && playerData.self.uid == newData.auction.currentBidders[newData.auction.currentPlayerBidIndex])
+            || (currentActionState != "bid" && playerData.self.uid == currentPlayer)){
+            document.title = "PowuhGred * Your Turn!";
+        }
+        else{
+            document.title = "PowuhGred";
+        }
+
         for(var change in scorePanel.args.changes){
             if(scorePanel.args.changes[change] == "startGame"){
                 animStartGame();
