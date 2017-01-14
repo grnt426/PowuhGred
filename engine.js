@@ -192,7 +192,7 @@ exports.Engine = function(comms, cities, plants){
 	 */
 	this.resolveTurnOrder = function(){
 		var sortablePlayers = [];
-		for(p in this.players){
+		for(var p in this.players){
 			sortablePlayers.push(this.players[p]);
 		}
 		sortablePlayers.sort(function(playerA, playerB){
@@ -214,7 +214,7 @@ exports.Engine = function(comms, cities, plants){
      * TODO: move this to the auction phase class.
 	 */
 	this.setupAuction = function(){
-        for(p in this.plants){
+        for(var p in this.plants){
             this.plantCosts.push(this.plants[p].cost);
         }
 		this.currentMarket = [this.plants[3], this.plants[4], this.plants[5], this.plants[6]];

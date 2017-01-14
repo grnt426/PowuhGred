@@ -11,7 +11,7 @@ var animationTickLoop = function(){
 
         anim.progress = animationFlags["start_game_p"];
         clearRect(1300,0,380,1050);
-        drawScorePanel(scorePanel.args.data, ctx, ppp)
+        drawScorePanel(scorePanel.args.data, ctx, ppp);
         redraw(scorePanel);
     }
 };
@@ -255,13 +255,13 @@ var redraw = function(scorePanel){
         var playerOwnedPlantCosts = scorePanel.players[playerData.self.uid].plants;
 
         // TODO: Really should make the below a function....
-        for(i in playerOwnedPlantCosts){
+        for(var i in playerOwnedPlantCosts){
             playerPlants.push(ppp[parseInt(i)]);
         }
 
         // draw the resource count of the currently selected plant, so the player can change the amount to purchase
         if(selectedOwnedPlant != undefined) {
-            for (type in selectedOwnedPlant.resources) {
+            for (var type in selectedOwnedPlant.resources) {
                 ctx.fillText(selectedOwnedPlant.resources[type] + " " + type, 800, 65 + (offset * 20));
                 offset += 1;
             }
@@ -269,7 +269,7 @@ var redraw = function(scorePanel){
 
         // Then, draw the total number of resources requested across all plants
         var totalResources = {'coal':0,'oil':0,'garbage':0,'uranium':0};
-        for(index in playerPlants){
+        for(var index in playerPlants){
             var plant = playerPlants[index];
             if(plant.resources == undefined)
                 continue;

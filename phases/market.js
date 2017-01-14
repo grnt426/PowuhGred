@@ -59,7 +59,7 @@ exports.Market = function (engine, comms, powerPlants) {
             else {
                 console.info(currentPlayer.uid + " purchasing resources, at " + cost + " money");
                 currentPlayer.money -= cost;
-                for(plant in data){
+                for(var plant in data){
                     this.powerPlants[plant].addResources(data[plant]);
                     this.subtractResources(data[plant]);
                 }
@@ -76,7 +76,7 @@ exports.Market = function (engine, comms, powerPlants) {
     };
 
     this.subtractResources = function(resources){
-        for(type in resources){
+        for(var type in resources){
             this.resources[type] -= resources[type];
         }
     };
@@ -152,7 +152,7 @@ exports.Market = function (engine, comms, powerPlants) {
     this.computeTotalCost = function (data) {
         var cost = 0;
         for(var plantCost in data) {
-            for(type in data[plantCost]) {
+            for(var type in data[plantCost]) {
                 cost += this.computeCost(data[plantCost][type], type);
             }
         }

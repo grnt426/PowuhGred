@@ -110,7 +110,7 @@ var confirmBidButton = function(){
 var confirmResourcePurchase = function(){
     var playerOwnedPlantCosts = scorePanel.args.data.players[playerData.self.uid].plants;
     var resourceSelection = {};
-    for(i in playerOwnedPlantCosts){
+    for(var i in playerOwnedPlantCosts){
         resourceSelection[parseInt(i)] = ppp[parseInt(i)].resources;
     }
     socket.emit(SOCKET_GAMEACTION, {uid:playerData.self.uid, cmd:"buy", args:resourceSelection});

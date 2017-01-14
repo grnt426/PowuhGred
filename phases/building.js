@@ -46,7 +46,7 @@ exports.Building = function (engine, comms, cities) {
 
             // Otherwise, all good! Reserve the city slots and subtract the cost
             else{
-                for(i in data){
+                for(var i in data){
                     this.cities.purchaseCity(data[i], currentPlayer.uid);
                     currentPlayer.buildOnCity(data[i]);
                 }
@@ -63,7 +63,7 @@ exports.Building = function (engine, comms, cities) {
 
     this.isValid = function(cities){
         var valid = true;
-        for(i in cities){
+        for(var i in cities){
             valid &= this.cities.isCityAvailableForPurchase(cities[i], this.engine.getCurrentPlayer());
         }
         return valid;

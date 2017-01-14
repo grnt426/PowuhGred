@@ -172,7 +172,7 @@ exports.Auction = function(engine, comms){
 	// TODO: Check for Step 3 card (and handle step 2 and 3 specifics).
 	this.updateMarket = function(){
 		var index = 0;
-		for(plant in this.engine.currentMarket){
+		for(var plant in this.engine.currentMarket){
 			if(this.engine.currentMarket[plant].cost == this.currentBidChoice){
 				break;
 			}

@@ -58,7 +58,7 @@ exports.Player = function(uid, comms, socket){
 
     this.getPowerPlantCosts = function(){
         var costs = [];
-        for(p in this.plants){
+        for(var p in this.plants){
             costs.push(this.plants[p].cost);
         }
         return costs;
