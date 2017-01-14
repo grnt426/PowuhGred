@@ -183,6 +183,9 @@ exports.Market = function (engine, comms, powerPlants) {
 
             this.resources[type] -= 1;
         }
+
+        // After computing the amount, put back what we subtracted to compute the answer.
+        this.resources[type] += amt;
         return cost;
     };
 };

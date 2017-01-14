@@ -313,13 +313,16 @@ exports.Engine = function(comms, cities, plants){
 			turnOrder = 1;
 
 		this.currentPlayerIndex = this.currentPlayerIndex + turnOrder;
-		if(this.currentPlayerIndex >= 0 && this.currentPlayerIndex < util.olen(this.players) - 1){
+		if(this.currentPlayerIndex >= 0 && this.currentPlayerIndex < util.olen(this.players)){
 			this.currentPlayer = this.playerOrder[this.currentPlayerIndex];
 		}
 
         // Once we have iterated through all players, we reset the index
 		else{
-			this.currentPlayerIndex = util.olen(this.players); // Why do this?
+
+            // All other phases start with the last player in the turn order track, and advance to to the front,
+            // so we want to start with the last player
+			this.currentPlayerIndex = util.olen(this.players) - 1;
 
             // The first turn is special, as player order is initially chosen at random. Once all players have
             // purchased power plants, the turn order must be correct.
@@ -328,7 +331,7 @@ exports.Engine = function(comms, cities, plants){
 				this.firstTurn = false;
 			}
 
-            this.currentPlayer = this.playerOrder[util.olen(this.players) - 1];
+            this.currentPlayer = this.playerOrder[this.currentPlayerIndex];
 			this.nextAction();
 
             // Once we advance past to the "START_AUCTION" phase again, we must recompute turn order and point to

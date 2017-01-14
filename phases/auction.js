@@ -23,12 +23,6 @@ exports.Auction = function(engine, comms){
 	this.currentBidders = [];
 
     /**
-     * No longer can bid (does this need to be separate from finishedAuctions?)
-     * @type {String[]}
-     */
-	this.finishedBidding = [];
-
-    /**
      * No longer can start auctions
      * @type {String[]}
      */
@@ -76,19 +70,16 @@ exports.Auction = function(engine, comms){
 		// award the power plant if the last bidder passed, or if there is only
 		// one bidder at the start of the bid.
 		if((this.currentBidders.length == 2 && pass) || this.currentBidders.length == 1){
-			this.currentBidders.slice(this.currentPlayerBidIndex, 1);
 			var bidWinner = this.currentBidLeader;
 			this.finishedAuctions.push(bidWinner);
-			this.finishedBidding.push(bidWinner);
 			var player = this.engine.players[bidWinner];
 			player.awardPlant(this.engine.plants[this.currentBidChoice], this.currentBid);
 			this.updateMarket();
-
-            // TODO is it appropriate to clean the auction state here?
 			this.cleanAuctionState();
 		}
 		else{
 			console.info(this.currentBidder + " index: " + this.currentPlayerBidIndex);
+            this.currentBidders.slice(this.currentPlayerBidIndex, 1);
 			this.currentPlayerBidIndex = (this.currentPlayerBidIndex + 1) % this.currentBidders.length;
 			this.currentBidder = this.currentBidders[this.currentPlayerBidIndex];
 			console.info(this.currentBidder + " index: " + this.currentPlayerBidIndex);
@@ -105,7 +96,6 @@ exports.Auction = function(engine, comms){
 	this.startAuction = function(data){
 
 		if(data === "pass"){
-			this.finishedBidding.push(this.engine.currentPlayer);
 			this.finishedAuctions.push(this.engine.currentPlayer);
 			this.engine.nextPlayer();
 		}
@@ -138,8 +128,8 @@ exports.Auction = function(engine, comms){
 
 			for(var key in this.engine.players){
 				console.info(this.engine.players[key].uid + " Eligible? "
-					+ (this.finishedBidding.indexOf(this.engine.players[key].uid) == -1 ? "yes" : "no"));
-				if(this.finishedBidding.indexOf(this.engine.players[key].uid) == -1)
+					+ (this.finishedAuctions.indexOf(this.engine.players[key].uid) == -1 ? "yes" : "no"));
+				if(this.finishedAuctions.indexOf(this.engine.players[key].uid) == -1)
 					this.currentBidders.push(this.engine.players[key].uid);
 			}
 			this.currentPlayerBidIndex = this.currentBidders.indexOf(player.uid);

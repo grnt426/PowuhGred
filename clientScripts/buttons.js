@@ -122,10 +122,10 @@ createButton("Pass", passButton, AUCTION_F | BID_F | BUY_F | BUILD_F | POWER_F);
 createButton("Start Auction", startAuctionButton, AUCTION_F);
 createButton("Bid Up", bidUpButton, AUCTION_F | BID_F);
 createButton("Bid Down", bidDownButton, AUCTION_F | BID_F);
-createButton("Confirm", confirmBidButton, AUCTION_F | BID_F);
+createButton("Raise", confirmBidButton, BID_F);
 
 // The below is awful, but a good enough placeholder
-createButton("Confirm", confirmResourcePurchase, BUY_F);
+createButton("Purchase", confirmResourcePurchase, BUY_F);
 createButton("Coal +", function(){resourceMore('coal');}, BUY_F);
 createButton("Coal -", function(){resourceLess('coal');}, BUY_F);
 createButton("Oil +", function(){resourceMore('oil');}, BUY_F);
