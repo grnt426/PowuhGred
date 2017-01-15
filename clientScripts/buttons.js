@@ -116,6 +116,17 @@ var confirmResourcePurchase = function(){
     socket.emit(SOCKET_GAMEACTION, {uid:playerData.self.uid, cmd:"buy", args:resourceSelection});
 };
 
+var buildCities = function(){
+    socket.emit(SOCKET_GAMEACTION, {uid:playerData.self.uid, cmd:"build", args:selectedCities})
+    selectedCities = [];
+    selectedCity = false;
+};
+
+var activatePlants = function(){
+    socket.emit(SOCKET_GAMEACTION, {uid:playerData.self.uid, cmd:"power", args:selectedPlants})
+    selectedPlants = [];
+};
+
 // createButton( Display String, listener, buttons flags);
 createButton("Start Game!", startGameButton, UNSTARTED_F);
 createButton("Pass", passButton, AUCTION_F | BID_F | BUY_F | BUILD_F | POWER_F);
@@ -134,3 +145,7 @@ createButton("Garbage +", function(){resourceMore('garbage');}, BUY_F);
 createButton("Garbage -", function(){resourceLess('garbage');}, BUY_F);
 createButton("Uranium +", function(){resourceMore('uranium');}, BUY_F);
 createButton("Uranium -", function(){resourceLess('uranium');}, BUY_F);
+
+createButton("Build Cities", buildCities, BUILD_F);
+
+createButton("Activate Plants", activatePlants, POWER_F);

@@ -348,7 +348,10 @@ exports.Engine = function(comms, cities, plants){
 			this.currentAction = this.BUY;
 		else if(this.currentAction == this.BUY)
 			this.currentAction = this.BUILD;
-		else if(this.currentAction == this.BUILD){
+		else if(this.currentAction == this.BUILD) {
+            this.currentAction = this.POWER;
+        }
+        else if(this.currentAction == this.POWER){
             this.resolveTurnOrder();
             this.currentAction = this.START_AUCTION;
             this.currentPlayerIndex = 0;

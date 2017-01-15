@@ -103,15 +103,25 @@ var redraw = function(scorePanel){
 	});
 
 	// highlight selected city
-	if(selectedCity){
-		ctx.strokeStyle = ORANGE;
-		ctx.lineWidth = 3;
+    ctx.strokeStyle = ORANGE;
+    ctx.lineWidth = 3;
+	if(selectedCity && currentActionState != "build"){
 		ctx.beginPath();
 		var x = externalX(selectedCity.x);
 		var y = externalY(selectedCity.y);
 		ctx.arc(x, y, 20, 0, 360, false);
 		ctx.stroke();
 	}
+    else{
+        for(var key in selectedCities){
+            ctx.beginPath();
+            var city = citiesDef[selectedCities[key]];
+            var x = externalX(city.x);
+            var y = externalY(city.y);
+            ctx.arc(x, y, 20, 0, 360, false);
+            ctx.stroke();
+        }
+    }
 
 	// console output
 	ctx.fillStyle = BLACK;

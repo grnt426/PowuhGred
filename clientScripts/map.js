@@ -40,9 +40,10 @@ mapCanvas.addEventListener('click', function(event) {
 
     // Check if a plant was selected from the actual market
     // TODO: will need to change to support Step3
-    if(x > 800 && x < 1280 && y > 300 && y < 420){
+    if(x > 800 && x < 1280 && y > 300 && y < 420 && scorePanel.args.data.currentAction == "startAuction"){
         selectedPlant = 3-(Math.floor((1260 - x) / 114));
         selectedCity = null;
+        selectedOwnedPlant = -1;
         redraw(scorePanel);
         return;
     }
@@ -51,7 +52,7 @@ mapCanvas.addEventListener('click', function(event) {
     }
 
     // Check if the player's own power plant was selected, used for buy resources phase and power phase
-    if(x > PLAYER_PLANTS_START_X && y > 50) {
+    if(x > PLAYER_PLANTS_START_X && y > 50 && scorePanel.args.data.currentAction == "buy") {
         console.log("Clicked in player power plant region...");
 
         // Really lazy, but just search all 50 plants to see if any of them are in the spot where the player clicked
@@ -84,7 +85,17 @@ mapCanvas.addEventListener('click', function(event) {
     x = internalX(event.pageX - 8);
     y = internalY(event.pageY - 8);
     $.each(citiesDef,function(key,city) {
-        if(sqrDist(x,city.x,y,city.y)<500) {selectedCity = city;selectedPlant = -1;}
+        if(sqrDist(x,city.x,y,city.y)<500) {
+            selectedCity = city;
+            if(scorePanel.args.data.currentAction == "build"){
+                if(selectedCities.indexOf(key) != -1){
+                    selectedCities.splice(selectedCities.indexOf(key), 1);
+                }
+                else{
+                    selectedCities.push(key);
+                }
+            }
+        }
     });
     redraw(scorePanel);
 },false);

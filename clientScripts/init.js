@@ -18,7 +18,7 @@ var PURPLE =    "#AF02C3";
 
 var citiesDef = {};
 var selectedCity;
-
+var selectedCities = [];
 var selectedBid = 0;
 var selectedPlant = -1;
 

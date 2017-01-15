@@ -42,5 +42,12 @@ exports.olen = function(obj) {
  * @returns {Object} A deep-copy of the object,
  */
 exports.deepCopy = function(obj){
-    return JSON.parse(JSON.stringify(obj));
+
+    // Seems to be an issue with the else-block on empty arrays, so we need to handle this special-case
+    if(obj.constructor === Array && obj.length == 0) {
+        return [];
+    }
+    else{
+        return JSON.parse(JSON.stringify(obj));
+    }
 };

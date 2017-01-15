@@ -34,6 +34,7 @@ exports.Cities = function(){
      * @returns {Object}    The shortest route and its cost
      */
 	this.findCheapestRoute = function(start, end){
+        console.info("PATH " + JSON.stringify(start) + " => " + JSON.stringify(end));
 	    
 	    var startDict = this.cityDistDict[start.name.toLowerCase()];
 	    if(startDict === undefined) 
@@ -127,6 +128,13 @@ exports.Cities = function(){
      * @returns {number}    The cost to pay for connections to the given destinations.
      */
     this.findOptimalPurchaseCostOrderOfCities = function(cities, dests){
+
+        // In the very edge case of no existing cities and one destination city, this function
+        // will not work simply. Instead, just return a cost of 0, as there are no connections to make.
+        if(dests.length == 1 && cities.length == 0){
+            return 0;
+        }
+
         var totalCost = 999;
         var possibleOrderings = allcombinations(dests);
         var next;
@@ -134,10 +142,17 @@ exports.Cities = function(){
             var cost = 0;
             var tempCities = util.deepCopy(cities);
             var comb = next.value;
+
+            // In the special case where the player has no cities (beginning of the game), we need to seed the start
+            // from the destination. This will mean every destination city will become a "start" city.
+            if(tempCities.length == 0){
+                tempCities.push(comb.pop());
+            }
+
             for(var i in comb){
 
                 // Find the cheapest cost for this city given the cities we already have
-                cost += this.findArbitraryCheapestToDest(this.convertToCityObjects(tempCities), comb[i]);
+                cost += this.findArbitraryCheapestToDest(this.convertToCityObjects(tempCities), this.convertToCityObjects(comb[i]));
 
                 // Then, add this city to cities we "have", so we recompute the next cheapest as this city a part of our
                 // network.
@@ -163,6 +178,9 @@ exports.Cities = function(){
     };
 
     this.convertToCityObjects = function(cities){
+        if(!(cities instanceof Array)){
+            return this.cities[cities.toLowerCase()];
+        }
         var citiesO = [];
         for(var i in cities){
             citiesO.push(this.cities[cities[i].toLowerCase()]);
