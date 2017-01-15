@@ -48,7 +48,7 @@ exports.Building = function (engine, comms, cities) {
             else{
                 for(var i in data){
                     this.cities.purchaseCity(data[i], currentPlayer.uid);
-                    currentPlayer.buildOnCity(data[i]);
+                    currentPlayer.buildOnCity(this.cities.convertToCityObjects(data[i]));
                 }
                 currentPlayer.money -= totalCost;
                 engine.nextPlayer();

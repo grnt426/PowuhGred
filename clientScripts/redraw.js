@@ -102,6 +102,27 @@ var redraw = function(scorePanel){
 		}
 	});
 
+    // draw owned cities
+    for(var p in scorePanel.players){
+        var player = scorePanel.players[p];
+        for(var city in player.cities){
+            var city = player.cities[city];
+            var pos = city.players.indexOf(player.uid);
+            ctx.fillStyle = colorNameToColorCode(player.color);
+            var posX = city.x;
+            var posY = city.y;
+            if(pos == 0){
+                ctx.fillRect(externalX(posX) - 17, externalY(posY), 10, 10);
+            }
+            else if(pos == 1){
+                ctx.fillRect(externalX(posX) + 5, externalY(posY), 10, 10);
+            }
+            else {
+                ctx.fillRect(externalX(posX) - 5, externalY(posY) - 15, 10, 10);
+            }
+        }
+    }
+
 	// highlight selected city
     ctx.strokeStyle = ORANGE;
     ctx.lineWidth = 3;
@@ -294,5 +315,38 @@ var redraw = function(scorePanel){
             ctx.fillText(totalResources[type] + " " + type, 800 + (80 * offset), 175);
             offset += 1;
         }
+    }
+};
+
+function colorNameToColorCode(name){
+    if(name == "red"){
+        return RED;
+    }
+    else if(name == "blue"){
+        return BLUE;
+    }
+    else if(name == "green"){
+        return GREEN;
+    }
+    else if(name == "yellow"){
+        return DKYELLOW;
+    }
+    else if(name == "purple"){
+        return PURPLE;
+    }
+    else if(name == "black"){
+        return BLACK;
+    }
+    else if(name === "coal"){
+        return BROWN;
+    }
+    else if(name === "oil"){
+        return BLACK;
+    }
+    else if(name === "garbage"){
+        return YELLOW;
+    }
+    else if(name === "uranium"){
+        return RED;
     }
 };

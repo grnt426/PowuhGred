@@ -79,25 +79,7 @@ function drawScorePanel(data, ctx, ppp) {
         var resources = player.resources;
         var name = player.displayName;
 
-        var playerColorCode;
-        if(player.color == "red"){
-            playerColorCode = RED;
-        }
-        else if(player.color == "blue"){
-            playerColorCode = BLUE;
-        }
-        else if(player.color == "green"){
-            playerColorCode = GREEN;
-        }
-        else if(player.color == "yellow"){
-            playerColorCode = DKYELLOW;
-        }
-        else if(player.color == "purple"){
-            playerColorCode = PURPLE;
-        }
-        else if(player.color == "black"){
-            playerColorCode = BLACK;
-        }
+        var playerColorCode = colorNameToColorCode(player.color);
 
         var p=anim.progress;
         var p1,p2,p3,p4,p5;
@@ -199,20 +181,7 @@ function drawScorePanel(data, ctx, ppp) {
             var drawn = 0;
             for(type in availableResources){
                 for(var j = 0; j < availableResources[type]; j++){
-
-                    // TODO: this was copied from elsewhere. Make a utility class.
-                    if(type === "coal"){
-                        ctx.fillStyle = BROWN;
-                    }
-                    else if(type === "oil"){
-                        ctx.fillStyle = BLACK;
-                    }
-                    else if(type === "garbage"){
-                        ctx.fillStyle = YELLOW;
-                    }
-                    else if(type === "uranium"){
-                        ctx.fillStyle = RED;
-                    }
+                    ctx.fillStyle = colorNameToColorCode(type);
                     ctx.fillRect(ppp[cost].curX + 15 + (20 * (drawn % 3)),
                         ppp[cost].curY + 55 - (20 * Math.floor(drawn / 3)),
                         10, 10);
