@@ -8,9 +8,25 @@
  */
 exports.Power = function (engine, comms, powerPlants) {
 
+    /**
+     * @type {Engine}
+     */
     this.engine = engine;
+
+    /**
+     * @type {Communications}
+     */
     this.comms = comms;
+
+    /**
+     * @type {PowerPlant[]}
+     */
     this.powerPlants = powerPlants;
+
+    /**
+     * List of UIDs.
+     * @type {String[]}
+     */
     this.playersPaid = [];
 
     this.payTable = [10, 22, 33, 44, 54, 64, 73, 82, 90, 98, 105, 112, 118, 124, 129, 134, 138, 142, 145, 148, 150];
@@ -40,7 +56,15 @@ exports.Power = function (engine, comms, powerPlants) {
 
                 // Players only get money for the number of actual cities they own and can power
                 powerableCities = Math.min(player.cities.length, powerableCities);
-                player.money += this.payTable[powerableCities];
+                var payout = this.payTable[powerableCities];
+                player.money += payout;
+                this.comms.toAll(player.displayName + " earned $" + payout);
+                this.playersPaid.push(player.uid);
+
+                if(this.playersPaid.length == this.engine.getPlayerCount()){
+                    this.playersPaid = [];
+                    this.engine.nextAction();
+                }
             }
         }
     };
@@ -58,8 +82,8 @@ exports.Power = function (engine, comms, powerPlants) {
         var plants = [];
         for(var d in data){
             var cost = data[d];
-            if(this.powerPlants.indexOf(cost) != -1){
-                plants.push(powerPlants[cost]);
+            if(this.powerPlants[cost] != undefined){
+                plants.push(this.powerPlants[cost]);
             }
             else{
                 return false;
@@ -89,7 +113,7 @@ exports.Power = function (engine, comms, powerPlants) {
     this.ownsAllPlants = function(player, plants){
         var ownsAll = true;
         for(var p in plants){
-            ownsAll &= player.plants.indexOf(p) != -1;
+            ownsAll &= player.plants[plants[p].cost] != undefined;
         }
         return ownsAll;
     };

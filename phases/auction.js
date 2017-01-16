@@ -76,6 +76,8 @@ exports.Auction = function(engine, comms){
 			this.finishedAuctions.push(bidWinner);
 			var player = this.engine.players[bidWinner];
 			player.awardPlant(this.engine.plants[this.currentBidChoice], this.currentBid);
+            this.comms.toAll(player.displayName + " won " + this.engine.plants[this.currentBidChoice].cost
+                    + " power plant for $" + this.currentBid);
 			this.updateMarket();
 			this.cleanAuctionState();
 		}
@@ -131,6 +133,8 @@ exports.Auction = function(engine, comms){
 			this.currentBidChoice = plant;
 			this.currentBidLeader = player.uid;
 			this.engine.currentAction = this.engine.BID;
+
+            this.comms.toAll(player.displayName + " started the auction for plant " + plant + " at $" + bid);
 
 			for(var key in this.engine.players){
 				console.info(this.engine.players[key].uid + " Eligible? "

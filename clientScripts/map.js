@@ -52,7 +52,7 @@ mapCanvas.addEventListener('click', function(event) {
     }
 
     // Check if the player's own power plant was selected, used for buy resources phase and power phase
-    if(x > PLAYER_PLANTS_START_X && y > 50 && scorePanel.args.data.currentAction == "buy") {
+    if(x > PLAYER_PLANTS_START_X && y > 50 && (scorePanel.args.data.currentAction == "buy" || scorePanel.args.data.currentAction == "power")) {
         console.log("Clicked in player power plant region...");
 
         // Really lazy, but just search all 50 plants to see if any of them are in the spot where the player clicked
@@ -65,8 +65,19 @@ mapCanvas.addEventListener('click', function(event) {
                 // TODO: this is awful
                 if(scorePanel.args.data.players[playerData.self.uid].plants[parseInt(p)] != undefined){
                     console.log("Clicked on an owned power plant.");
-                    plant.selected = true;
-                    selectedOwnedPlant = plant;
+                    plant.selected = plant.selected === undefined ? true : !plant.selected;
+                    if(plant.selected) {
+                        selectedOwnedPlant = plant;
+                    }
+                    else{
+                        selectedOwnedPlant = undefined;
+                    }
+                    if(selectedPlants.indexOf(plant.cost) != -1){
+                        selectedPlants.splice(selectedPlants.indexOf(p), 1);
+                    }
+                    else {
+                        selectedPlants.push(p);
+                    }
                 }
             }
         }
@@ -79,6 +90,7 @@ mapCanvas.addEventListener('click', function(event) {
             ppp[p].selected = false;
         }
         selectedOwnedPlant = undefined;
+        selectedPlants = [];
     }
 
     // Otherwise, check if a city was clicked

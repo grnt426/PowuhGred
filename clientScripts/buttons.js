@@ -117,13 +117,13 @@ var confirmResourcePurchase = function(){
 };
 
 var buildCities = function(){
-    socket.emit(SOCKET_GAMEACTION, {uid:playerData.self.uid, cmd:"build", args:selectedCities})
+    socket.emit(SOCKET_GAMEACTION, {uid:playerData.self.uid, cmd:"build", args:selectedCities});
     selectedCities = [];
     selectedCity = false;
 };
 
 var activatePlants = function(){
-    socket.emit(SOCKET_GAMEACTION, {uid:playerData.self.uid, cmd:"power", args:selectedPlants})
+    socket.emit(SOCKET_GAMEACTION, {uid:playerData.self.uid, cmd:"power", args:selectedPlants});
     selectedPlants = [];
 };
 

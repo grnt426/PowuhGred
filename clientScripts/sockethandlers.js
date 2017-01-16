@@ -43,7 +43,7 @@ socket.on(SOCKET_UPDATES, function(data){
         if(currentActionState != "startGame"
             && (currentActionState == "bid" && playerData.self.uid == newData.auction.currentBidders[newData.auction.currentPlayerBidIndex])
             || (currentActionState != "bid" && playerData.self.uid == currentPlayer)){
-            document.title = "PowuhGred * Your Turn!";
+            document.title = "* PowuhGred - Your Turn!";
         }
         else{
             document.title = "PowuhGred";

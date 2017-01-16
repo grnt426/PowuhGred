@@ -49,6 +49,7 @@ exports.Building = function (engine, comms, cities) {
                 for(var i in data){
                     this.cities.purchaseCity(data[i], currentPlayer.uid);
                     currentPlayer.buildOnCity(this.cities.convertToCityObjects(data[i]));
+                    this.comms.toAll(currentPlayer.displayName + " bought " + data);
                 }
                 currentPlayer.money -= totalCost;
                 engine.nextPlayer();

@@ -154,6 +154,13 @@ exports.Engine = function(comms, cities, plants){
         return this.players[this.currentPlayer];
     };
 
+    /**
+     * @returns {number}
+     */
+    this.getPlayerCount = function(){
+        return util.olen(this.players);
+    };
+
 	this.startGame = function(){
 		if(this.gameStarted) {
             comms.debug(true, "Trying to start after already started?");

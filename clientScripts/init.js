@@ -21,6 +21,7 @@ var selectedCity;
 var selectedCities = [];
 var selectedBid = 0;
 var selectedPlant = -1;
+var selectedPlants = [];
 
 var selectedResources = [];
 selectedResources['coal'] = 0;
