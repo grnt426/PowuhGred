@@ -36,6 +36,14 @@ exports.PowerPlant = function(cost, type, requires, powers){
     this.powers = powers;
 
     /**
+     * Used exclusively by plants that can burn both coal and oil.
+     * @type {Object.<String, number>}
+     */
+    this.selectedToBurn = {};
+    this.selectedToBurn[res.COAL] = 0;
+    this.selectedToBurn[res.OIL] = 0;
+
+    /**
      * The amount of resources available for consumption on this power plant.
      * @type {Object<String, number>}
      */

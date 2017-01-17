@@ -25,7 +25,7 @@ function norm(x,preBound) {
 //     tween(.5,.25,.5) -> 1
 //     tween(.6,.25,.5) -> 1
 function tween(x,start,end) {
-    var diff = end-start
+    var diff = end-start;
     return norm(min(max(x -start,0),diff),diff)
 }
 
@@ -153,7 +153,7 @@ function drawScorePanel(data, ctx, ppp) {
 
         //draw power plants
         var count = 1;
-        for(p in plants){
+        for(var p in plants){
             var plant = plants[p];
             var cost = parseInt(plant.cost);
             console.log(JSON.stringify(plant));
@@ -179,22 +179,67 @@ function drawScorePanel(data, ctx, ppp) {
             // Draw the resources on the card
             var availableResources = plant.resources;
             var drawn = 0;
-            for(type in availableResources){
+            var highlightSelected = getSelectedResourceAmounts(ppp[cost].selectionIndex, plant.requires, plant.type);
+            for(var type in availableResources){
                 for(var j = 0; j < availableResources[type]; j++){
                     ctx.fillStyle = colorNameToColorCode(type);
                     ctx.fillRect(ppp[cost].curX + 15 + (20 * (drawn % 3)),
                         ppp[cost].curY + 55 - (20 * Math.floor(drawn / 3)),
                         10, 10);
 
+                    if(ppp[cost].selected && highlightSelected[type] > 0){
+                        ctx.strokeStyle = GREEN;
+                        ctx.lineWidth = 2;
+                        ctx.strokeRect(ppp[cost].curX + 13 + (20 * (drawn % 3)),
+                            ppp[cost].curY + 53 - (20 * Math.floor(drawn / 3)),
+                            14, 14);
+                        highlightSelected[type] -= 1;
+                    }
                     drawn += 1;
                 }
             }
-
             count+=1;
         }
-
         t_y += y_pad + b_y;
     }
-
-
 }
+
+function getSelectedResourceAmounts(selectionIndex, required, type) {
+    if (type == "both") {
+        if (selectionIndex == 1) {
+            return resourceList(required, 0, 0, 0);
+        }
+        else if (selectionIndex == 2) {
+            return resourceList(0, required, 0, 0);
+        }
+        else if (selectionIndex == 3) {
+            return resourceList(required == 3 ? 2 : 1, 1, 0, 0);
+        }
+        else if (selectionIndex == 4) {
+            return resourceList(1, required == 3 ? 2 : 1, 0, 0);
+        }
+    }
+    else{
+        var resources = resourceList(0, 0, 0, 0);
+        resources[type] = required;
+        return resources;
+    }
+}
+
+/**
+ * My JS greenhorn is showing: how to leverage the "server" version of util.js for client side?
+ * TODO: don't copy/paste this from util.js
+ * @param coal
+ * @param oil
+ * @param garbage
+ * @param uranium
+ * @returns {{}}
+ */
+resourceList = function(coal, oil, garbage, uranium){
+    var data = {};
+    data['coal'] = coal;
+    data['oil'] = oil;
+    data['garbage'] = garbage;
+    data['uranium'] = uranium;
+    return data;
+};

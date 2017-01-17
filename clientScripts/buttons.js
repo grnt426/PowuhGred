@@ -114,6 +114,7 @@ var confirmResourcePurchase = function(){
         resourceSelection[parseInt(i)] = ppp[parseInt(i)].resources;
     }
     socket.emit(SOCKET_GAMEACTION, {uid:playerData.self.uid, cmd:"buy", args:resourceSelection});
+    deseletOwnPowerPlants();
 };
 
 var buildCities = function(){

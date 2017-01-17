@@ -1,4 +1,5 @@
-var res = require("../State/Resources.js");
+var res = require("../State/Resources.js"),
+    util = require("../util.js");
 
 /**
  * Handles the market phase of the game, where players purchase resources to add to their power plants.
@@ -10,12 +11,46 @@ var res = require("../State/Resources.js");
  */
 exports.Market = function (engine, comms, powerPlants) {
 
+    /**
+     * @type {Engine}
+     */
     this.engine = engine;
+
+    /**
+     * @type {Communications}
+     */
     this.comms = comms;
+
+    /**
+     * @type {PowerPlant[]}
+     */
     this.powerPlants = powerPlants;
 
-    // The resources available for purchase.
+    /**
+     * The resources available for purchase in the market
+     * @type {Object.<String, number>}
+     */
     this.resources = {};
+
+    /**
+     * Resources not on plants and not in the market.
+     * @type {Object.<String, number>}
+     */
+    this.excessResources = {};
+
+    /**
+     * The rate of replenishment by player, step, type.
+     *
+     * TODO: This should be read from a data file along with the map.
+     * @type {Object}
+     */
+    this.replenishRate = {
+        2:[util.resourceList(3, 2, 1, 1), util.resourceList(4, 2, 2, 1), util.resourceList(3, 4, 3, 1)],
+        3:[],
+        4:[],
+        5:[],
+        6:[]
+    };
 
     /**
      * For now, the starting resources are assumed for the Germany map.
@@ -27,6 +62,10 @@ exports.Market = function (engine, comms, powerPlants) {
         this.resources[res.OIL] = 18;
         this.resources[res.GARBAGE] = 6;
         this.resources[res.URANIUM] = 2;
+        this.excessResources[res.COAL] = 0;
+        this.excessResources[res.OIL] = 6;
+        this.excessResources[res.GARBAGE] = 18;
+        this.excessResources[res.URANIUM] = 10;
     };
 
     /**
@@ -69,15 +108,36 @@ exports.Market = function (engine, comms, powerPlants) {
     };
 
     /**
-     * TODO: Implement this.
+     * Replenishes resources with the amount available within the excess pool of resources.
+     *
+     * Note: If there are fewer resources available in the excess pool than the rate of replenishment, the lesser
+     * amount is all that is added.
      */
     this.replenishResources = function(){
-
+        var rate = this.replenishRate[this.engine.getPlayerCount()][this.engine.getCurrentStep() - 1];
+        for(var type in rate){
+            var realAmt = Math.min(rate[type], this.excessResources[type]);
+            this.excessResources -= realAmt;
+            this.resources[type] += realAmt;
+        }
     };
 
+    /**
+     * Removes resources from the market.
+     * @param {Object} resources
+     */
     this.subtractResources = function(resources){
         for(var type in resources){
             this.resources[type] -= resources[type];
+        }
+    };
+
+    /**
+     * When a player activates a power plant and consumes resources, those resources are returned to the excess pool.
+     */
+    this.returnUsedResources = function(resources){
+        for(var type in resources){
+            this.resources[type] += resources[type];
         }
     };
 
@@ -185,6 +245,7 @@ exports.Market = function (engine, comms, powerPlants) {
         }
 
         // After computing the amount, put back what we subtracted to compute the answer.
+        // TODO: Subtracting/adding back the resources to compute the cost is awkward. Should be doable with straight algebra.
         this.resources[type] += amt;
         return cost;
     };

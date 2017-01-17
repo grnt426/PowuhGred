@@ -148,10 +148,26 @@ exports.Engine = function(comms, cities, plants){
     util.shuffle(this.colorsAvailable);
 
     /**
+     * The current Step the game is in. Will always be either: 1, 2, or 3.
+     * @type {number}
+     */
+    this.currentStep = 1;
+
+    /**
      * @returns {Player}
      */
     this.getCurrentPlayer = function(){
         return this.players[this.currentPlayer];
+    };
+
+    /**
+     * The current Step the game is in.
+     * 1 - The Step the game starts in, where players may not build on a city another player has already built in.
+     * 2 - The step the game proceeds to once at least one player has 7 cities.
+     * @returns {number}
+     */
+    this.getCurrentStep = function(){
+        return this.currentStep;
     };
 
     /**
@@ -308,6 +324,14 @@ exports.Engine = function(comms, cities, plants){
         this.broadcastGameState();
 	};
 
+    /**
+     * A Mediator for the Market and Power phase.
+     * @param resources
+     */
+    this.returnUsedResources = function(resources){
+        this.market.returnUsedResources(resources);
+    };
+
 	/**
 	 * Progresses to the next player, or starts the next Action.
 	 */
@@ -356,9 +380,18 @@ exports.Engine = function(comms, cities, plants){
 		else if(this.currentAction == this.BUY)
 			this.currentAction = this.BUILD;
 		else if(this.currentAction == this.BUILD) {
+
+            // TODO: Check if game is over
+            // YES, this is performed AFTER the build phase BEFORE the power phase.
+            // See pg. 7, line 1
+
             this.currentAction = this.POWER;
         }
         else if(this.currentAction == this.POWER){
+
+            this.market.replenishResources();
+
+            // And move on to the Auction phase once more
             this.resolveTurnOrder();
             this.currentAction = this.START_AUCTION;
             this.currentPlayerIndex = 0;

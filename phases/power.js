@@ -1,3 +1,5 @@
+var util = require("../util.js");
+
 /**
  * The Power (Bureaucracy) phase of the game.
  * @param {Engine} engine
@@ -50,8 +52,17 @@ exports.Power = function (engine, comms, powerPlants) {
             }
             else{
                 var powerableCities = 0;
+                var resourcesConsumed = util.resourceList(0, 0, 0, 0);
                 for(var p in powerPlants){
-                    powerableCities += powerPlants[p].activate();
+                    var plant = powerPlants[p];
+                    powerableCities += plant.activate();
+                    if(plant.type == "both"){
+                        resourcesConsumed['coal'] += plant.selectedToBurn['coal'];
+                        resourcesConsumed['oil'] += plant.selectedToBurn['oil'];
+                    }
+                    else{
+                        resourcesConsumed[plant.type] += plant.requires;
+                    }
                 }
 
                 // Players only get money for the number of actual cities they own and can power
@@ -60,6 +71,7 @@ exports.Power = function (engine, comms, powerPlants) {
                 player.money += payout;
                 this.comms.toAll(player.displayName + " earned $" + payout);
                 this.playersPaid.push(player.uid);
+                this.engine.returnUsedResources(resourcesConsumed);
 
                 if(this.playersPaid.length == this.engine.getPlayerCount()){
                     this.playersPaid = [];

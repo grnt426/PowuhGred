@@ -1,3 +1,5 @@
+var res = require("./State/Resources.js");
+
 /**
  * Fisher-Yates shuffle algorithm, operates on the array in-place.
  *
@@ -39,7 +41,7 @@ exports.olen = function(obj) {
 /**
  * A convenience function for performing a deep-copy of an object.
  * @param {Object} obj The object to deep-copy
- * @returns {Object} A deep-copy of the object,
+ * @returns {Object} A deep-copy of the object
  */
 exports.deepCopy = function(obj){
 
@@ -50,4 +52,13 @@ exports.deepCopy = function(obj){
     else{
         return JSON.parse(JSON.stringify(obj));
     }
+};
+
+exports.resourceList = function(coal, oil, garbage, uranium){
+    var data = {};
+    data[res.COAL] = coal;
+    data[res.OIL] = oil;
+    data[res.GARBAGE] = garbage;
+    data[res.URANIUM] = uranium;
+    return data;
 };
