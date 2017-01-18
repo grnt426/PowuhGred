@@ -20,6 +20,9 @@ beforeEach(function () {
     engine.getCurrentPlayer = sinon.stub().returns(player);
 
     cities.purchaseCity = sinon.spy();
+    cities.convertToCityObjects = sinon.spy();
+
+    comms.toAll = sinon.spy();
 
     building = new buildingjs.Building(engine, comms, cities);
     building.computeCost = sinon.stub().returns(20);
