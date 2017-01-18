@@ -45,6 +45,9 @@ exports.Market = function (engine, comms, powerPlants) {
      * @type {Object}
      */
     this.replenishRate = {
+
+        // 1 is here only to enable easy testing with a single player. It is not a real rate
+        1:[util.resourceList(3, 2, 1, 1), util.resourceList(4, 2, 2, 1), util.resourceList(3, 4, 3, 1)],
         2:[util.resourceList(3, 2, 1, 1), util.resourceList(4, 2, 2, 1), util.resourceList(3, 4, 3, 1)],
         3:[],
         4:[],
@@ -117,7 +120,7 @@ exports.Market = function (engine, comms, powerPlants) {
         var rate = this.replenishRate[this.engine.getPlayerCount()][this.engine.getCurrentStep() - 1];
         for(var type in rate){
             var realAmt = Math.min(rate[type], this.excessResources[type]);
-            this.excessResources -= realAmt;
+            this.excessResources[type] -= realAmt;
             this.resources[type] += realAmt;
         }
     };

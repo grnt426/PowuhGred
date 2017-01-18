@@ -28,7 +28,7 @@ app.use('/data', express.static(__dirname+'/data'));
 comms = new communicationsjs.Communications(io);
 
 var citiesDef = new citiesjs.Cities();
-citiesDef.parseCityList();
+citiesDef.parseCityList("data/germany_cities.txt");
 citiesDef.parseCities("data/germany_connections.txt");
 var powerPlants = new powerplantjs.PowerPlantReader();
 powerPlants.parsePowerPlants("data/power_plants.txt");

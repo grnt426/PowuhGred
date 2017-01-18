@@ -56,9 +56,9 @@ exports.Cities = function(){
 		for(var city in neighbors){
 			cheapestRoutes.push({
 				path : [city],
-				cost : neighbors[city].connection
+				cost : neighbors[city]
 			});
-			visited[city] = neighbors[city].connection;
+			visited[city] = neighbors[city];
 		}
 
 		while(cheapestRoutes.length > 0){
@@ -81,7 +81,7 @@ exports.Cities = function(){
 			// Iterate through all the neighbors of this new path
 			for(city in neighbors){
 
-                var cost = neighbors[city].connection + shortest.cost;
+                var cost = neighbors[city] + shortest.cost;
 
                 // If we already visited this city, and we got to it cheaper, then we want to terminate searching on
                 // this path; and kill cycles.
@@ -146,17 +146,17 @@ exports.Cities = function(){
             // In the special case where the player has no cities (beginning of the game), we need to seed the start
             // from the destination. This will mean every destination city will become a "start" city.
             if(tempCities.length == 0){
-                tempCities.push(comb.pop());
+                tempCities.push(this.convertToCityObjects(comb.pop()));
             }
 
             for(var i in comb){
 
                 // Find the cheapest cost for this city given the cities we already have
-                cost += this.findArbitraryCheapestToDest(this.convertToCityObjects(tempCities), this.convertToCityObjects(comb[i]));
+                cost += this.findArbitraryCheapestToDest(tempCities, this.convertToCityObjects(comb[i]));
 
                 // Then, add this city to cities we "have", so we recompute the next cheapest as this city a part of our
                 // network.
-                tempCities.push(comb[i].name);
+                tempCities.push(this.convertToCityObjects(comb[i]));
             }
             if(cost < totalCost)
                 totalCost = cost;
@@ -202,8 +202,8 @@ exports.Cities = function(){
 			var cost = parseInt(cityArgs[2]);
 			var conn = cityArgs[1];
 			var startCity = this.cities[name];
-			startCity.connections[conn] = {connection:cost};
-            this.cities[conn].connections[name] = {connection:cost};
+			startCity.connections[conn] = cost;
+            this.cities[conn].connections[name] = cost;
 		}
 	};
 

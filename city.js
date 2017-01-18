@@ -7,7 +7,7 @@
  */
 exports.City = function(name){
 
-	this.connections = [];
+	this.connections = {};
 
     // String
 	this.name = name;
