@@ -29,12 +29,13 @@ exports.Cities = function(){
     /**
      * Computes the lowest cost route from start to end. Note: does NOT account for the cost of buying the city.
      *
-     * @param start City to start from
-     * @param end   City to go to
+     * @param {City} start City to start from
+     * @param {City} end   City to go to
+     * @param {boolean} [debug=false]
      * @returns {Object}    The shortest route and its cost
      */
-	this.findCheapestRoute = function(start, end){
-        console.info("PATH " + JSON.stringify(start) + " => " + JSON.stringify(end));
+	this.findCheapestRoute = function(start, end, debug = false){
+        if(debug) console.info("PATH " + JSON.stringify(start) + " => " + JSON.stringify(end));
 	    
 	    var startDict = this.cityDistDict[start.name.toLowerCase()];
 	    if(startDict === undefined) 

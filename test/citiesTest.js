@@ -17,6 +17,17 @@ var MUNSTER = cities.cities["munster"];
 var DRESDEN = cities.cities["dresden"];
 var TORGELOW = cities.cities["torgelow"];
 var TRIER = cities.cities["trier"];
+var SAARBRUCKEN = cities.cities["saarbrucken"];
+var MUNCHEN = cities.cities["munchen"];
+var PASSAU = cities.cities["passau"];
+var FRANKFURTM = cities.cities["frankfurt-m"];
+var OSNABRUCK = cities.cities["osnabruck"];
+var KASSEL = cities.cities["kassel"];
+var FULDA = cities.cities["fulda"];
+var WURZBURG = cities.cities["wurzburg"];
+var HANNOVER = cities.cities["hannover"];
+var MAGDEBURG = cities.cities["magdeburg"];
+var BREMEN = cities.cities["bremen"];
 
 beforeEach(function () {
 
@@ -77,7 +88,7 @@ describe('Cities', function () {
     describe('#findOptimalPurchaseCostOrderOfCities()', function () {
 
         it('Find cheapest between [KOLN,ESSEN,MUNSTER] to [DORTMUND,AACHEN], which is 9', function () {
-            assert.equal(cities.findOptimalPurchaseCostOrderOfCities([KOLN.name, ESSEN.name, MUNSTER.name], [DORTMUND,AACHEN]), 9);
+            assert.equal(cities.findOptimalPurchaseCostOrderOfCities([KOLN, ESSEN, MUNSTER], [DORTMUND.name, AACHEN.name]), 9);
         });
 
         /**
@@ -87,7 +98,7 @@ describe('Cities', function () {
 
             // There are actually two valid ways to get there at 54, and both start from Flensburg,
             // and either go through Berlin or Magdeburg
-            assert.equal(cities.findOptimalPurchaseCostOrderOfCities([KOLN.name, FLENSBURG.name, KONSTANZ.name], [DRESDEN,ESSEN]), 60);
+            assert.equal(cities.findOptimalPurchaseCostOrderOfCities([KOLN, FLENSBURG, KONSTANZ], [DRESDEN.name, ESSEN.name]), 60);
         });
 
         /**
@@ -95,7 +106,7 @@ describe('Cities', function () {
          * The total savings over this method instead of separate paths from KOLN and FLENSBURG is 2.
          */
         it('Find cheapest between [KOLN,KONSTANZ,FLENSBURG] to [DRESDEN,DORTMUND], which is 62', function () {
-            assert.equal(cities.findOptimalPurchaseCostOrderOfCities([KOLN.name, FLENSBURG.name, KONSTANZ.name], [DRESDEN,DORTMUND]), 62);
+            assert.equal(cities.findOptimalPurchaseCostOrderOfCities([KOLN, FLENSBURG, KONSTANZ], [DRESDEN.name, DORTMUND.name]), 62);
         });
 
         /**
@@ -106,8 +117,8 @@ describe('Cities', function () {
             // There are actually two valid ways to get there at 54, and both start from Flensburg,
             // and either go through Berlin or Magdeburg
             assert.equal(cities.findOptimalPurchaseCostOrderOfCities(
-                [KOLN.name, FLENSBURG.name, KONSTANZ.name, ESSEN.name, MUNSTER.name, AACHEN.name],
-                [DRESDEN,DORTMUND]), 54);
+                [KOLN, FLENSBURG, KONSTANZ, ESSEN, MUNSTER, AACHEN],
+                [DRESDEN.name,DORTMUND.name]), 54);
         });
 
         /**
@@ -118,9 +129,9 @@ describe('Cities', function () {
             // There are actually two valid ways to get there at 54, and both start from Flensburg,
             // and either go through Berlin or Magdeburg
             assert.equal(cities.findOptimalPurchaseCostOrderOfCities(
-                [KOLN.name, FLENSBURG.name, KONSTANZ.name, ESSEN.name, MUNSTER.name, "saarbrucken", "munchen", "passau",
-                "frankfurt-m", "osnabruck", "kassel", "fulda", "wurzburg", "hannover", "magdeburg", "bremen"],
-                [DRESDEN,DORTMUND,AACHEN,FLENSBURG]), 56);
+                [KOLN, FLENSBURG, KONSTANZ, ESSEN, MUNSTER, SAARBRUCKEN, MUNCHEN, PASSAU,
+                    FRANKFURTM, OSNABRUCK, KASSEL, FULDA, WURZBURG, HANNOVER, MAGDEBURG, BREMEN],
+                [DRESDEN.name,DORTMUND.name,AACHEN.name,FLENSBURG.name]), 56);
         });
 
         /**
@@ -134,9 +145,9 @@ describe('Cities', function () {
             // There are actually two valid ways to get there at 54, and both start from Flensburg,
             // and either go through Berlin or Magdeburg
             assert.equal(cities.findOptimalPurchaseCostOrderOfCities(
-                [KOLN.name, FLENSBURG.name, KONSTANZ.name, ESSEN.name, MUNSTER.name, "saarbrucken", "munchen", "passau",
-                    "frankfurt-m", "osnabruck", "kassel", "fulda", "wurzburg", "hannover", "magdeburg"],
-                [DRESDEN,DORTMUND,AACHEN,FLENSBURG,TRIER,TORGELOW]), 98);
+                [KOLN, FLENSBURG, KONSTANZ, ESSEN, MUNSTER, SAARBRUCKEN, MUNCHEN, PASSAU,
+                    FRANKFURTM, OSNABRUCK, KASSEL, FULDA, WURZBURG, HANNOVER, MAGDEBURG],
+                [DRESDEN.name,DORTMUND.name,AACHEN.name,FLENSBURG.name,TRIER.name,TORGELOW.name]), 98);
         });
     });
 });
