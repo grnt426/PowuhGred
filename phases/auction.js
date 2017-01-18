@@ -20,12 +20,14 @@ exports.Auction = function(engine, comms){
 	this.comms = comms;
 
     /**
+     * List of UIDs.
      * @type {String[]}
      */
 	this.currentBidders = [];
 
     /**
-     * No longer can start auctions
+     * UID of players that can no longer can start auctions. Either because they already purchased a plant, or passed
+     * on their turn to start the auction.
      * @type {String[]}
      */
 	this.finishedAuctions = [];
@@ -49,7 +51,8 @@ exports.Auction = function(engine, comms){
 	this.currentBidChoice = -1;
 
 	/**
-     * @type {boolean|number}
+     * UID of the current bidder.
+     * @type {boolean|string}
 	 */
 	this.currentBidder = false;
 

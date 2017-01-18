@@ -16,6 +16,7 @@ beforeEach(function () {
     engine.players[BID_LEADER_ID].uid = BID_LEADER_ID;
     engine.BID = "bid";
     comms.toPlayer = sinon.spy();
+    comms.toAll = sinon.spy();
     auction = new auctionjs.Auction(engine, comms);
     auction.nextBidder = sinon.stub();
 });
@@ -34,8 +35,7 @@ describe('Phase/auction', function() {
             auction.engine.nextPlayer = sinon.spy();
             auction.startAuction("pass");
 
-            assert.equal(auction.finishedBidding.length, 1);
-            assert.equal(auction.finishedBidding[0], CURRENT_BIDDER);
+            assert.equal(auction.currentBidders.length, 0);
             assert.equal(auction.finishedAuctions.length, 1);
             assert.equal(auction.finishedAuctions[0], CURRENT_BIDDER);
             assert(auction.engine.nextPlayer.calledOnce);
@@ -47,7 +47,7 @@ describe('Phase/auction', function() {
             auction.startAuction(createStartAuctionData(4, 1));
             auction.nextBidder = sinon.spy();
 
-            assert.equal(auction.finishedBidding.length, 0);
+            assert.equal(auction.currentBidders.length, 0);
             assert.equal(auction.finishedAuctions.length, 0);
             assert(auction.nextBidder.notCalled, "Bidding too low shouldn't advance to the next player.");
             assert(auction.comms.toPlayer.calledOnce, "Expected an error message to the player.");
@@ -61,7 +61,7 @@ describe('Phase/auction', function() {
 
             auction.startAuction(createStartAuctionData(4, 6));
 
-            assert.equal(auction.finishedBidding.length, 0);
+            assert.equal(auction.currentBidders.length, 0);
             assert.equal(auction.finishedAuctions.length, 0);
             assert(auction.nextBidder.notCalled, "Bidding more than you have shouldn't advance to the next player.");
             assert(auction.comms.toPlayer.calledOnce, "Expected an error message to the player.");
@@ -75,7 +75,6 @@ describe('Phase/auction', function() {
 
             auction.startAuction(createStartAuctionData(4, 5));
 
-            assert.equal(auction.finishedBidding.length, 0);
             assert.equal(auction.finishedAuctions.length, 0);
             assert.equal(auction.currentBid, 5, "The current bid should be equal to what the player just placed.");
             assert.equal(auction.currentBidChoice, 4, "Current bid index should be equal to the plant just selected.");
@@ -90,6 +89,7 @@ describe('Phase/auction', function() {
             "should be with the CURRENT_BIDDER.");
             assert(auction.auctionRunning, "The auction should have started");
             assert(auction.nextBidder.calledOnce, "After starting the auction, the next bidder should place a bid.");
+            assert(auction.comms.toAll.calledOnce);
         });
     });
     describe('#placeBid()', function () {

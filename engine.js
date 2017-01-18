@@ -435,7 +435,6 @@ exports.Engine = function(comms, cities, plants){
 
 		// Auction Data
 		score.auction = {currentBidders:this.auction.currentBidders,
-			finishedBidding:this.auction.finishedBidding,
 			finishedAuctions:this.auction.finishedAuctions,
 			currentBid:this.auction.currentBid,
 			currentPlayerBidIndex:this.auction.currentPlayerBidIndex,
