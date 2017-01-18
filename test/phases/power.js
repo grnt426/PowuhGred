@@ -21,8 +21,13 @@ beforeEach(function () {
     player.uid = PLAYER_ID;
     player.buildOnCity = sinon.spy();
 
+    comms.toAll = sinon.spy();
+
     engine.nextPlayer = sinon.spy();
     engine.getCurrentPlayer = sinon.stub().returns(player);
+    engine.returnUsedResources = sinon.spy();
+    engine.getPlayerCount = sinon.stub().returns(1);
+    engine.nextAction = sinon.spy();
 
     power = new powerjs.Power(engine, comms, powerPlants);
 
