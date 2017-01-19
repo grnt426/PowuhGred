@@ -125,7 +125,7 @@ var buildCities = function(){
 
 var activatePlants = function(){
     socket.emit(SOCKET_GAMEACTION, {uid:playerData.self.uid, cmd:"power", args:selectedPlants});
-    selectedPlants = [];
+    deseletOwnPowerPlants();
 };
 
 // createButton( Display String, listener, buttons flags);

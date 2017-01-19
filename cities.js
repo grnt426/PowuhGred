@@ -139,6 +139,7 @@ exports.Cities = function(){
         var totalCost = 999;
         var possibleOrderings = allcombinations(dests);
         var next;
+        var bestOrder = [];
         while(!(next = possibleOrderings.next()).done){
             var cost = 0;
             var tempCities = util.deepCopy(cities);
@@ -159,9 +160,12 @@ exports.Cities = function(){
                 // network.
                 tempCities.push(this.convertToCityObjects(comb[i]));
             }
-            if(cost < totalCost)
+            if(cost < totalCost) {
                 totalCost = cost;
+                bestOrder = comb;
+            }
         }
+        console.log("Best ordering: " + bestOrder + " at $" + totalCost + " for connections.");
         return totalCost;
     };
 

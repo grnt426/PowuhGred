@@ -211,14 +211,20 @@ exports.Auction = function(engine, comms){
 		// If the current player lost the auction, they get to start the auction
 		// once more.
 		if(this.finishedAuctions.indexOf(this.engine.currentPlayer) == -1){
-			return;
+			this.comms.toAll(this.engine.getCurrentPlayer().displayName + " gets to start the auction again.");
 		}
 
-		// Otherwise we keep progressing to the next player in this phase
-		// until we find one that has not finished their auction phase.
-		do{
-			this.engine.nextPlayer();
-		}while(this.finishedAuctions.indexOf(this.engine.currentPlayer) != -1
-            && this.finishedAuctions.length < util.olen(this.engine.players));
+        else if(this.finishedAuctions.length == this.engine.getPlayerCount()){
+            this.finishedAuctions = [];
+            this.engine.nextPlayer();
+        }
+        else {
+
+            // Otherwise we keep progressing to the next player in this phase
+            // until we find one that has not finished their auction phase.
+            do {
+                this.engine.nextPlayer();
+            } while (this.finishedAuctions.indexOf(this.engine.currentPlayer) != -1);
+        }
 	};
 };

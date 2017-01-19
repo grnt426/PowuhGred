@@ -120,16 +120,23 @@ mapCanvas.addEventListener('click', function(event) {
                     else {
                         plant.selected = plant.selected === undefined ? true : !plant.selected;
                         if (plant.selected) {
+                            if(selectedOwnedPlant !== undefined && currentActionState != "power")
+                                selectedOwnedPlant.selected = false;
                             selectedOwnedPlant = plant;
                         }
                         else {
                             selectedOwnedPlant = undefined;
                         }
-                        if (selectedPlants.indexOf(plant.cost) != -1) {
-                            selectedPlants.splice(selectedPlants.indexOf(p), 1);
-                        }
-                        else {
-                            selectedPlants.push(p);
+
+                        // We can only select multiple plants if we are in the power phase. While it *might* make sense
+                        // in the resource purchase phase, it would be somewhat confusing.
+                        if(currentActionState == "power") {
+                            if (selectedPlants.indexOf(plant.cost) != -1) {
+                                selectedPlants.splice(selectedPlants.indexOf(p), 1);
+                            }
+                            else {
+                                selectedPlants.push(p);
+                            }
                         }
                     }
                 }

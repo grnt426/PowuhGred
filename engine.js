@@ -396,8 +396,6 @@ exports.Engine = function(comms, cities, plants){
             this.currentAction = this.START_AUCTION;
             this.currentPlayerIndex = 0;
             this.currentPlayer = this.playerOrder[this.currentPlayerIndex];
-
-            // TODO: If someone wins, halt game
             this.currentAction = this.START_AUCTION;
         }
 
