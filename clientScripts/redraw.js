@@ -85,20 +85,20 @@ var redraw = function(scorePanel){
 
 		// Draw resource unit
 		if(box.type == "coal" && key % regular >= 24 - resources.coal){
-			ctx.fillRect(x + box.size / 8, y + box.size / 8,
-					box.size * (3 / 4), box.size * (3 / 4));
+			ctx.fillRect(x + box.size / 4, y + box.size / 4,
+					box.size * (0.5), box.size * (0.5));
 		}
 		if(box.type == "oil" && key % regular >= 24 - resources.oil){
-			ctx.fillRect(x + box.size / 8, y + box.size / 8,
-					box.size * (3 / 4), box.size * (3 / 4));
+			ctx.fillRect(x + box.size / 4, y + box.size / 4,
+					box.size * (0.5), box.size * (0.5));
 		}
 		if(box.type == "garbage" && key % regular >= 24 - resources.garbage){
-			ctx.fillRect(x + box.size / 8, y + box.size / 8,
-					box.size * (3 / 4), box.size * (3 / 4));
+			ctx.fillRect(x + box.size / 4, y + box.size / 4,
+					box.size * (0.5), box.size * (0.5));
 		}
 		if(box.type == "uranium" && key % uranium >= 12 - resources.uranium){
-			ctx.fillRect(x + box.size / 8, y + box.size / 8,
-					box.size * (3 / 4), box.size * (3 / 4));
+			ctx.fillRect(x + box.size / 4, y + box.size / 4,
+					box.size * (0.5), box.size * (0.5));
 		}
 	});
 
@@ -112,13 +112,13 @@ var redraw = function(scorePanel){
             var posX = city.x;
             var posY = city.y;
             if(pos == 0){
-                ctx.fillRect(externalX(posX) - 17, externalY(posY), 10, 10);
+                ctx.fillRect(externalX(posX) - 17, externalY(posY) - 5, 10, 10);
             }
             else if(pos == 1){
                 ctx.fillRect(externalX(posX) + 5, externalY(posY), 10, 10);
             }
             else {
-                ctx.fillRect(externalX(posX) - 5, externalY(posY) - 15, 10, 10);
+                ctx.fillRect(externalX(posX) - 5, externalY(posY) - 25, 10, 10);
             }
         }
     }
@@ -225,11 +225,20 @@ var redraw = function(scorePanel){
 		ctx.stroke();
 	}
 
+    drawScorePanel(scorePanel, ctx, ppp);
+
+    // Draw Phase header
+    var yOffsetForButtons = 20;
+    ctx.fillStyle = BLACK;
+    ctx.font = "20px monospace";
+    ctx.fillText(getPhaseName(currentActionState), 800, yOffsetForButtons);
+
 	// draw buttons
 	ctx.fillStyle = WHITE;
 	var currentWidth = 800;
 	var bufferSpace = 5;
     var buttonsDrawn = 0;
+    yOffsetForButtons += 15;
 	for(var key in buttonArray){
 		var btn = buttonArray[key];
 
@@ -244,10 +253,10 @@ var redraw = function(scorePanel){
                 currentWidth = 800;
             }
             if(buttonsDrawn >= 7){
-                btn.y = 30;
+                btn.y = yOffsetForButtons + 25;
             }
             else{
-                btn.y = 5;
+                btn.y = yOffsetForButtons;
             }
 
             var pos = currentWidth;
@@ -263,21 +272,21 @@ var redraw = function(scorePanel){
 		}
 	}
 
-    drawScorePanel(scorePanel, ctx, ppp);
-
 	// Draw bid amount box
 	if((ACTIONS_FLAGS[currentActionState] & (AUCTION_F | BID_F)) > 0){
+        yOffsetForButtons += 30;
 		ctx.strokeStyle = GREEN;
 		ctx.font = "14px monospace";
-		ctx.fillText("Current Bid: " + selectedBid, 800, 30);
+		ctx.fillText("Current Bid: " + selectedBid, 800, yOffsetForButtons);
 		if(scorePanel.auction.currentBid != 0){
-			ctx.fillText("Highest Bid: " + scorePanel.auction.currentBid, 925, 30);
-			ctx.fillText("Highest Bidder: " + scorePanel.players[scorePanel.auction.currentBidLeader].displayName, 1050, 30);
+			ctx.fillText("Highest Bid: " + scorePanel.auction.currentBid, 925, yOffsetForButtons);
+			ctx.fillText("Highest Bidder: " + scorePanel.players[scorePanel.auction.currentBidLeader].displayName, 1050, yOffsetForButtons);
 		}
 	}
 
     // Draw resource purchase amounts boxes
     else if((ACTIONS_FLAGS[currentActionState] & BUY_F) > 0){
+        yOffsetForButtons += 60;
         ctx.strokeStyle = GREEN;
         ctx.font = "14px monospace";
         var offset = 0;
@@ -293,7 +302,7 @@ var redraw = function(scorePanel){
         // draw the resource count of the currently selected plant, so the player can change the amount to purchase
         if(selectedOwnedPlant != undefined) {
             for (var type in selectedOwnedPlant.resources) {
-                ctx.fillText(selectedOwnedPlant.resources[type] + " " + type, 800, 65 + (offset * 20));
+                ctx.fillText(selectedOwnedPlant.resources[type] + " " + type, 800, yOffsetForButtons + (offset * 20));
                 offset += 1;
             }
         }
@@ -310,43 +319,22 @@ var redraw = function(scorePanel){
         }
 
         offset = 0;
-        ctx.fillText("Total Requested", 800, 150);
+        ctx.fillText("Total Requested", 800, yOffsetForButtons + 85);
         for(type in totalResources){
-            ctx.fillText(totalResources[type] + " " + type, 800 + (80 * offset), 175);
+            ctx.fillText(totalResources[type] + " " + type, 800 + (80 * offset), yOffsetForButtons + 110);
             offset += 1;
         }
     }
 };
 
 function colorNameToColorCode(name){
-    if(name == "red"){
-        return RED;
-    }
-    else if(name == "blue"){
-        return BLUE;
-    }
-    else if(name == "green"){
-        return GREEN;
-    }
-    else if(name == "yellow"){
-        return DKYELLOW;
-    }
-    else if(name == "purple"){
-        return PURPLE;
-    }
-    else if(name == "black"){
-        return BLACK;
-    }
-    else if(name === "coal"){
-        return BROWN;
-    }
-    else if(name === "oil"){
-        return BLACK;
-    }
-    else if(name === "garbage"){
-        return YELLOW;
-    }
-    else if(name === "uranium"){
-        return RED;
-    }
+    var colorMap = {"red":RED, "blue":BLUE, "green":GREEN, "yellow":YELLOW, "purple":PURPLE, "black":BLACK,
+        "coal":BROWN, "oil":BLACK, "garbage": YELLOW, "uranium":RED};
+    return colorMap[name];
+};
+
+function getPhaseName(currentAction){
+    var phaseNames = {"startGame": "Waiting for Players", "startAuction": "Start Auction", "bid": "Bidding", "buy": "Buy Resources",
+        "build": "Build On Cities", "power": "Get Money!"};
+    return phaseNames[currentAction];
 };
