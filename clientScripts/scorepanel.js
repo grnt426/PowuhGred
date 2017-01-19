@@ -65,6 +65,8 @@ function drawScorePanel(data, ctx, ppp) {
     ctx.fillStyle = "#DDDDDD";
     ctx.lineWidth=6;
 
+    var playerCityCount = {};
+
     var t_x = s_x1;
     var t_y = s_y1;
     for(var i=0; i < data.playerOrder.length; i++) {
@@ -95,6 +97,22 @@ function drawScorePanel(data, ctx, ppp) {
         // Draw player position on turn track
         ctx.fillStyle = playerColorCode;
         ctx.fillRect(74 + (27 * data.playerOrder.indexOf(player.uid) * 1.01), 25, 13, 13);
+
+        // Draw position on city track
+        var cityCount = cities.length;
+        if(cityCount > 0 && cityCount < 7){
+            var x = 415;
+            var y = 22;
+            var currentCount = playerCityCount[cityCount] == undefined ? 0 : playerCityCount[cityCount];
+            ctx.fillStyle = playerColorCode;
+            x = x + (50 * (cityCount - 1)) * 1.04 + (15 * (currentCount % 3));
+            y = y + (13 * Math.floor(currentCount / 3));
+            ctx.fillRect(x, y, 10, 10);
+            playerCityCount[cityCount] = playerCityCount[cityCount] == undefined ? 1 : playerCityCount[cityCount] + 1;
+        }
+        else if(cityCount > 6){
+
+        }
 
         // draw curved border
         if(currentPlayer == player.uid)

@@ -1,4 +1,4 @@
-var DEBUG = false;
+var DEBUG = true;
 
 //initiates Color Vars
 var WHITE =     "#FFFFFF";
