@@ -6,6 +6,7 @@ var express = require('express'),
 	server = http.createServer(app),
 	io = require('socket.io').listen(server),
 	communicationsjs = require('./communications.js'),
+	comms = new communicationsjs.Communications(io),
     citiesjs = require('./cities.js'),
 	powerplantjs = require('./powerplantreader.js'),
 	enginejs = require('./engine.js'),
@@ -24,8 +25,6 @@ app.get("/clientScripts/sockethandlers.js", function(req, res) { res.sendFile(__
 app.get("/clientScripts/scorepanel.js", function(req, res) { res.sendFile(__dirname + '/clientScripts/scorepanel.js'); });
 app.get("/clientScripts/cardpositions.js", function(req, res) {	res.sendFile(__dirname + '/clientScripts/cardpositions.js'); });
 app.use('/data', express.static(__dirname+'/data'));
-
-comms = new communicationsjs.Communications(io);
 
 var citiesDef = new citiesjs.Cities();
 citiesDef.parseCityList("data/germany_cities.txt");

@@ -2,6 +2,9 @@
   "name": "PowuhGred",
   "description": "Boardgame Clone",
   "version": "0.0.1",
+  "engines" : { 
+    "node" : ">=6.9.0" 
+  },
   "dependencies": {
     "allcombinations": "^1.1.1",
     "express": "4.x",

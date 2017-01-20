@@ -19,7 +19,7 @@ Setup
 Download germany.jpg, plants.jpg, and plants_t.jpg from someone who has them
 and place them, exactly as they were named, into the data/ folder.
 
-NodeJS https://nodejs.org/en/
+NodeJS https://nodejs.org/en/ (Node 6+ for ES2015 support)
 Mocha https://mochajs.org/#installation
 
 	npm install
@@ -48,3 +48,4 @@ To run tests, repeat, but instead create a new Mocha profile and then point at t
 pass --recursive to the "Extra mocha options" field.
 
 	mocha
+	
