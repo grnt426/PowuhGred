@@ -244,26 +244,26 @@ var redraw = function(scorePanel){
 
 		var cur = ACTIONS_FLAGS[currentActionState];
 		var flag = btn.flags;
+    	btn.width = btn.disp.length * 10 + 8
+    	btn.height = 24;
+    		
 		if((cur & flag) > 0){
             buttonsDrawn += 1;
 			ctx.fillStyle = GREEN;
 			ctx.strokeStyle = GREEN;
 			ctx.lineWidth = 1;
-            if(buttonsDrawn == 7) {
+            if((currentWidth+btn.width) >= 1280){
+                yOffsetForButtons += 30;
                 currentWidth = 800;
             }
-            if(buttonsDrawn >= 7){
-                btn.y = yOffsetForButtons + 25;
-            }
-            else{
-                btn.y = yOffsetForButtons;
-            }
+            
+            btn.y = yOffsetForButtons;
 
             var pos = currentWidth;
             btn.x = pos;
 			ctx.strokeRect(pos, btn.y, btn.width, btn.height);
-			ctx.font = "12px monospace";
-			ctx.fillText(btn.disp, pos + 5, btn.y + 10);
+			ctx.font = "16px monospace";
+			ctx.fillText(btn.disp, pos + 5, btn.y + 18);
 			currentWidth = pos + btn.width + bufferSpace;
 		}
 		else{
@@ -274,7 +274,7 @@ var redraw = function(scorePanel){
 
 	// Draw bid amount box
 	if((ACTIONS_FLAGS[currentActionState] & (AUCTION_F | BID_F)) > 0){
-        yOffsetForButtons += 30;
+        yOffsetForButtons += 60;
 		ctx.strokeStyle = GREEN;
 		ctx.font = "14px monospace";
 		ctx.fillText("Current Bid: " + selectedBid, 800, yOffsetForButtons);

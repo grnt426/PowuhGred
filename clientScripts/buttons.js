@@ -32,12 +32,6 @@ var createButton = function(disp,listener,flags) {
     // when this button should appear
     button.flags = flags;
 
-    // The width of even monospace font isn't very even :(
-    // so I hacked up something that kinda seems to work
-    button.width = disp.length > 5 ?
-        (disp.length > 8 ? disp.length * 8 : disp.length * 9)
-        : disp.length * 10;
-    button.height = 12;
     buttonArray[disp] = button;
 };
 
