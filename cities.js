@@ -105,8 +105,6 @@ exports.Cities = function(){
     /**
      * Finds the cheapest route from any of a player's cities to the destination city.
      *
-     * TODO: Memoization would help us greatly here.
-     *
      * @param cities    List of cities to try starting from
      * @param dest  City to path to
      * @returns {number}    The lowest cost found.

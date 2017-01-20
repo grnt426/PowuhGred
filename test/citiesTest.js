@@ -136,9 +136,6 @@ describe('Cities', function () {
 
         /**
          * Intense test, to see where the limits are.
-         *
-         * TODO: Currently, the limit is about 6 requested cities and 15 owned. At this point, it takes upwards of 8
-         * seconds to compute, and sometimes the unit-test times out before. Memoization/precomputation is needed.
          */
         it('Find cheapest between 16 cities to 6 cities, which is 62', function () {
 

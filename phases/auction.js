@@ -69,7 +69,7 @@ exports.Auction = function(engine, comms){
      */
 	this.auctionRunning = false;
 
-	// TODO use a different order
+	// TODO Should a different order be used?
 	this.nextBidder = function(pass){
 
 		// award the power plant if the last bidder passed, or if there is only
