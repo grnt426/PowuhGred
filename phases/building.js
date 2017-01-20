@@ -30,6 +30,7 @@ exports.Building = function (engine, comms, cities) {
 
         // Players can always choose to not purchase any cities
         if(data == "pass") {
+            this.comms.toAll(this.engine.getCurrentPlayer().displayName + " has passed on purchasing cities.");
             this.engine.nextPlayer();
         }
         else{
@@ -37,11 +38,13 @@ exports.Building = function (engine, comms, cities) {
             var totalCost = this.computeCost(data);
             var currentPlayer = this.engine.getCurrentPlayer();
 
-            if(!this.isValid(data)){
-                // TODO: alert player invalid selection
+            var validPurchase = this.isValid(data);
+            if(validPurchase !== true){
+                this.comms.toCurrent((validPurchase.length == 1 ? "This city is " : " These cities are ")
+                        + " not available for purchase: " + validPurchase);
             }
             else if(totalCost > currentPlayer.money){
-                // TODO: alert player their selection is too expensive
+                this.comms.toCurrent("The selected set of cities cost $" + totalCost + ", and you only have $" + currentPlayer.money);
             }
 
             // Otherwise, all good! Reserve the city slots and subtract the cost
@@ -62,11 +65,19 @@ exports.Building = function (engine, comms, cities) {
                 this.cities.getTotalCostToBuild(requestedCities);
     };
 
+    /**
+     * Determines if the list of cities are all purchasable for that player.
+     * @param {string[]} cities    The list of cities to check.
+     * @returns {boolean|string[]}  True if all the cities are purchable, otherwise a list of the cities by name which
+     *                              aren't valid are returned.
+     */
     this.isValid = function(cities){
-        var valid = true;
+        var invalidCities = [];
         for(var i in cities){
-            valid &= this.cities.isCityAvailableForPurchase(cities[i], this.engine.getCurrentPlayer());
+            if(!this.cities.isCityAvailableForPurchase(cities[i], this.engine.getCurrentPlayer())){
+                invalidCities.push(cities[i]);
+            }
         }
-        return valid;
+        return invalidCities.length == 0 ? true : invalidCities;
     };
 };

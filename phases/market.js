@@ -82,21 +82,21 @@ exports.Market = function (engine, comms, powerPlants) {
 
         // It is ALWAYS valid for players to not purchase any resources
         if (data == "pass") {
+            this.comms.toAll(this.engine.getCurrentPlayer().displayName + " has passed on buying resources.");
             engine.nextPlayer();
         }
 
         else if(!this.validateRequest(data)){
-            // TODO alert player of bad choice
+            this.comms.toCurrent("Invalid request to purchase resources. Please try again.");
         }
 
-        // Otherwise, the player has requested resources
+        // Otherwise, the player has at least requested valid resources
         else {
             var cost = this.computeTotalCost(data);
             var currentPlayer = this.engine.getCurrentPlayer();
 
-            // Both conditions shouldn't be possible unless the UI has a bug or the player is spoofing messages.
             if (currentPlayer.money < cost) {
-                console.info("Invalid purchase. Money: " + currentPlayer.money + ". Request: " + data);
+                console.info("Invalid purchase. Cost: $" + cost + ", Money: $" + currentPlayer.money + ". Request: " + data);
             }
             else {
                 console.info(currentPlayer.uid + " purchasing resources, at " + cost + " money");
@@ -165,6 +165,9 @@ exports.Market = function (engine, comms, powerPlants) {
      * Validates there are enough resources available to make the purchase, and that the kind of resource requested
      * is valid.
      *
+     * This is somewhat unnecessary, as the client should be enforcing all this logic. The only reason it is here is to
+     * prevent client tampering. Extensive error reporting isn't needed.
+     *
      * @param data {Object} of type {P1:{coal:W, oil:X, garbage:Y, uranium:Z}, P2:{coal:W2, oil:X2, garbage:Y2, uranium:Z2}, ...}
      * @returns {boolean} True if those resources are available.
      */
@@ -175,6 +178,8 @@ exports.Market = function (engine, comms, powerPlants) {
             // Check if the requested resources exist and are available to buy in quantities asked
             var resources = data[plant];
             for(var type in resources) {
+
+                // This would be a very odd if-statement to trigger, as it would imply someone is tampering with the client
                 if (type != res.COAL && type != res.OIL && type != res.GARBAGE && type != res.URANIUM) {
                     return false;
                 }

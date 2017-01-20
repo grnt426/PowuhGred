@@ -177,6 +177,19 @@ exports.Engine = function(comms, cities, plants){
         return util.olen(this.players);
     };
 
+    /**
+     * Gets the Player object by UID.
+     * @param {string} uid  The UID of the player to get.
+     * @returns {Player}    The Player object represented by that UID.
+     */
+    this.getPlayerByUID = function(uid){
+        for(var p in this.players){
+            if(this.players[p].uid == uid){
+                return this.players[p];
+            }
+        }
+    };
+
 	this.startGame = function(){
 		if(this.gameStarted) {
             comms.debug(true, "Trying to start after already started?");
@@ -323,6 +336,17 @@ exports.Engine = function(comms, cities, plants){
 		}
         this.broadcastGameState();
 	};
+
+    this.getPowerPlantFromActualAuction = function(plantCost){
+        var index = 0;
+        for(var plant in this.currentMarket){
+            if(this.currentMarket[plant].cost == plantCost){
+                return this.currentMarket[plant];
+            }
+            index += 1;
+        }
+        return undefined;
+    };
 
     /**
      * A Mediator for the Market and Power phase.

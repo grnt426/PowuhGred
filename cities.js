@@ -242,7 +242,7 @@ exports.Cities = function(){
     };
 
     /**
-     * @param city  Name of city to check
+     * @param {string} city  Name of city to check
      * @returns {boolean}
      */
     this.isCityAvailableForPurchase = function(city, playerId){

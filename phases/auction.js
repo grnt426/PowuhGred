@@ -79,17 +79,19 @@ exports.Auction = function(engine, comms){
 			this.finishedAuctions.push(bidWinner);
 			var player = this.engine.players[bidWinner];
 			player.awardPlant(this.engine.plants[this.currentBidChoice], this.currentBid);
-            this.comms.toAll(player.displayName + " won " + this.engine.plants[this.currentBidChoice].cost
-                    + " power plant for $" + this.currentBid);
+            this.comms.toAll(player.displayName + " won power plant " + this.engine.plants[this.currentBidChoice].cost
+                    + " for $" + this.currentBid);
 			this.updateMarket();
 			this.cleanAuctionState();
 		}
         else if(pass){
+            this.comms.toAll(this.engine.getPlayerByUID(this.currentBidder).displayName + " has passed on bidding.");
             this.currentBidders.splice(this.currentPlayerBidIndex, 1);
             this.currentPlayerBidIndex = this.currentPlayerBidIndex % this.currentBidders.length;
             this.currentBidder = this.currentBidders[this.currentPlayerBidIndex];
         }
 		else{
+            this.comms.toAll(this.engine.getPlayerByUID(this.currentBidder).displayName + " has raised the bid to $" + this.currentBid);
 			console.info(this.currentBidder + " index: " + this.currentPlayerBidIndex);
 			this.currentPlayerBidIndex = (this.currentPlayerBidIndex + 1) % this.currentBidders.length;
 			this.currentBidder = this.currentBidders[this.currentPlayerBidIndex];
@@ -111,12 +113,15 @@ exports.Auction = function(engine, comms){
 			this.engine.nextPlayer();
 		}
 		else{
-
-            // TODO: should verify plant to prevent message spoofing
-
 			console.info(data);
 			var player = this.engine.players[this.engine.currentPlayer];
 			var plant = data.cost;
+
+            var plantObject = this.engine.getPowerPlantFromActualAuction(plant);
+            if(plantObject === undefined){
+                this.comms.toPlayer(player, "Invalid plant selected");
+            }
+
 			var bid = data.bid;
 			if(bid < plant){
 				// Reject bid

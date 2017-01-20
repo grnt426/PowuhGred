@@ -45,10 +45,10 @@ exports.Power = function (engine, comms, powerPlants) {
         else{
             var powerPlants = this.convertDataToPowerPlants(data);
             if(!this.ownsAllPlants(player, powerPlants)){
-                // TODO: alert user they selected an invalid plant
+                this.comms.toCurrent("You do not own all the power plants selected...?");
             }
             else if(!this.canActivateAll(powerPlants)){
-                // TODO: alert player they can't activate all their power plants
+                this.comms.toCurrent("Not all the plants selected can be activated.");
             }
             else{
                 var powerableCities = 0;
