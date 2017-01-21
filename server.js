@@ -33,6 +33,7 @@ var powerPlants = new powerplantjs.PowerPlantReader();
 powerPlants.parsePowerPlants("data/power_plants.txt");
 
 var engine = new enginejs.Engine(comms, citiesDef, powerPlants.powerPlants);
+comms.engine = engine;
 
 // connect to a player, listen
 // TODO: There seems to be an issue with a player joining, but the tab not gaining focus in FF, and the player not initializing the game correctly.

@@ -74,7 +74,7 @@ exports.Building = function (engine, comms, cities) {
     this.isValid = function(cities){
         var invalidCities = [];
         for(var i in cities){
-            if(!this.cities.isCityAvailableForPurchase(cities[i], this.engine.getCurrentPlayer())){
+            if(!this.cities.isCityAvailableForPurchase(cities[i], this.engine.getCurrentPlayer(), this.engine.getCurrentStep())){
                 invalidCities.push(cities[i]);
             }
         }

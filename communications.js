@@ -1,13 +1,16 @@
 /**
  *
  * @param io
+ * @param {Engine} engine
  * @constructor
  * @this {Communications}
  */
-exports.Communications = function(io){
+exports.Communications = function(io, engine){
 
 	// Used to broadcast to channels
 	this.io = io;
+
+    this.engine = engine;
 
     // Init sequence
     this.SOCKET_CONNECTION = 'connection';      // client -> server
@@ -47,12 +50,10 @@ exports.Communications = function(io){
 	 * (not the player resolving an action or card, but the player whose turn it
 	 * is) from SERVER.
 	 *
-	 * TODO: test this?
-	 *
 	 * @param msg    The message to send.
 	 */
 	this.toCurrent = function(msg){
-//		this.toPlayer(gamestate.curPlayer, msg);
+		this.toPlayer(this.engine.getCurrentPlayer(), msg);
 	};
 
 	/**

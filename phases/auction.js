@@ -85,13 +85,11 @@ exports.Auction = function(engine, comms){
 			this.cleanAuctionState();
 		}
         else if(pass){
-            this.comms.toAll(this.engine.getPlayerByUID(this.currentBidder).displayName + " has passed on bidding.");
             this.currentBidders.splice(this.currentPlayerBidIndex, 1);
             this.currentPlayerBidIndex = this.currentPlayerBidIndex % this.currentBidders.length;
             this.currentBidder = this.currentBidders[this.currentPlayerBidIndex];
         }
 		else{
-            this.comms.toAll(this.engine.getPlayerByUID(this.currentBidder).displayName + " has raised the bid to $" + this.currentBid);
 			console.info(this.currentBidder + " index: " + this.currentPlayerBidIndex);
 			this.currentPlayerBidIndex = (this.currentPlayerBidIndex + 1) % this.currentBidders.length;
 			this.currentBidder = this.currentBidders[this.currentPlayerBidIndex];

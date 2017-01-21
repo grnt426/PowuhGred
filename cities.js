@@ -245,8 +245,8 @@ exports.Cities = function(){
      * @param {string} city  Name of city to check
      * @returns {boolean}
      */
-    this.isCityAvailableForPurchase = function(city, playerId){
-        return this.cities[city.toLowerCase()].canBuild(playerId);
+    this.isCityAvailableForPurchase = function(city, playerId, step){
+        return this.cities[city.toLowerCase()].canBuild(playerId, step);
     };
 
     /**
