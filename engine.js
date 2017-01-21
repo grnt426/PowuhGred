@@ -439,6 +439,7 @@ exports.Engine = function(comms, cities, plants){
 		score.futuresMarket = this.futuresMarket;
 		score.currentAction = this.currentAction;
 		score.resources = this.market.resources;
+        score.playersPaid = this.power.playersPaid;
 
         // making a subset of player data, don't want whole object
         score.players = {};

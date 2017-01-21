@@ -69,6 +69,7 @@ function drawScorePanel(data, ctx, ppp) {
 
     var t_x = s_x1;
     var t_y = s_y1;
+    var playersPaid = data.playersPaid;
     for(var i=0; i < data.playerOrder.length; i++) {
 
         t_x = s_x1;
@@ -115,9 +116,11 @@ function drawScorePanel(data, ctx, ppp) {
         }
 
         // draw curved border
-        if(currentPlayer == player.uid)
+        if(currentPlayer == player.uid && currentActionState != "power")
             ctx.strokeStyle = "#3366FF";
         else if(currentPlayer != player.uid && data.auction.currentBidder == player.uid)
+            ctx.strokeStyle = "#336633";
+        else if(currentActionState == "power" && playersPaid.indexOf(player.uid) == -1)
             ctx.strokeStyle = "#336633";
         else
             ctx.strokeStyle = "#111111";

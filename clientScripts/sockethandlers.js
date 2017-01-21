@@ -41,8 +41,9 @@ socket.on(SOCKET_UPDATES, function(data){
 
         // Change the title of the browser window so the player knows it is their turn
         if(currentActionState != "startGame"
-            && (currentActionState == "bid" && playerData.self.uid == newData.auction.currentBidders[newData.auction.currentPlayerBidIndex])
-            || (currentActionState != "bid" && playerData.self.uid == currentPlayer)){
+            && ((currentActionState == "bid" && playerData.self.uid == newData.auction.currentBidders[newData.auction.currentPlayerBidIndex])
+            || (currentActionState != "bid" && currentActionState != "power" && playerData.self.uid == currentPlayer)
+            || (currentActionState == "power" && scorePanel.args.data.playersPaid.indexOf(playerData.self.uid) == -1))){
             document.title = "* PowuhGred - Your Turn!";
         }
         else{
