@@ -338,6 +338,9 @@ exports.Engine = function(comms, cities, plants){
         this.plantCosts = this.plantCosts.filter(function(n){return n != undefined});
         util.shuffle(this.plantCosts);
 
+        // We need to randomly remove power plants based on player count after setup.
+        this.plantCosts.splice(0, this.removeFaceDownPlants[this.getPlayerCount() - 1]);
+
         // The 13 cost (wind turbine) power plant is always on top of the deck
 		this.plantCosts.splice(0, 0, 13);
         this.plantCosts.push(this.STEP_THREE);
