@@ -282,7 +282,7 @@ exports.Engine = function(comms, cities, plants){
 
         // The 13 cost (wind turbine) power plant is always on top of the deck
 		this.plantCosts.splice(0, 0, 13);
-        this.plantCosts.splice(1, 0, this.STEP_THREE);
+        this.plantCosts.push(this.STEP_THREE);
         this.plants[this.STEP_THREE] = this.STEP_THREE_CARD;
 	};
 
