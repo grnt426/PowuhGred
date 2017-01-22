@@ -39,10 +39,11 @@ socket.on(SOCKET_UPDATES, function(data){
         actualMarket = newData.actualMarket;
         futureMarket = newData.futuresMarket;
         currentStep = newData.currentStep;
+        gameOver = newData.gameOver;
 
 
         // Change the title of the browser window so the player knows it is their turn
-        if(currentActionState != "startGame"
+        if(currentActionState != "startGame" && !gameOver
             && ((currentActionState == "bid" && playerData.self.uid == newData.auction.currentBidders[newData.auction.currentPlayerBidIndex])
             || (currentActionState != "bid" && currentActionState != "power" && playerData.self.uid == currentPlayer)
             || (currentActionState == "power" && scorePanel.args.data.playersPaid.indexOf(playerData.self.uid) == -1))){

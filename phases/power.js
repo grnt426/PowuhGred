@@ -132,4 +132,28 @@ exports.Power = function (engine, comms, powerPlants) {
         }
         return ownsAll;
     };
+
+    this.whoCanPowerTheMost = function(){
+        var mostPowered = [];
+        var mostPowerableAmount = -1;
+        for(var p in this.engine.players){
+            var player = this.engine.players[p];
+            var canPower = 0;
+            for(var plantCost in player.plants){
+                var plant = player.plants[plantCost];
+                if(plant.canActivate()){
+                    canPower += plant.powers;
+                }
+            }
+            canPower = Math.min(player.cities.length, canPower);
+            if(canPower > mostPowerableAmount){
+                mostPowered = [player];
+                mostPowerableAmount = canPower;
+            }
+            else if(canPower >= mostPowerableAmount){
+                mostPowered.push(player);
+            }
+        }
+        return mostPowered;
+    };
 };
