@@ -350,7 +350,14 @@ function colorNameToColorCode(name){
 };
 
 function getPhaseName(currentAction){
+    if(gameOver){
+        return "Game Over! " + scorePanel.args.data.winner + " has won!";
+    }
     var phaseNames = {"startGame": "Waiting for Players", "startAuction": "Start Auction", "bid": "Bidding", "buy": "Buy Resources",
         "build": "Build On Cities", "power": "Get Money!"};
-    return phaseNames[currentAction] + " - Step " + currentStep;
+    var name = phaseNames[currentAction];
+    if(currentAction != "startGame"){
+        name += " - Step " + currentStep;
+    }
+    return name;
 };

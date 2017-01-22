@@ -168,6 +168,64 @@ exports.Engine = function(comms, cities, plants){
     this.step3Triggered = false;
 
     /**
+     * Zero-indexed by player count (index 0 for 1 player, 1 for 2 players, etc). The value is the minimum number of cities
+     * any one player must own for the game to end.
+     * @type {number[]}
+     */
+    this.gameEndCityCounts = [3, 21, 17, 17, 15, 14];
+
+    /**
+     * Zero-indexed by player count (index 0 for 1 player, 1 for 2 players, etc). The value is the minimum number of
+     * cities for Step 2 to be triggered.
+     * @type {number[]}
+     */
+    this.step2CityCounts = [3, 10, 7, 7, 7, 6];
+
+    /**
+     * Zero-indexed by player count (index 0 for 1 player, 1 for 2 players, etc). The value is the number of power plant
+     * cards to remove from the draw deck permanently from the game after setup.
+     * @type {number[]}
+     */
+    this.removeFaceDownPlants = [8, 8, 8, 4, 0, 0];
+
+    /**
+     * This is set to true once the game is over. Otherwise, will remain false.
+     * @type {boolean}
+     */
+    this.gameOver = false;
+
+    /**
+     * If players are tied by number of cities powered, and by money, and by number of cities owned, the game is officially
+     * ended in a tie.
+     * @type {boolean}
+     */
+    this.gameEndedInTie = false;
+
+    /**
+     * If players tied by number of cities powered, and by money, this is true if someone won because they had more cities.
+     * @type {boolean}
+     */
+    this.gameEndedByMostCities = false;
+
+    /**
+     * If players tied in number of cities powered, this is true if someone had more money.
+     * @type {boolean}
+     */
+    this.gameWinnerByMoney = false;
+
+    /**
+     * If a player can power more cities than anyone else, they win.
+     * @type {boolean}
+     */
+    this.gameWinnerByMostPowered = false;
+
+    /**
+     * The player that won the game.
+     * @type {undefined|Player}
+     */
+    this.winner = undefined;
+
+    /**
      * @returns {Player}
      */
     this.getCurrentPlayer = function(){
@@ -287,8 +345,11 @@ exports.Engine = function(comms, cities, plants){
         this.plantCosts = this.plantCosts.filter(function(n){return n != undefined});
         util.shuffle(this.plantCosts);
 
+        // We need to randomly remove power plants based on player count after setup.
+        this.plantCosts.splice(0, this.removeFaceDownPlants[this.getPlayerCount() - 1]);
+
         // The 13 cost (wind turbine) power plant is always on top of the deck
-		this.plantCosts.splice(0, 0, 13);
+        this.plantCosts.splice(0, 0, 13);
         this.plantCosts.push(this.STEP_THREE);
         this.plants[this.STEP_THREE] = this.STEP_THREE_CARD;
 	};
@@ -321,6 +382,11 @@ exports.Engine = function(comms, cities, plants){
 		var player = this.players[uid];
 
 		console.info(uid + ", action: " + action + ", args: " + JSON.stringify(args));
+
+        if(this.gameOver){
+            this.comms.toPlayer(player, "The game has ended! Why not play another game? :)");
+            return;
+        }
 
 		// TODO: compress the boolean logic
 		if(this.currentPlayer !== false && uid !== this.currentPlayer && this.currentAction != this.BID && this.currentAction != this.POWER){
@@ -437,11 +503,17 @@ exports.Engine = function(comms, cities, plants){
             // TODO: Check if game is over
             // YES, this is performed AFTER the build phase BEFORE the power phase.
             // See pg. 7, line 1
+            if(this.checkIfGameOver()){
+
+                // No need to trigger potentially weird side-effects, so don't bother finishing the transition to the
+                // next phase.
+                return;
+            }
 
             // Check if Step2 should happen
             var triggerStep2 = false;
             for(var p in this.players){
-                if(this.players[p].cities.length >= 7){
+                if(this.players[p].cities.length >= this.step2CityCounts[this.getPlayerCount() - 1]){
                     triggerStep2 = true;
                     break;
                 }
@@ -489,6 +561,80 @@ exports.Engine = function(comms, cities, plants){
 	};
 
     /**
+     * Determines if the game is over. Using this criteria: https://github.com/grnt426/PowuhGred/issues/34
+     * @returns {boolean}   True if the game ended, otherwise false.
+     */
+    this.checkIfGameOver = function(){
+        for(var p in this.players){
+            var player = this.players[p];
+            if(player.cities.length >= this.gameEndCityCounts[this.getPlayerCount() - 1]){
+                this.gameOver = true;
+                break;
+            }
+        }
+        if(this.gameOver){
+            this.comms.toAll("The game has ended! And the winner is...");
+            var mostPoweredPlayers = this.power.whoCanPowerTheMost();
+            if(mostPoweredPlayers.length == 1){
+                this.winner = mostPoweredPlayers[0];
+                this.gameWinnerByMostPowered = true;
+                this.comms.toAll(this.winner.displayName + " has won because they can power the most cities!");
+            }
+            else{
+                this.comms.toAll("Multiple players are tied for most powered! Who has more money...");
+                var mostMoney = -1;
+                var mostMoneyPlayers = [];
+                for(var p in mostPoweredPlayers){
+                    var player = mostPoweredPlayers[p];
+                    if(player.money > mostMoney){
+                        mostMoneyPlayers = [player];
+                        mostMoney = player.money;
+                    }
+                    else if(player.money == mostMoney){
+                        mostMoneyPlayers.push(player);
+                    }
+                }
+                if(mostMoneyPlayers.length == 1){
+                    this.winner = mostMoneyPlayers[0];
+                    this.gameWinnerByMoney = true;
+                    this.comms.toAll(this.winner.displayName + " has won the tie-breaker with the most money!");
+                }
+                else{
+                    this.comms.toAll("Multiple players are tied for most money! Who has more cities in total...");
+                    var mostCities = -1;
+                    var mostCitiesPlayers = [];
+                    for(var p in mostMoneyPlayers){
+                        var player = mostMoneyPlayers[p];
+                        if(player.cities.length > mostCities){
+                            mostCitiesPlayers = [player];
+                            mostCities = player.cities.length;
+                        }
+                        else if(player.cities.length == mostCities){
+                            mostCitiesPlayers.push(player);
+                        }
+                    }
+                    if(mostCitiesPlayers.length == 1){
+                        this.winner = mostCitiesPlayers[0];
+                        this.gameEndedByMostCities = true;
+                        this.comms.toAll(this.winner.displayName + " has won the tie-breaker-breaker with the most cities!");
+                    }
+                    else{
+                        this.winner = undefined;
+                        this.gameEndedInTie = true;
+                        this.comms.toAll("Against all possible odds, the game has ended in a complete tie!");
+                        var tiedPlayerNames = [];
+                        for(var p in mostCitiesPlayers){
+                            tiedPlayerNames.push(mostCitiesPlayers[p].displayName);
+                        }
+                        this.comms.toAll("The winners are: " + ", ".join(tiedPlayerNames));
+                    }
+                }
+            }
+        }
+        return this.gameOver;
+    };
+
+    /**
      * Step 3 has various conditions for what should happen depending on which phase the card was drawn on.
      *
      * For a breakdown of what will be implemented in greater detail, see: https://github.com/grnt426/PowuhGred/issues/25
@@ -533,7 +679,7 @@ exports.Engine = function(comms, cities, plants){
 
     this.removePowerPlantFromRoundEnd = function(){
         if(this.currentStep != 3 && !this.step3Triggered){
-            var plant = this.futuresMarket.splice(3, 1);
+            var plant = this.futuresMarket.splice(3, 1)[0];
             this.plantCosts.push(plant.cost);
             this.auction.addNewAndReorder();
         }
@@ -584,6 +730,13 @@ exports.Engine = function(comms, cities, plants){
 			currentBidder:this.auction.currentBidder,
 			currentBidLeader:this.auction.currentBidLeader,
 			auctionRunning:this.auction.auctionRunning};
+
+        score.gameOver = this.gameOver;
+        score.winner = this.winner != undefined ? this.winner.displayName : undefined;
+        score.gameWinnerByMostPowered = this.gameWinnerByMostPowered;
+        score.gameWinnerByMoney = this.gameWinnerByMoney;
+        score.gameEndedByMostCities = this.gameEndedByMostCities;
+        score.gameEndedInTie = this.gameEndedInTie;
 
 		// Score is the current data
 		// Changes is an array of strings identifying what updated.

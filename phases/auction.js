@@ -230,12 +230,14 @@ exports.Auction = function(engine, comms){
      * Draws a new power plant from the market, and then reorders the market.
      */
     this.addNewAndReorder = function(){
-        var nextCost = this.engine.plantCosts.splice(0, 1);
-        var newPlant = this.engine.plants[nextCost];
         var unsortedPlants = this.engine.currentMarket.concat(this.engine.futuresMarket);
-        unsortedPlants = unsortedPlants.concat(newPlant);
+        if(this.engine.plantCosts.length != 0){
+            var nextCost = this.engine.plantCosts.splice(0, 1);
+            var newPlant = this.engine.plants[nextCost];
+            unsortedPlants = unsortedPlants.concat(newPlant);
+        }
         unsortedPlants.sort(function(plantA, plantB){if(plantA.cost == "step3") return 100; else return plantA.cost - plantB.cost});
-        if(unsortedPlants.length == 6){
+        if(unsortedPlants.length <= 6){
             this.engine.currentMarket = unsortedPlants;
         }
         else {
