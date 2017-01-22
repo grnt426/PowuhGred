@@ -75,6 +75,7 @@ exports.Power = function (engine, comms, powerPlants) {
 
                 if(this.playersPaid.length == this.engine.getPlayerCount()){
                     this.playersPaid = [];
+                    this.engine.removePowerPlantFromRoundEnd();
                     this.engine.nextAction();
                 }
             }

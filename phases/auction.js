@@ -235,13 +235,18 @@ exports.Auction = function(engine, comms){
         var unsortedPlants = this.engine.currentMarket.concat(this.engine.futuresMarket);
         unsortedPlants = unsortedPlants.concat(newPlant);
         unsortedPlants.sort(function(plantA, plantB){if(plantA.cost == "step3") return 100; else return plantA.cost - plantB.cost});
-        this.engine.currentMarket = unsortedPlants.splice(0, 4);
-        this.engine.futuresMarket = unsortedPlants.splice(0, 4);
-        if(this.engine.futuresMarket[3].cost == this.engine.STEP_THREE && this.haveNotShuffledAfterStep3){
+        if(unsortedPlants.length == 6){
+            this.engine.currentMarket = unsortedPlants;
+        }
+        else {
+            this.engine.currentMarket = unsortedPlants.splice(0, 4);
+            this.engine.futuresMarket = unsortedPlants.splice(0, 4);
+            if (this.engine.futuresMarket[3].cost == this.engine.STEP_THREE && this.haveNotShuffledAfterStep3) {
 
-            // As soon as Step 3 is revealed, we must shuffle the draw deck.
-            util.shuffle(this.engine.plantCosts);
-            this.haveNotShuffledAfterStep3 = false;
+                // As soon as Step 3 is revealed, we must shuffle the draw deck.
+                util.shuffle(this.engine.plantCosts);
+                this.haveNotShuffledAfterStep3 = false;
+            }
         }
     };
 

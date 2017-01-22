@@ -282,7 +282,7 @@ exports.Engine = function(comms, cities, plants){
 
         // The 13 cost (wind turbine) power plant is always on top of the deck
 		this.plantCosts.splice(0, 0, 13);
-        this.plantCosts.push(this.STEP_THREE);
+        this.plantCosts.splice(1, 0, this.STEP_THREE);
         this.plants[this.STEP_THREE] = this.STEP_THREE_CARD;
 	};
 
@@ -510,11 +510,7 @@ exports.Engine = function(comms, cities, plants){
     this.checkCityCounts = function(cities){
         while(cities >= this.getLowestCostPlant()){
             this.auction.removeLowestPlant(true);
-            if(this.futuresMarket[3].cost == this.STEP_THREE){
-                this.auction.removeLowestPlant(false);
-                this.futuresMarket.splice(3, 1);
-                this.auction.reorderForStep3();
-            }
+            this.checkForStep3();
         }
     };
 
@@ -526,6 +522,17 @@ exports.Engine = function(comms, cities, plants){
             }
         }
         return lowest;
+    };
+
+    this.removePowerPlantFromRoundEnd = function(){
+        if(this.currentStep != 3 && !this.step3Triggered){
+            var plant = this.futuresMarket.splice(3, 1);
+            this.plantCosts.push(plant.cost);
+            this.auction.addNewAndReorder();
+        }
+        else{
+            this.auction.removeLowestPlant(true);
+        }
     };
 
     /**
