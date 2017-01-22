@@ -118,7 +118,13 @@ var buildCities = function(){
 };
 
 var activatePlants = function(){
-    socket.emit(SOCKET_GAMEACTION, {uid:playerData.self.uid, cmd:"power", args:selectedPlants});
+    var payload = {};
+    for(var p in selectedPlants){
+        var plantCost = selectedPlants[p];
+        var toBurn = ppp[plantCost].selectedToBurn;
+        payload[plantCost] = toBurn == undefined ? {} : toBurn;
+    }
+    socket.emit(SOCKET_GAMEACTION, {uid:playerData.self.uid, cmd:"power", args:payload});
     deseletOwnPowerPlants();
 };
 

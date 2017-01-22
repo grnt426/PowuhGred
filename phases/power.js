@@ -55,7 +55,6 @@ exports.Power = function (engine, comms, powerPlants) {
                 var resourcesConsumed = util.resourceList(0, 0, 0, 0);
                 for(var p in powerPlants){
                     var plant = powerPlants[p];
-                    powerableCities += plant.activate();
                     if(plant.type == "both"){
                         resourcesConsumed['coal'] += plant.selectedToBurn['coal'];
                         resourcesConsumed['oil'] += plant.selectedToBurn['oil'];
@@ -63,6 +62,7 @@ exports.Power = function (engine, comms, powerPlants) {
                     else{
                         resourcesConsumed[plant.type] += plant.requires;
                     }
+                    powerableCities += plant.activate();
                 }
 
                 // Players only get money for the number of actual cities they own and can power
@@ -93,9 +93,11 @@ exports.Power = function (engine, comms, powerPlants) {
          */
         var plants = [];
         for(var d in data){
-            var cost = data[d];
-            if(this.powerPlants[cost] != undefined){
-                plants.push(this.powerPlants[cost]);
+            var cost = d;
+            var plant = this.powerPlants[cost];
+            if(plant != undefined){
+                plants.push(plant);
+                plant.selectedToBurn = data[d];
             }
             else{
                 return false;

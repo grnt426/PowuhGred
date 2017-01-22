@@ -208,7 +208,7 @@ function drawScorePanel(data, ctx, ppp) {
                         ppp[cost].curY + 55 - (20 * Math.floor(drawn / 3)),
                         10, 10);
 
-                    if(ppp[cost].selected && highlightSelected[type] > 0){
+                    if(ppp[cost].selected && highlightSelected[type] > 0 && currentActionState == "power"){
                         ctx.strokeStyle = GREEN;
                         ctx.lineWidth = 2;
                         ctx.strokeRect(ppp[cost].curX + 13 + (20 * (drawn % 3)),

@@ -102,7 +102,10 @@ exports.PowerPlant = function(cost, type, requires, powers){
     this.activate = function(){
         if(this.type != "free"){
             if(this.type == "both"){
-                // Remove whatever the user asked to burn
+                for(type in this.selectedToBurn){
+                    this.resources[type] -= this.selectedToBurn[type];
+                }
+                this.selectedToBurn = {};
             }
             else{
                 this.resources[this.type] -= this.requires;

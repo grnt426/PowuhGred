@@ -62,7 +62,7 @@ mapCanvas.addEventListener('click', function(event) {
                 console.log("Clicked on a power plant...");
 
                 // Now that we found a plant that matches the click location, only select this plant if we own it
-                // TODO: this is awful
+                // TODO: this super long line is awful
                 var ownedPlant = scorePanel.args.data.players[playerData.self.uid].plants[parseInt(p)];
                 if(ownedPlant != undefined){
                     console.log("Clicked on an owned power plant.");
@@ -80,9 +80,11 @@ mapCanvas.addEventListener('click', function(event) {
                         if(selectedIndex != 0) {
                             while(selectedIndex != 0){
                                 if(selectedIndex == 1 && ownedPlant.resources['coal'] >= ownedPlant.requires){
+                                    plant.selectedToBurn = {'coal': ownedPlant.requires, 'oil':0};
                                     break;
                                 }
                                 else if(selectedIndex == 2 && ownedPlant.resources['oil'] >= ownedPlant.requires){
+                                    plant.selectedToBurn = {'coal': 0, 'oil': ownedPlant.requires};
                                     break;
                                 }
 
@@ -97,10 +99,12 @@ mapCanvas.addEventListener('click', function(event) {
                                 else if(selectedIndex == 3 && (
                                         (ownedPlant.resources['coal'] > 0 && ownedPlant.resources['oil'] > 0 && ownedPlant.requires == 2) ||
                                         (ownedPlant.resources['coal'] > 1 && ownedPlant.resources['oil'] > 0 && ownedPlant.requires == 3))){
+                                    plant.selectedToBurn = {'coal': ownedPlant.requires - 1, 'oil': 1};
                                     break;
                                 }
                                 else if(selectedIndex == 4 && ownedPlant.resources['oil'] > 1 && ownedPlant.resources['coal'] > 0
                                         && ownedPlant.requires == 3){
+                                    plant.selectedToBurn = {'coal': 1, 'oil': 2};
                                     break;
                                 }
                                 selectedIndex = (selectedIndex + 1) % (ownedPlant.requires + 2);
@@ -112,9 +116,12 @@ mapCanvas.addEventListener('click', function(event) {
                             // or the player has no valid selectable options (completely insufficient resources).
                             // TODO: We can detect the later case if we checked all three states and got back to 0, and then alert the user their selection was invalid.
                             plant.selected = plant.selectionIndex != 0;
+                            selectedPlants.push(p);
                         }
                         else{
                             plant.selected = false;
+                            selectedPlants.splice(selectedPlants.indexOf(p), 1);
+                            plant.selectedToBurn = {};
                         }
                     }
                     else {
