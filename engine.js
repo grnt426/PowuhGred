@@ -412,7 +412,7 @@ exports.Engine = function(comms, cities, plants){
             // Check if Step2 should happen
             var triggerStep2 = false;
             for(var p in this.players){
-                if(this.players[p].cities.length >- 7){
+                if(this.players[p].cities.length >= 7){
                     triggerStep2 = true;
                     break;
                 }

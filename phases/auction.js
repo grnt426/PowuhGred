@@ -199,7 +199,13 @@ exports.Auction = function(engine, comms){
      * deck and reorders the market.
      */
     this.removeLowestPlant = function(){
-        this.engine.currentMarket.pop();
+        var lowestIndex = -1;
+        for(var p in this.engine.currentMarket){
+            if(lowestIndex == -1 || this.engine.currentMarket[p].cost < this.engine.currentMarket[lowestIndex].cost){
+                lowestIndex = p;
+            }
+        }
+        this.engine.currentMarket.splice(lowestIndex, 1);
         this.addNewAndReorder();
     };
 
