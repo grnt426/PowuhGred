@@ -119,7 +119,7 @@ exports.Market = function (engine, comms, powerPlants) {
      * amount is all that is added.
      */
     this.replenishResources = function(){
-        var rate = this.replenishRate[this.engine.getPlayerCount()][this.engine.getCurrentStep() - 1];
+        var rate = this.replenishRate[this.engine.getPlayerCount()][this.engine.getCurrentStep(this.engine.POWER) - 1];
         for(var type in rate){
             var realAmt = Math.min(rate[type], this.excessResources[type]);
             this.excessResources[type] -= realAmt;

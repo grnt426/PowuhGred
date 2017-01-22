@@ -18,7 +18,8 @@ exports.Engine = function(comms, cities, plants){
     this.STARTING_MONEY = 500;
 
     // The Step Three card constant, for simple comparison.
-    this.STEP_THREE = "Step3";
+    this.STEP_THREE = "step3";
+    this.STEP_THREE_CARD = {cost:this.STEP_THREE};
 
     // Action Enums
     this.START_GAME = "startGame";
@@ -154,6 +155,13 @@ exports.Engine = function(comms, cities, plants){
     this.currentStep = 1;
 
     /**
+     * This is used to indicate the Step 3 card has been drawn and triggered. However, not all of Step 3's conditions
+     * are immediately in play. Some phases operate differently depending on when Step 3 was drawn.
+     * @type {boolean}
+     */
+    this.step3Triggered = false;
+
+    /**
      * @returns {Player}
      */
     this.getCurrentPlayer = function(){
@@ -164,10 +172,21 @@ exports.Engine = function(comms, cities, plants){
      * The current Step the game is in.
      * 1 - The Step the game starts in, where players may not build on a city another player has already built in.
      * 2 - The step the game proceeds to once at least one player has 7 cities.
+     * @param {string} phase    The current phase the game is in. Used for special Step 3 logic.
      * @returns {number}
      */
-    this.getCurrentStep = function(){
-        return this.currentStep;
+    this.getCurrentStep = function(phase){
+        if(this.step3Triggered){
+            if(phase == "power" || phase == "build"){
+                return this.currentStep;
+            }
+            else{
+                return 3;
+            }
+        }
+        else {
+            return this.currentStep;
+        }
     };
 
     /**
@@ -262,8 +281,9 @@ exports.Engine = function(comms, cities, plants){
         util.shuffle(this.plantCosts);
 
         // The 13 cost (wind turbine) power plant is always on top of the deck
-		this.plantCosts.splice(0, 0, 13);
-		this.plantCosts.push(this.STEP_THREE);
+		this.plantCosts.splice(0, 0, this.STEP_THREE);
+		//this.plantCosts.push(this.STEP_THREE);
+        this.plants[this.STEP_THREE] = this.STEP_THREE_CARD;
 	};
 
 	/**
@@ -399,8 +419,10 @@ exports.Engine = function(comms, cities, plants){
 	};
 
 	this.nextAction = function(){
-		if(this.currentAction == this.START_AUCTION)
-			this.currentAction = this.BUY;
+		if(this.currentAction == this.START_AUCTION) {
+            this.checkForStep3();
+            this.currentAction = this.BUY;
+        }
 		else if(this.currentAction == this.BUY)
 			this.currentAction = this.BUILD;
 		else if(this.currentAction == this.BUILD) {
@@ -419,7 +441,7 @@ exports.Engine = function(comms, cities, plants){
             }
 
             if(triggerStep2){
-                this.auction.removeLowestPlant();
+                this.auction.removeLowestPlant(true);
 
                 // While very rare/bizarre, it is possible for players to progress to Step 3 before progressing to
                 // Step 2. If so, we don't want to permanently revert, so we check here just to make sure.
@@ -432,14 +454,22 @@ exports.Engine = function(comms, cities, plants){
                     this.comms.toAll("Two players can build in a city, and the game restocks at Step 2 rates.");
                     this.currentStep = 2;
                 }
-                this.checkForStep3();
             }
+
+            // This, it is OK this is not guarded by an else. Step 3 can immediately trigger after Step 2 happens (though,
+            // this is very unlikely to happen).
+            this.checkForStep3();
 
             this.currentAction = this.POWER;
         }
         else if(this.currentAction == this.POWER){
 
             this.market.replenishResources();
+
+
+            // Yes, we want to check for Step 3 **after** replenishing resources at the previous Step's amount. This
+            // is an explicit rule.
+            this.checkForStep3();
 
             // And move on to the Auction phase once more
             this.resolveTurnOrder();
@@ -457,7 +487,45 @@ exports.Engine = function(comms, cities, plants){
      * For a breakdown of what will be implemented in greater detail, see: https://github.com/grnt426/PowuhGred/issues/25
      */
     this.checkForStep3 = function(){
+        if(this.futuresMarket[3] == this.STEP_THREE_CARD){
+            this.futuresMarket.splice(3, 1);
+            util.shuffle(this.plantCosts);
+            this.auction.removeLowestPlant(false);
+            this.auction.reorderForStep3();
+            this.step3Triggered = true;
+        }
 
+        // Once triggered, Step 3 can be fully transitioned to the next time we check (which always happens on phase transitions).
+        else if(this.step3Triggered){
+            this.step3Triggered = false;
+            this.currentStep = 3;
+        }
+    };
+
+    /**
+     * Checks if the number of cities owned is greater than the lowest cost power plant. If so, removes the lowest cost
+     * power plant and redraws.
+     * @param cities
+     */
+    this.checkCityCounts = function(cities){
+        while(cities > this.getLowestCostPlant){
+            this.auction.removeLowestPlant(true);
+            if(this.futuresMarket[3].cost == this.STEP_THREE){
+                this.auction.removeLowestPlant(false);
+                this.futuresMarket.splice(3, 1);
+                this.auction.reorderForStep3();
+            }
+        }
+    };
+
+    this.getLowestCostPlant = function(){
+        var lowest = 999;
+        for(var p in this.currentMarket){
+            if(this.currentMarket[p].cost < lowest){
+                lowest = this.currentMarket[p].cost;
+            }
+        }
+        return lowest;
     };
 
     /**
@@ -476,6 +544,7 @@ exports.Engine = function(comms, cities, plants){
 		score.resources = this.market.resources;
         score.playersPaid = this.power.playersPaid;
         score.excessResources = this.market.excessResources;
+        score.currentStep = this.getCurrentStep(this.currentAction);
 
         // making a subset of player data, don't want whole object
         score.players = {};

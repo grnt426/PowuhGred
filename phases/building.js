@@ -55,6 +55,9 @@ exports.Building = function (engine, comms, cities) {
                 }
                 this.comms.toAll(currentPlayer.displayName + " bought " + data);
                 currentPlayer.money -= totalCost;
+
+                //this.engine.checkCityCounts(currentPlayer.cities.length);
+
                 engine.nextPlayer();
             }
         }
@@ -74,7 +77,7 @@ exports.Building = function (engine, comms, cities) {
     this.isValid = function(cities){
         var invalidCities = [];
         for(var i in cities){
-            if(!this.cities.isCityAvailableForPurchase(cities[i], this.engine.getCurrentPlayer(), this.engine.getCurrentStep())){
+            if(!this.cities.isCityAvailableForPurchase(cities[i], this.engine.getCurrentPlayer(), this.engine.getCurrentStep(this.engine.BUILD))){
                 invalidCities.push(cities[i]);
             }
         }

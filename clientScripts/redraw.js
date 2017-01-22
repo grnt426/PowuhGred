@@ -189,32 +189,34 @@ var redraw = function(scorePanel){
 	ctx.lineWidth = 1;
     ctx.font = "12px Arial";
     ctx.fillText("Actual Market", 794, 284);
-	ctx.strokeRect(794, 294, 4 * 120 + 7, 125);
+	ctx.strokeRect(794, 294, (currentStep == 3 ? 3 : 4) * 120 + 7, (currentStep == 3 ? 250 : 125));
+    var wrap = currentStep == 3 ? 3 : 4;
 	for(p in actualMarket){
 		plant = actualMarket[p];
 		plant.drawnPosition = count;
 		cost = plant.cost;
-		ctx.drawImage(plantImg, ppp[cost].x * pppWidth, ppp[cost].y * pppHeight,
-			pppWidth, pppHeight,
-				800 + count * 120, 300, pppWidth, pppHeight);
+		ctx.drawImage(plantImg, ppp[cost].x * pppWidth, ppp[cost].y * pppHeight, pppWidth, pppHeight,
+				800 + ((count % wrap) * 120), 300 + (125 * (currentStep == 3 && count > 2 ? 1 : 0)), pppWidth, pppHeight);
 		count += 1;
 	}
 
 	// Draw the future market
-	count = 0;
-	ctx.strokeStyle = PINK;
-    ctx.fillStyle = PINK;
-    ctx.font = "12px Arial";
-    ctx.fillText("Future Market", 794, 434);
-	ctx.strokeRect(794, 444, 4 * 120 + 7, 125);
-	for(p in futureMarket){
-		plant = futureMarket[p];
-		cost = plant.cost;
-		ctx.drawImage(plantImg, ppp[cost].x * pppWidth, ppp[cost].y * pppHeight,
-			pppWidth, pppHeight,
-				800 + count * 120, 450, pppWidth, pppHeight);
-		count += 1;
-	}
+    if(currentStep != 3) {
+        count = 0;
+        ctx.strokeStyle = PINK;
+        ctx.fillStyle = PINK;
+        ctx.font = "12px Arial";
+        ctx.fillText("Future Market", 794, 434);
+        ctx.strokeRect(794, 444, 4 * 120 + 7, 125);
+        for (p in futureMarket) {
+            plant = futureMarket[p];
+            cost = plant.cost;
+            ctx.drawImage(plantImg, ppp[cost].x * pppWidth, ppp[cost].y * pppHeight,
+                pppWidth, pppHeight,
+                800 + count * 120, 450, pppWidth, pppHeight);
+            count += 1;
+        }
+    }
 
 	// draws a selection box on a plant if it's selected (not selected = -1)
 	if(selectedPlant >= 0 || scorePanel.auction.auctionRunning){
@@ -350,5 +352,5 @@ function colorNameToColorCode(name){
 function getPhaseName(currentAction){
     var phaseNames = {"startGame": "Waiting for Players", "startAuction": "Start Auction", "bid": "Bidding", "buy": "Buy Resources",
         "build": "Build On Cities", "power": "Get Money!"};
-    return phaseNames[currentAction];
+    return phaseNames[currentAction] + " - Step " + currentStep;
 };

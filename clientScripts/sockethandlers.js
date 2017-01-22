@@ -38,6 +38,8 @@ socket.on(SOCKET_UPDATES, function(data){
         resources = newData.resources;
         actualMarket = newData.actualMarket;
         futureMarket = newData.futuresMarket;
+        currentStep = newData.currentStep;
+
 
         // Change the title of the browser window so the player knows it is their turn
         if(currentActionState != "startGame"

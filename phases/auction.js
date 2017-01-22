@@ -69,6 +69,13 @@ exports.Auction = function(engine, comms){
      */
 	this.auctionRunning = false;
 
+    /**
+     * This is used to indicate if the Step 3 card was drawn during the Auction phase, and already triggered a shuffle
+     * of the draw deck (while shuffling each time isn't that big of a deal, it is unnecessary).
+     * @type {boolean}
+     */
+    this.haveNotShuffledAfterStep3 = true;
+
 	// TODO Should a different order be used?
 	this.nextBidder = function(pass){
 
@@ -197,8 +204,10 @@ exports.Auction = function(engine, comms){
     /**
      * Removes the lowest cost power plant from the market, then adds a new plant from the
      * deck and reorders the market.
+     * @param {boolean} replaceLowest   If true, after removing the power plant, a new card is draw. Otherwise no new
+     *                                  card is drawn.
      */
-    this.removeLowestPlant = function(){
+    this.removeLowestPlant = function(replaceLowest){
         var lowestIndex = -1;
         for(var p in this.engine.currentMarket){
             if(lowestIndex == -1 || this.engine.currentMarket[p].cost < this.engine.currentMarket[lowestIndex].cost){
@@ -206,7 +215,15 @@ exports.Auction = function(engine, comms){
             }
         }
         this.engine.currentMarket.splice(lowestIndex, 1);
-        this.addNewAndReorder();
+        if(replaceLowest) {
+            this.addNewAndReorder();
+        }
+    };
+
+    this.reorderForStep3 = function(){
+        this.engine.currentMarket = this.engine.currentMarket.concat(this.engine.futuresMarket);
+        this.engine.currentMarket.sort(function(plantA, plantB){return plantA.cost - plantB.cost});
+        this.engine.futuresMarket = [];
     };
 
     /**
@@ -217,9 +234,15 @@ exports.Auction = function(engine, comms){
         var newPlant = this.engine.plants[nextCost];
         var unsortedPlants = this.engine.currentMarket.concat(this.engine.futuresMarket);
         unsortedPlants = unsortedPlants.concat(newPlant);
-        unsortedPlants.sort(function(plantA, plantB){if(plantA == "Step3") return 100; else return plantA.cost - plantB.cost});
+        unsortedPlants.sort(function(plantA, plantB){if(plantA.cost == "step3") return 100; else return plantA.cost - plantB.cost});
         this.engine.currentMarket = unsortedPlants.splice(0, 4);
         this.engine.futuresMarket = unsortedPlants.splice(0, 4);
+        if(this.engine.futuresMarket[3].cost == this.engine.STEP_THREE && this.haveNotShuffledAfterStep3){
+
+            // As soon as Step 3 is revealed, we must shuffle the draw deck.
+            util.shuffle(this.engine.plantCosts);
+            this.haveNotShuffledAfterStep3 = false;
+        }
     };
 
     /**
