@@ -3,7 +3,8 @@ var playerjs = require("./includes/Player.js"),
 	util = require("./util.js"),
     marketjs = require("./phases/market.js"),
     buildingjs = require("./phases/building.js"),
-    powerjs = require("./phases/power.js");
+    powerjs = require("./phases/power.js"),
+    regionsjs = require("./regions.js");
 
 /**
  * Primary entry point for the game, which manages game creation, phase transition, and action verification.
@@ -43,7 +44,7 @@ exports.Engine = function(comms, cities, plants){
 	 * list of names of active regions for this game
 	 * @type {String[]}
 	 */
-	this.activeRegions = ["cyan","red"];  // TODO: do this for real
+	this.activeRegions = [];
 
     /**
      * @type {PowerPlant[]}
@@ -279,7 +280,7 @@ exports.Engine = function(comms, cities, plants){
 			return;
 		}
 
-        this.cities.onlyUseTheseRegions(this.activeRegions);
+        this.initRegions();
 		this.changes.push(this.START_GAME);
 		this.gameStarted = true;
 		this.market.setupStartingResources();
@@ -298,6 +299,15 @@ exports.Engine = function(comms, cities, plants){
         player.color = this.colorsAvailable.pop();
 	};
 
+    /**
+	 * At the start of the game, randomly pick a valid set regions to use
+	 */
+    this.initRegions = function() {
+        this.activeRegions = regionsjs.selectRegions(this.getPlayerCount());
+        this.comms.toAll("Using regions " + this.activeRegions.join(", ") + " for this game.");
+        this.cities.onlyUseTheseRegions(this.activeRegions);
+    };
+    
 	/**
 	 * At the start of the game, player order is random.
 	 */

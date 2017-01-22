@@ -34,6 +34,7 @@ describe('Engine', function () {
             engine.market.setupStartingResources = sinon.spy();
             engine.randomizePlayerOrder = sinon.spy();
             engine.setupAuction = sinon.spy();
+            engine.initRegions = sinon.spy();
 
             engine.startGame();
 
