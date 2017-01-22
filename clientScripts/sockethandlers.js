@@ -19,11 +19,6 @@ socket.on(SOCKET_DEFINECITIES, function(data){
 	$.each(data, function(key, value){
 		citiesDef[key] = value;
 	});
-
-	// load the background image
-	bgImg.onload = function(){
-	//	redraw(scorePanel);
-	};
 });
 
 // NOTSURE: what the data format for input is

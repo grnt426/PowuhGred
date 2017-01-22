@@ -1,3 +1,5 @@
+/* global $ */
+
 /**
  * The below comes from scorepanel.js, which is t_x + (p_x * count). For the first iteration (count 1), this will be
  * 1300 + (95 * 1), or 1395.
@@ -151,8 +153,22 @@ canvas.addEventListener('mouseup', function(event) {
     }
 
     // Otherwise, check if a city was clicked
-    x = internalX(event.pageX - 8);
-    y = internalY(event.pageY - 8);
+    checkCityClick(event);
+    
+    redraw(scorePanel);
+},false);
+
+var deselectOwnPowerPlants = function(){
+    for(p in ppp){
+        ppp[p].selected = false;
+    }
+    selectedOwnedPlant = undefined;
+    selectedPlants = [];
+};
+
+var checkCityClick = function(event) {
+    var x = internalX(event.pageX - 8);
+    var y = internalY(event.pageY - 8);
     $.each(citiesDef,function(key,city) {
         if(sqrDist(x,city.x,y,city.y)<500) {
             selectedCity = city;
@@ -166,13 +182,4 @@ canvas.addEventListener('mouseup', function(event) {
             }
         }
     });
-    redraw(scorePanel);
-},false);
-
-function deselectOwnPowerPlants(){
-    for(p in ppp){
-        ppp[p].selected = false;
-    }
-    selectedOwnedPlant = undefined;
-    selectedPlants = [];
-}
+};
