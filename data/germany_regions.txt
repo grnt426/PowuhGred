@@ -1,0 +1,9 @@
+cyan brown
+cyan yellow
+cyan red
+brown yellow
+yellow red
+yellow blue
+yellow purple
+red blue
+blue purple
