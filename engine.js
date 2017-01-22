@@ -342,7 +342,7 @@ exports.Engine = function(comms, cities, plants){
         this.plantCosts.splice(0, this.removeFaceDownPlants[this.getPlayerCount() - 1]);
 
         // The 13 cost (wind turbine) power plant is always on top of the deck
-		this.plantCosts.splice(0, 0, 13);
+        this.plantCosts.splice(0, 0, 13);
         this.plantCosts.push(this.STEP_THREE);
         this.plants[this.STEP_THREE] = this.STEP_THREE_CARD;
 	};
@@ -672,7 +672,7 @@ exports.Engine = function(comms, cities, plants){
 
     this.removePowerPlantFromRoundEnd = function(){
         if(this.currentStep != 3 && !this.step3Triggered){
-            var plant = this.futuresMarket.splice(3, 1);
+            var plant = this.futuresMarket.splice(3, 1)[0];
             this.plantCosts.push(plant.cost);
             this.auction.addNewAndReorder();
         }
