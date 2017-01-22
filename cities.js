@@ -17,6 +17,18 @@ exports.Cities = function(){
 	this.cities = {};
 	
 	/**
+	 * String (name of city) -> City, which has been deactivated due to being part of a region that's not used by the current game
+	 * @type {Object<string, City>}
+	 */
+	this.deactivatedCities = {};
+	
+	/**
+	 * list of names of active regions for this game
+	 * @type {String[]}
+	 */
+	this.activeRegions = [];
+	
+	/**
 	 * String (name of city A) + String (name of city B) -> Distance
 	 * @type {Object<string, Object<string, number>>}
 	 */
@@ -169,24 +181,24 @@ exports.Cities = function(){
 
     /**
      * Computes the total cost to just build the cities, but not its path from/to anywhere.
-     * @param cities    The cities to purchase
+     * @param {string[]} cityNames    The cities to purchase
      * @returns {number}    The cost to build.
      */
-    this.getTotalCostToBuild = function(cities){
+    this.getTotalCostToBuild = function(cityNames){
         var cost = 0;
-        for(var i in cities){
-            cost += this.costToBuildOnCity(cities[i]);
+        for(var name of cityNames){
+            cost += this.costToBuildOnCity(name);
         }
         return cost;
     };
 
-    this.convertToCityObjects = function(cities){
-        if(!(cities instanceof Array)){
-            return this.cities[cities.toLowerCase()];
+    this.convertToCityObjects = function(cityNames){
+        if(!(cityNames instanceof Array)){
+            return this.cities[cityNames.toLowerCase()];
         }
         var citiesO = [];
-        for(var i in cities){
-            citiesO.push(this.cities[cities[i].toLowerCase()]);
+        for(var name of cityNames){
+            citiesO.push(this.cities[name.toLowerCase()]);
         }
         return citiesO;
     };
@@ -234,26 +246,64 @@ exports.Cities = function(){
     };
 
     /**
-     * @param city  Name of city to buy.
+     * @param {string} cityName  Name of city to buy.
      * @param player    UID of Player
      */
-    this.purchaseCity = function(city, player){
-        this.cities[city.toLowerCase()].buildForPlayer(player);
+    this.purchaseCity = function(cityName, player){
+        this.cities[cityName.toLowerCase()].buildForPlayer(player);
     };
 
     /**
-     * @param {string} city  Name of city to check
-     * @returns {boolean}
-     */
-    this.isCityAvailableForPurchase = function(city, playerId, step){
-        return this.cities[city.toLowerCase()].canBuild(playerId, step);
-    };
-
-    /**
-     * @param city  Name of city to check
+     * @param {string} cityName  Name of city to check
      * @returns {number}    Cost to build there.
      */
-    this.costToBuildOnCity = function(city){
-        return this.cities[city.toLowerCase()].costToBuild();
+    this.costToBuildOnCity = function(cityName){
+        return this.cities[cityName.toLowerCase()].costToBuild();
+    }
+    
+    /**
+     * culls cities not included in this game
+     * @param {string[]} names of active regions
+     */
+    this.onlyUseTheseRegions = function(activeRegions){
+        this.activeRegions = activeRegions;  // TODO: this should be picked (and validated against # players) before starting the game, hard coding for now
+        for(var name in this.cities) {
+            if(!this.activeRegions.includes(this.cities[name].region)) {
+                this.deactivateCity(name);
+            }
+        }
+    }
+    
+    /**
+     * deactives a single city, moving it to this.deactivatedCities and deleting connections to it
+     * @param {string} cityName name of the city to deactivate
+     */
+    this.deactivateCity = function(cityName) {
+        this.deactivatedCities[cityName] = this.cities[cityName];
+        for(var connCityName in this.cities[cityName].connections) {
+            delete this.cities[connCityName].connections[cityName];
+        }
+        delete this.cities[cityName];
+    }
+    
+    /**
+     * deactives a single city, moving it to this.deactivatedCities and deleting connections to it
+     * @param {string} cityName name of the city to check
+     * @param {string[]} cityError error message if not active
+     * @returns {boolean} true if city is active, false otherwise
+     */
+    this.isCityActive = function(cityName, cityErrors) {
+        var city = this.cities[cityName];
+        if(city === undefined) {
+            city = this.deactivatedCities[cityName];
+            if(city === undefined) {
+                cityErrors.push("Can't build at " + cityName + ", that city does not exist.")
+            }
+            else {
+                cityErrors.push("Can't build at " + cityName + ", the " + city.region + " region is not enabled for this game.")
+            }
+            return false;
+        }
+        return true;
     }
 };

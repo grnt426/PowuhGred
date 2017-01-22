@@ -154,7 +154,7 @@ mapCanvas.addEventListener('click', function(event) {
     // Deselect if selected
     // TODO: this is *really* bad, but it works for now
     else{
-        deseletOwnPowerPlants();
+        deselectOwnPowerPlants();
     }
 
     // Otherwise, check if a city was clicked
@@ -176,7 +176,7 @@ mapCanvas.addEventListener('click', function(event) {
     redraw(scorePanel);
 },false);
 
-function deseletOwnPowerPlants(){
+function deselectOwnPowerPlants(){
     for(p in ppp){
         ppp[p].selected = false;
     }

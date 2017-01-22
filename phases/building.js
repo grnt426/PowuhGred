@@ -34,16 +34,17 @@ exports.Building = function (engine, comms, cities) {
             this.engine.nextPlayer();
         }
         else{
-
+            var cityErrors = [];
+            var validPurchase = this.isValid(data, cityErrors);
+            
+            if(validPurchase !== true){
+                this.comms.toCurrent(cityErrors[0]);
+                return;
+            }
+            
             var totalCost = this.computeCost(data);
             var currentPlayer = this.engine.getCurrentPlayer();
-
-            var validPurchase = this.isValid(data);
-            if(validPurchase !== true){
-                this.comms.toCurrent((validPurchase.length == 1 ? "This city is " : " These cities are ")
-                        + " not available for purchase: " + validPurchase);
-            }
-            else if(totalCost > currentPlayer.money){
+            if(totalCost > currentPlayer.money){
                 this.comms.toCurrent("The selected set of cities cost $" + totalCost + ", and you only have $" + currentPlayer.money);
             }
 
@@ -69,16 +70,32 @@ exports.Building = function (engine, comms, cities) {
     /**
      * Determines if the list of cities are all purchasable for that player.
      * @param {string[]} cities    The list of cities to check.
-     * @returns {boolean|string[]}  True if all the cities are purchable, otherwise a list of the cities by name which
-     *                              aren't valid are returned.
+     * @param {string[]} errors
+     * @returns {boolean}  True if all the cities are purchable, false if not.
      */
-    this.isValid = function(cities){
-        var invalidCities = [];
-        for(var i in cities){
-            if(!this.cities.isCityAvailableForPurchase(cities[i], this.engine.getCurrentPlayer(), this.engine.getCurrentStep(this.engine.BUILD))){
-                invalidCities.push(cities[i]);
+    this.isValid = function(cityNames, cityErrors){
+        var city;
+        var playerId = this.engine.getCurrentPlayer();
+        var currentStep = this.engine.getCurrentStep(this.engine.BUILD);
+        for(var name of cityNames){
+            
+            if(!this.cities.isCityActive(name, cityErrors)) {
+                return false;
+            }
+            
+            city = this.cities.convertToCityObjects(name);
+            
+            if(city.isPlayerHere(playerId)){
+                cityErrors.push("Can't build at " + name + ", you have already have a house there.")
+                return false;
+            }
+            
+            if(!city.isThereFreeSpace(playerId, currentStep)){
+                cityErrors.push("Can't build at " + name + ", it already has the maximum number of players for the current Step.")
+                return false;
             }
         }
-        return invalidCities.length == 0 ? true : invalidCities;
+        
+        return true;
     };
 };

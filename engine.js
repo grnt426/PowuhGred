@@ -40,6 +40,12 @@ exports.Engine = function(comms, cities, plants){
 	this.cities = cities;
 
     /**
+	 * list of names of active regions for this game
+	 * @type {String[]}
+	 */
+	this.activeRegions = ["cyan","red"];  // TODO: do this for real
+
+    /**
      * @type {PowerPlant[]}
      */
 	this.plants = plants;
@@ -215,6 +221,7 @@ exports.Engine = function(comms, cities, plants){
 			return;
 		}
 
+        this.cities.onlyUseTheseRegions(this.activeRegions);
 		this.changes.push(this.START_GAME);
 		this.gameStarted = true;
 		this.market.setupStartingResources();
