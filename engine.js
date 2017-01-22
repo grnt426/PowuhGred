@@ -432,7 +432,7 @@ exports.Engine = function(comms, cities, plants){
                     this.comms.toAll("Two players can build in a city, and the game restocks at Step 2 rates.");
                     this.currentStep = 2;
                 }
-
+                this.checkForStep3();
             }
 
             this.currentAction = this.POWER;
@@ -452,6 +452,15 @@ exports.Engine = function(comms, cities, plants){
 	};
 
     /**
+     * Step 3 has various conditions for what should happen depending on which phase the card was drawn on.
+     *
+     * For a breakdown of what will be implemented in greater detail, see: https://github.com/grnt426/PowuhGred/issues/25
+     */
+    this.checkForStep3 = function(){
+
+    };
+
+    /**
      * Bundles up all relevant game state to be sent to all players. Each broadcast is numbered with a strictly
      * monotonically increasing value, and loosely notes what values were changed.
      */
@@ -466,6 +475,7 @@ exports.Engine = function(comms, cities, plants){
 		score.currentAction = this.currentAction;
 		score.resources = this.market.resources;
         score.playersPaid = this.power.playersPaid;
+        score.excessResources = this.market.excessResources;
 
         // making a subset of player data, don't want whole object
         score.players = {};

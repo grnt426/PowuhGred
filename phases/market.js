@@ -142,7 +142,7 @@ exports.Market = function (engine, comms, powerPlants) {
      */
     this.returnUsedResources = function(resources){
         for(var type in resources){
-            this.resources[type] += resources[type];
+            this.excessResources[type] += resources[type];
         }
     };
 

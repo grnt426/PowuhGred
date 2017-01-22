@@ -102,6 +102,20 @@ var redraw = function(scorePanel){
 		}
 	});
 
+    // Draw excess supply
+    var typeStartX = {'coal':725, 'oil':705, 'garbage':685, 'uranium':665};
+    for(type in scorePanel.excessResources){
+        var amt = scorePanel.excessResources[type];
+        var startX = typeStartX[type];
+        ctx.fillStyle = colorNameToColorCode(type);
+        var amtDrawn = 0;
+        while(amt > 0){
+            ctx.fillRect(startX, 930 - (15 * amtDrawn), 10, 10);
+            amtDrawn += 1;
+            amt -= 1;
+        }
+    }
+
     // draw owned cities
     for(var p in scorePanel.players){
         var player = scorePanel.players[p];
