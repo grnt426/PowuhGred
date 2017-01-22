@@ -55,9 +55,7 @@ exports.Building = function (engine, comms, cities) {
                 }
                 this.comms.toAll(currentPlayer.displayName + " bought " + data);
                 currentPlayer.money -= totalCost;
-
-                //this.engine.checkCityCounts(currentPlayer.cities.length);
-
+                this.engine.checkCityCounts(currentPlayer.cities.length);
                 engine.nextPlayer();
             }
         }

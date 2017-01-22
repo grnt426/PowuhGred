@@ -281,8 +281,8 @@ exports.Engine = function(comms, cities, plants){
         util.shuffle(this.plantCosts);
 
         // The 13 cost (wind turbine) power plant is always on top of the deck
-		this.plantCosts.splice(0, 0, this.STEP_THREE);
-		//this.plantCosts.push(this.STEP_THREE);
+		this.plantCosts.splice(0, 0, 13);
+        this.plantCosts.push(this.STEP_THREE);
         this.plants[this.STEP_THREE] = this.STEP_THREE_CARD;
 	};
 
@@ -508,7 +508,7 @@ exports.Engine = function(comms, cities, plants){
      * @param cities
      */
     this.checkCityCounts = function(cities){
-        while(cities > this.getLowestCostPlant){
+        while(cities >= this.getLowestCostPlant()){
             this.auction.removeLowestPlant(true);
             if(this.futuresMarket[3].cost == this.STEP_THREE){
                 this.auction.removeLowestPlant(false);
