@@ -22,7 +22,7 @@ socket.on(SOCKET_DEFINECITIES, function(data){
 
 	// load the background image
 	bgImg.onload = function(){
-		redraw(scorePanel);
+	//	redraw(scorePanel);
 	};
 });
 

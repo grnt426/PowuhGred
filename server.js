@@ -19,7 +19,7 @@ app.get("/clientScripts/auction.js", function(req, res) { res.sendFile(__dirname
 app.get("/clientScripts/buttons.js", function(req, res) { res.sendFile(__dirname + '/clientScripts/buttons.js'); });
 app.get("/clientScripts/chat.js", function(req, res) { res.sendFile(__dirname + '/clientScripts/chat.js'); });
 app.get("/clientScripts/fuel.js", function(req, res) { res.sendFile(__dirname + '/clientScripts/fuel.js'); });
-app.get("/clientScripts/map.js", function(req, res) { res.sendFile(__dirname + '/clientScripts/map.js'); });
+app.get("/clientScripts/clickHandler.js", function(req, res) { res.sendFile(__dirname + '/clientScripts/clickHandler.js'); });
 app.get("/clientScripts/redraw.js", function(req, res) { res.sendFile(__dirname + '/clientScripts/redraw.js'); });
 app.get("/clientScripts/sockethandlers.js", function(req, res) { res.sendFile(__dirname + '/clientScripts/sockethandlers.js'); });
 app.get("/clientScripts/scorepanel.js", function(req, res) { res.sendFile(__dirname + '/clientScripts/scorepanel.js'); });

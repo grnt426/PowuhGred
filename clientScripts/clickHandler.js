@@ -1,10 +1,3 @@
-var bgImg = new Image();
-bgImg.src = "./data/germany.jpg";
-
-// mapCanvas is map image area
-var mapCanvas = document.getElementById("mapCanvas");
-var ctx = mapCanvas.getContext("2d");           // NOTSURE: what is context?
-
 /**
  * The below comes from scorepanel.js, which is t_x + (p_x * count). For the first iteration (count 1), this will be
  * 1300 + (95 * 1), or 1395.
@@ -21,7 +14,7 @@ var internalY = function (y) { return (y + 96) / 1.1; };
 var sqrDist = function(x1,x2,y1,y2) { return Math.pow(x1-x2,2)+Math.pow(y1-y2,2) };
 
 // Listen for clicks
-mapCanvas.addEventListener('click', function(event) {
+canvas.addEventListener('mouseup', function(event) {
     var x = event.pageX - 8;
     var y = event.pageY - 8;
 
