@@ -41,6 +41,8 @@ exports.Market = function (engine, comms, powerPlants) {
     /**
      * The rate of replenishment by player, step, type.
      *
+     * NOTE: Steps are one-indexed, but the array is zero-indexed!
+     *
      * TODO: This should be read from a data file along with the map.
      * @type {Object}
      */

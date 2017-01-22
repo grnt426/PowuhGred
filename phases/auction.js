@@ -81,7 +81,7 @@ exports.Auction = function(engine, comms){
 			player.awardPlant(this.engine.plants[this.currentBidChoice], this.currentBid);
             this.comms.toAll(player.displayName + " won power plant " + this.engine.plants[this.currentBidChoice].cost
                     + " for $" + this.currentBid);
-			this.updateMarket();
+			this.removeAuctionedPlant();
 			this.cleanAuctionState();
 		}
         else if(pass){
@@ -179,8 +179,10 @@ exports.Auction = function(engine, comms){
 		this.nextBidder(false);
 	};
 
-	// TODO: Check for Step 3 card (and handle step 2 and 3 specifics).
-	this.updateMarket = function(){
+    /**
+     * Removes the power plant currently up for auction, then draws a new power plant, and reorders the market.
+     */
+	this.removeAuctionedPlant = function(){
 		var index = 0;
 		for(var plant in this.engine.currentMarket){
 			if(this.engine.currentMarket[plant].cost == this.currentBidChoice){
@@ -189,14 +191,30 @@ exports.Auction = function(engine, comms){
 			index += 1;
 		}
 		this.engine.currentMarket.splice(index, 1);
-        var nextCost = this.engine.plantCosts.splice(0, 1);
-		var newPlant = this.engine.plants[nextCost];
-		var unsortedPlants = this.engine.currentMarket.concat(this.engine.futuresMarket);
-		unsortedPlants = unsortedPlants.concat(newPlant);
-		unsortedPlants.sort(function(plantA, plantB){if(plantA == "Step3") return 100; else return plantA.cost - plantB.cost});
-		this.engine.currentMarket = unsortedPlants.splice(0, 4);
-		this.engine.futuresMarket = unsortedPlants.splice(0, 4);
+        this.addNewAndReorder();
 	};
+
+    /**
+     * Removes the lowest cost power plant from the market, then adds a new plant from the
+     * deck and reorders the market.
+     */
+    this.removeLowestPlant = function(){
+        this.engine.currentMarket.pop();
+        this.addNewAndReorder();
+    };
+
+    /**
+     * Draws a new power plant from the market, and then reorders the market.
+     */
+    this.addNewAndReorder = function(){
+        var nextCost = this.engine.plantCosts.splice(0, 1);
+        var newPlant = this.engine.plants[nextCost];
+        var unsortedPlants = this.engine.currentMarket.concat(this.engine.futuresMarket);
+        unsortedPlants = unsortedPlants.concat(newPlant);
+        unsortedPlants.sort(function(plantA, plantB){if(plantA == "Step3") return 100; else return plantA.cost - plantB.cost});
+        this.engine.currentMarket = unsortedPlants.splice(0, 4);
+        this.engine.futuresMarket = unsortedPlants.splice(0, 4);
+    };
 
     /**
      * Prepares for another round of auctions within the same phase.

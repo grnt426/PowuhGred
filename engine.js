@@ -15,7 +15,7 @@ var playerjs = require("./includes/Player.js"),
  */
 exports.Engine = function(comms, cities, plants){
 
-    this.STARTING_MONEY = 50;
+    this.STARTING_MONEY = 500;
 
     // The Step Three card constant, for simple comparison.
     this.STEP_THREE = "Step3";
@@ -408,6 +408,32 @@ exports.Engine = function(comms, cities, plants){
             // TODO: Check if game is over
             // YES, this is performed AFTER the build phase BEFORE the power phase.
             // See pg. 7, line 1
+
+            // Check if Step2 should happen
+            var triggerStep2 = false;
+            for(var p in this.players){
+                if(this.players[p].cities.length >- 7){
+                    triggerStep2 = true;
+                    break;
+                }
+            }
+
+            if(triggerStep2){
+                this.auction.removeLowestPlant();
+
+                // While very rare/bizarre, it is possible for players to progress to Step 3 before progressing to
+                // Step 2. If so, we don't want to permanently revert, so we check here just to make sure.
+                if(this.currentStep == 3){
+                    this.comms.toAll("Step 2 triggered, but the game is already in Step 3.");
+                    this.comms.toAll("Only the lowest cost power plant is removed, and the game stays in Step 3");
+                }
+                else{
+                    this.comms.toAll("The game is now in Step 2!");
+                    this.comms.toAll("Two players can build in a city, and the game restocks at Step 2 rates.");
+                    this.currentStep = 2;
+                }
+
+            }
 
             this.currentAction = this.POWER;
         }

@@ -150,7 +150,7 @@ describe('Phase/auction', function() {
         });
     });
 
-    describe('#updateMarket()', function () {
+    describe('#removeAuctionedPlant()', function () {
 
         it('With no power plants, should return 0', function () {
 
