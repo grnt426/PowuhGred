@@ -51,10 +51,10 @@ exports.Market = function (engine, comms, powerPlants) {
         // 1 is here only to enable easy testing with a single player. It is not a real rate
         1:[util.resourceList(3, 2, 1, 1), util.resourceList(4, 2, 2, 1), util.resourceList(3, 4, 3, 1)],
         2:[util.resourceList(3, 2, 1, 1), util.resourceList(4, 2, 2, 1), util.resourceList(3, 4, 3, 1)],
-        3:[],
-        4:[],
-        5:[],
-        6:[]
+        3:[util.resourceList(4, 2, 1, 1), util.resourceList(5, 3, 2, 1), util.resourceList(3, 4, 3, 1)],
+        4:[util.resourceList(5, 3, 2, 1), util.resourceList(6, 4, 3, 2), util.resourceList(4, 5, 4, 2)],
+        5:[util.resourceList(5, 4, 3, 2), util.resourceList(7, 5, 3, 2), util.resourceList(5, 6, 5, 2)],
+        6:[util.resourceList(7, 5, 3, 2), util.resourceList(9, 6, 5, 3), util.resourceList(6, 7, 6, 3)]
     };
 
     /**
