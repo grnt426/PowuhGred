@@ -10,15 +10,14 @@ var outputDisplays = {
 // This function used to add to output of chat panel in game
 var log = function(str, output) {
     console.log(output + " => " + str);
-    var output = outputDisplays[output];
-    output.history.push(str);
-    if(output.history.length > 15)
-        output.history.splice(0, 1);
-    output.text = output.header;
-    for(var line in output.history){
-        output.text += output.history[line] + "\n";
+    if(output == "chat"){
+        var prev = $('#chatOutputBox').html();
+        $('#chatOutputBox').html(str + "<br/>" + prev );
     }
-    redraw(scorePanel);
+    else if(output == "console"){
+        var prev = $('#consoleOutputBox').html();
+        $('#consoleOutputBox').html(str + "<br/>" + prev );
+    }
 };
 
 var SOCKET_SENDCHAT = 'sendchat';  // client -> server

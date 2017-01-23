@@ -206,19 +206,6 @@ var redraw = function(scorePanel){
         }
     }
 
-	// console output
-	ctx.fillStyle = BLACK;
-	ctx.font = "10px Arial";
-	var txt = outputDisplays[CHAT_O].text.split("\n");
-	$.each(txt, function(index, chunk){
-		ctx.fillText(chunk, 800, 650 + 15 * index);
-	});
-
-	txt = outputDisplays[CONSOLE_O].text.split("\n");
-	$.each(txt, function(index, chunk){
-		ctx.fillText(chunk, 1200, 650 + 15 * index);
-	});
-
 	// Draw the player's power plants
 	var count = 0;
 	for(var p in playerData.self.ownedPlants){

@@ -60,7 +60,7 @@ io.sockets.on(comms.SOCKET_CONNECTION, function(socket) {
 		if(data[0] == '/'){
 			resolveCommand(socket, data);
 		}
-		else{
+		else if(data.trim().length != 0){
 			console.info("Chat message: " + data);
 			comms.toAllFrom(engine.reverseLookUp[socket.uid], data);
 		}
