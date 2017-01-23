@@ -227,6 +227,12 @@ exports.Engine = function(comms, cities, plants){
     this.winner = undefined;
 
     /**
+     * Regions not used.
+     * @type {Array}
+     */
+    this.inactiveRegions = [];
+
+    /**
      * @returns {Player}
      */
     this.getCurrentPlayer = function(){
@@ -303,7 +309,9 @@ exports.Engine = function(comms, cities, plants){
 	 * At the start of the game, randomly pick a valid set regions to use
 	 */
     this.initRegions = function() {
-        this.activeRegions = regionsjs.selectRegions(this.getPlayerCount());
+        var givenRegions = regionsjs.selectRegions(this.getPlayerCount());
+        this.activeRegions = givenRegions[0];
+        this.inactiveRegions = givenRegions[1];
         this.comms.toAll("Using regions " + this.activeRegions.join(", ") + " for this game.");
         this.cities.onlyUseTheseRegions(this.activeRegions);
     };
@@ -715,6 +723,7 @@ exports.Engine = function(comms, cities, plants){
         score.playersPaid = this.power.playersPaid;
         score.excessResources = this.market.excessResources;
         score.currentStep = this.getCurrentStep(this.currentAction);
+        score.inactiveRegions = this.inactiveRegions;
 
         // making a subset of player data, don't want whole object
         score.players = {};

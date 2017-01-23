@@ -48,16 +48,26 @@ var redraw = function(scorePanel){
 		ctx.strokeStyle = GRAY;
 		ctx.fillStyle = WHITE;
 		ctx.lineWidth = 2;
+        var x = externalX(city.x);
+        var y = externalY(city.y);
 		if(DEBUG){
 			ctx.beginPath();
-			var x = externalX(city.x);
-			var y = externalY(city.y);
 			ctx.arc(x, y, 20, 0, 360, false);
 			ctx.stroke();
 
 			ctx.font = "10px Arial";
 			ctx.fillText(city.name.toUpperCase(), x, y);
 		}
+
+        // Gray out a city if it is in an inactive region
+        if(scorePanel.inactiveRegions.indexOf(city.region) != -1){
+            ctx.fillStyle = GRAY;
+            ctx.globalAlpha = 0.6;
+            ctx.beginPath();
+            ctx.arc(x, y, 20, 0, 360, false);
+            ctx.fill();
+            ctx.globalAlpha = 1.0;
+        }
 	});
 
 	// draw internal resource grid

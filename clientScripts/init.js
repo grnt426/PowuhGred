@@ -1,4 +1,4 @@
-var DEBUG = true;
+var DEBUG = false;
 
 // canvas is the game area we can draw to
 var canvas = document.getElementById("canvas");

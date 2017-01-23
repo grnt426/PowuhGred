@@ -2,13 +2,19 @@
  * randomizes contiguous regions based on number of players
  * @param {number} numPlayers number of people playing
  * @param {string} filename, defaults to "data/germany_regions.txt"
- * @returns {string[]} region names
+ * @returns {string[],string[]} region names. First index is selected, second index is unselected.
  */
 exports.selectRegions = function(numPlayers, filename){
     if (!filename) filename = "data/germany_regions.txt";
-    var regions = {}, howMany;
+    var regions = {};
     this.importRegions(filename, regions);
-    return this.randomSelection(this.howManyRegions(numPlayers), regions);
+    var selected = this.randomSelection(this.howManyRegions(numPlayers), regions);
+    var unselected = [];
+    for(var name in regions){
+        if(selected.indexOf(name) == -1)
+            unselected.push(name);
+    }
+    return [selected, unselected];
 };
 
 /**
@@ -23,7 +29,7 @@ exports.importRegions = function(filename, regions) {
 	for(var i in data){
 		args = data[i].split(' ');
 		startName = args[0];
-		endName = args[1];
+		endName = args[1].trim();
 		
 		this.addConnection(startName, endName, regions);
 	}
@@ -60,11 +66,11 @@ exports.howManyRegions = function(numPlayers) {
     if(numPlayers == 5) { return 5; }
     if(numPlayers == 6) { return 5; }
     return 3; //just for solo debugging
-}
+};
 
 /**
  * reads region connections from a file
- * @param {string} num number of regions to select
+ * @param {number} num number of regions to select
  * @param {Object<Object>} regions region[regionName].connections = [list of region names]
  * @returns {string[]} list of region names
  */
@@ -93,7 +99,7 @@ exports.randomSelection = function(num, regions) {
     }
     
     return selectedRegions;
-}
+};
 
 /**
  * check if a selection of regions is connected
@@ -111,7 +117,7 @@ exports.isSelectionValid = function(selectedRegions, regions) {
         if(!visited.includes(regionName)) { return false; }
     }
     return true;
-}
+};
 
 /**
  * depth first search marking visited nodes to check for connectedness
@@ -128,4 +134,4 @@ exports.explore = function(node, visited, allowedConnections, regions) {
             this.explore(other, visited, allowedConnections, regions)
         }
     }
-}
+};
