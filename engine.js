@@ -724,6 +724,7 @@ exports.Engine = function(comms, cities, plants){
         score.excessResources = this.market.excessResources;
         score.currentStep = this.getCurrentStep(this.currentAction);
         score.inactiveRegions = this.inactiveRegions;
+        score.replenishRate = this.market.replenishRate[this.getPlayerCount()];
 
         // making a subset of player data, don't want whole object
         score.players = {};

@@ -117,6 +117,39 @@ var redraw = function(scorePanel){
 		}
 	});
 
+    var replenishRate = scorePanel.replenishRate;
+    ctx.fillStyle = WHITE;
+    ctx.globalAlpha = 0.8;
+    ctx.fillRect(32, 860, 125, 80);
+    ctx.globalAlpha = 1.0;
+    ctx.fillStyle = BLACK;
+    ctx.font = "14px monospace";
+    var replenishY = 935;
+    ctx.fillText("   Coal", 35, replenishY);
+    ctx.fillText("    Oil", 35, replenishY - 15);
+    ctx.fillText("Garbage", 35, replenishY - 30);
+    ctx.fillText("Uranium", 35, replenishY - 45);
+    ctx.fillText("   Step", 35, replenishY - 60);
+    var repOffSet = ["coal", "oil", "garbage", "uranium"];
+
+    var replenishX = 100;
+    ctx.fillText("1", replenishX, 875);
+    ctx.fillText("2", replenishX + 20, 875);
+    ctx.fillText("3", replenishX + 40, 875);
+    replenishX += 20;
+    for(var step in replenishRate){
+        var perStep = replenishRate[step];
+        for(var type in perStep){
+            if(step == currentStep - 1){
+                ctx.fillStyle = ORANGE;
+            }
+            else{
+                ctx.fillStyle = BLACK;
+            }
+            ctx.fillText(perStep[type], replenishX + (20 * (step - 1)), replenishY - (15 * repOffSet.indexOf(type)));
+        }
+    }
+
     // Draw excess supply
     var typeStartX = {'coal':725, 'oil':705, 'garbage':685, 'uranium':665};
     for(type in scorePanel.excessResources){
