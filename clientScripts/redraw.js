@@ -117,6 +117,7 @@ var redraw = function(scorePanel){
 		}
 	});
 
+    // Draw resource replenishment rate box
     var replenishRate = scorePanel.replenishRate;
     ctx.fillStyle = WHITE;
     ctx.globalAlpha = 0.8;
@@ -287,15 +288,16 @@ var redraw = function(scorePanel){
 	// draw buttons
 	ctx.fillStyle = WHITE;
 	var currentWidth = 800;
-	var bufferSpace = 5;
+	var bufferSpace = 10;
     var buttonsDrawn = 0;
     yOffsetForButtons += 15;
+    ctx.font = "16px monospace";
 	for(var key in buttonArray){
 		var btn = buttonArray[key];
 
 		var cur = ACTIONS_FLAGS[currentActionState];
 		var flag = btn.flags;
-    	btn.width = btn.disp.length * 10 + 8
+    	btn.width = btn.disp.length * 10 + 8;
     	btn.height = 24;
     		
 		if((cur & flag) > 0){
@@ -312,10 +314,15 @@ var redraw = function(scorePanel){
 
             var pos = currentWidth;
             btn.x = pos;
-			ctx.strokeRect(pos, btn.y, btn.width, btn.height);
-			ctx.font = "16px monospace";
-			ctx.fillText(btn.disp, pos + 5, btn.y + 18);
-			currentWidth = pos + btn.width + bufferSpace;
+            if(key == "Pass"){
+                ctx.strokeRect(1200, 245, btn.width, btn.height);
+                ctx.fillText(btn.disp, 1205, 263);
+            }
+            else {
+                ctx.strokeRect(pos, btn.y, btn.width, btn.height);
+                ctx.fillText(btn.disp, pos + 5, btn.y + 18);
+                currentWidth = pos + btn.width + bufferSpace;
+            }
 		}
 		else{
 			btn.x = -1;
