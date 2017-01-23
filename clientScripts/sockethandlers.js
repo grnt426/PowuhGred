@@ -21,7 +21,7 @@ socket.on(SOCKET_DEFINECITIES, function(data){
 	});
 });
 
-// NOTSURE: what the data format for input is
+
 socket.on(SOCKET_UPDATES, function(data){
     if(data.group == "updateGameState"){
         scorePanel = data;

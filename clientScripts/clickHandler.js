@@ -171,13 +171,22 @@ var checkCityClick = function(event) {
     var y = internalY(event.pageY - 8);
     $.each(citiesDef,function(key,city) {
         if(sqrDist(x,city.x,y,city.y)<500) {
-            selectedCity = city;
-            if(scorePanel.args.data.currentAction == "build"){
-                if(selectedCities.indexOf(key) != -1){
-                    selectedCities.splice(selectedCities.indexOf(key), 1);
+            if(scorePanel.args.data.inactiveRegions.indexOf(city.region) == -1) {
+                if(selectedCity == city){
+                    selectedCity = undefined;
                 }
-                else{
-                    selectedCities.push(key);
+                else {
+                    if (scorePanel.args.data.currentAction == "build") {
+                        if (selectedCities.indexOf(key) != -1) {
+                            selectedCities.splice(selectedCities.indexOf(key), 1);
+                        }
+                        else {
+                            selectedCities.push(key);
+                        }
+                    }
+                    else{
+                        selectedCity = city;
+                    }
                 }
             }
         }
