@@ -1,3 +1,5 @@
+var util = require("../util.js");
+
 /**
  *
  * @param uid {string}
@@ -64,9 +66,8 @@ exports.Player = function(uid, comms, socket){
         return costs;
     };
 
-    this.replacePowerPlant = function(newPlant, oldPlant){
-        delete this.plants[oldPlant.cost];
-        this.plants[newPlant.cost] = newPlant;
+    this.removePowerPlant = function(cost){
+        delete this.plants[cost];
     };
 
     this.getHighestCostPowerPlant = function(){
@@ -81,5 +82,9 @@ exports.Player = function(uid, comms, socket){
     this.awardPlant = function(plant, bidCost){
         this.plants[plant.cost] = plant;
         this.money -= bidCost;
+    };
+
+    this.getPlantCount = function(){
+        return util.olen(this.plants);
     };
 };

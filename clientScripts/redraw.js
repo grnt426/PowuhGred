@@ -315,7 +315,9 @@ var redraw = function(scorePanel){
             var pos = currentWidth;
             btn.x = pos;
             if(key == "Pass"){
-                ctx.strokeRect(1200, 245, btn.width, btn.height);
+                btn.x = 1200;
+                btn.y = 245;
+                ctx.strokeRect(btn.x, btn.y, btn.width, btn.height);
                 ctx.fillText(btn.disp, 1205, 263);
             }
             else {
@@ -389,17 +391,17 @@ function colorNameToColorCode(name){
     var colorMap = {"red":RED, "blue":BLUE, "green":GREEN, "yellow":YELLOW, "purple":PURPLE, "black":BLACK,
         "coal":BROWN, "oil":BLACK, "garbage": YELLOW, "uranium":RED};
     return colorMap[name];
-};
+}
 
 function getPhaseName(currentAction){
     if(gameOver){
         return "Game Over! " + scorePanel.args.data.winner + " has won!";
     }
     var phaseNames = {"startGame": "Waiting for Players", "startAuction": "Start Auction", "bid": "Bidding", "buy": "Buy Resources",
-        "build": "Build On Cities", "power": "Get Money!"};
+        "build": "Build On Cities", "power": "Get Money!", "remove": "Remove Power Plant"};
     var name = phaseNames[currentAction];
     if(currentAction != "startGame"){
         name += " - Step " + currentStep;
     }
     return name;
-};
+}

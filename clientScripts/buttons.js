@@ -12,6 +12,7 @@ var BID_F = 		4;              //bitwise 000100
 var BUY_F = 	    8;              //bitwise 001000
 var BUILD_F =		16;             //bitwise 010000
 var POWER_F =		32;             //bitwise 100000
+var REMOVE_F =      64;
 
 // Used for enabling/disabling buttons
 var ACTIONS_FLAGS = [];
@@ -21,6 +22,7 @@ ACTIONS_FLAGS["bid"] = BID_F;
 ACTIONS_FLAGS["buy"] = BUY_F;
 ACTIONS_FLAGS["build"] = BUILD_F;
 ACTIONS_FLAGS["power"] = POWER_F;
+ACTIONS_FLAGS["remove"] = REMOVE_F;
 
 var createButton = function(disp,listener,flags) {
     var button = {};
@@ -108,7 +110,7 @@ var confirmResourcePurchase = function(){
         resourceSelection[parseInt(i)] = ppp[parseInt(i)].resources;
     }
     socket.emit(SOCKET_GAMEACTION, {uid:playerData.self.uid, cmd:"buy", args:resourceSelection});
-    deseletOwnPowerPlants();
+    deselectOwnPowerPlants();
 };
 
 var buildCities = function(){
@@ -125,7 +127,12 @@ var activatePlants = function(){
         payload[plantCost] = toBurn == undefined ? {} : toBurn;
     }
     socket.emit(SOCKET_GAMEACTION, {uid:playerData.self.uid, cmd:"power", args:payload});
-    deseletOwnPowerPlants();
+    deselectOwnPowerPlants();
+};
+
+var removePowerPlant = function(){
+    socket.emit(SOCKET_GAMEACTION, {uid:playerData.self.uid, cmd:"remove", args:selectedOwnedPlant.cost});
+    deselectOwnPowerPlants();
 };
 
 // createButton( Display String, listener, buttons flags);
@@ -150,3 +157,5 @@ createButton("Uranium -", function(){resourceLess('uranium');}, BUY_F);
 createButton("Build Cities", buildCities, BUILD_F);
 
 createButton("Activate Plants", activatePlants, POWER_F);
+
+createButton("Remove Plant", removePowerPlant, REMOVE_F);

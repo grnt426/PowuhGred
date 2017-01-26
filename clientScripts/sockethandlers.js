@@ -36,6 +36,11 @@ socket.on(SOCKET_UPDATES, function(data){
         currentStep = newData.currentStep;
         gameOver = newData.gameOver;
 
+        // If we are the player the game is waiting on to choose a plant to remove, override the action state
+        // to "remove" so the correct buttons appear
+        currentActionState = newData.playerMustRemovePlant && newData.auction.currentBidLeader == playerData.self.uid ? "remove"
+            : currentActionState;
+
 
         // Change the title of the browser window so the player knows it is their turn
         if(currentActionState != "startGame" && !gameOver

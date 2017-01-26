@@ -80,6 +80,26 @@ exports.PowerPlant = function(cost, type, requires, powers){
         return true;
     };
 
+    this.removeResources = function(resources){
+        for(var r in resources){
+            this.resources[r] -= resources[r];
+        }
+    };
+
+    this.canRemoveResources = function(resources){
+
+        // Power Plants which don't require resources couldn't even have resources on them
+        if(this.type == "free")
+            return false;
+
+        for(var r in resources){
+            if(this.resources[r] - resources[r] < 0)
+                return false;
+        }
+
+        return true;
+    };
+
     /**
      * Determines if this plant has the resources available to activate.
      * @returns {boolean}   True if sufficient resources are available to activate, otherwise false.

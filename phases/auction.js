@@ -76,6 +76,8 @@ exports.Auction = function(engine, comms){
      */
     this.haveNotShuffledAfterStep3 = true;
 
+    this.playerMustRemovePlant = false;
+
 	// TODO Should a different order be used?
 	this.nextBidder = function(pass){
 
@@ -85,11 +87,16 @@ exports.Auction = function(engine, comms){
 			var bidWinner = this.currentBidLeader;
 			this.finishedAuctions.push(bidWinner);
 			var player = this.engine.players[bidWinner];
-			player.awardPlant(this.engine.plants[this.currentBidChoice], this.currentBid);
             this.comms.toAll(player.displayName + " won power plant " + this.engine.plants[this.currentBidChoice].cost
-                    + " for $" + this.currentBid);
-			this.removeAuctionedPlant();
-			this.cleanAuctionState();
+            + " for $" + this.currentBid);
+			if(player.getPlantCount() == this.engine.getMaxPowerPlantsPerPlayer()){
+                this.playerMustRemovePlant = true;
+                this.comms.toAll(player.displayName + " must first discard a power plant before accepting the new plant.");
+                this.engine.broadcastGameState();
+            }
+			else{
+                this.awardPlantToBidWinner();
+            }
 		}
         else if(pass){
             this.currentBidders.splice(this.currentPlayerBidIndex, 1);
@@ -103,6 +110,32 @@ exports.Auction = function(engine, comms){
 			console.info(this.currentBidder + " index: " + this.currentPlayerBidIndex);
 		}
 	};
+
+    this.awardPlantToBidWinner = function(){
+        var player = this.engine.players[this.currentBidLeader];
+        player.awardPlant(this.engine.plants[this.currentBidChoice], this.currentBid);
+        this.removeAuctionedPlant();
+        this.cleanAuctionState();
+    };
+
+    this.removePlantAndResumeAuction = function(removePlantCost){
+        var player = this.engine.players[this.currentBidLeader];
+        var plantToRemove = player.plants[removePlantCost];
+        if(plantToRemove == undefined){
+            this.comms.toPlayer(player, "You can't remove a plant you don't own.");
+        }
+        else{
+
+            // Don't let unused resources be lost!
+            this.engine.returnUsedResources(plantToRemove.resources);
+            player.removePowerPlant(removePlantCost);
+            this.playerMustRemovePlant = false;
+
+            // Now we can resume the Auction
+            this.awardPlantToBidWinner();
+            this.engine.broadcastGameState();
+        }
+    };
 
 	/**
 	 * The expected data is either

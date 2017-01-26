@@ -240,6 +240,15 @@ exports.Engine = function(comms, cities, plants){
     };
 
     /**
+     * Returns the maximum number of power plants a player can have. If there are 2 or fewer players, the maximum is
+     * 4, otherwise the maximum is 3.
+     * @returns {number} The maximum number of power plants a player can have.
+     */
+    this.getMaxPowerPlantsPerPlayer = function(){
+        return this.getPlayerCount() <= 2 ? 4 : 3;
+    };
+
+    /**
      * The current Step the game is in.
      * 1 - The Step the game starts in, where players may not build on a city another player has already built in.
      * 2 - The step the game proceeds to once at least one player has 7 cities.
@@ -406,6 +415,19 @@ exports.Engine = function(comms, cities, plants){
             return;
         }
 
+        // Any player may move their resources around at any time.
+        if(action == "move"){
+            this.moveResourcesBetweenPlants(args, player);
+            this.broadcastGameState();
+            return;
+        }
+
+        // If a player needs to remove a plant from mat, that is also a short-circuiting action
+        if(action == "remove" && this.auction.playerMustRemovePlant && uid == this.auction.currentBidLeader){
+            this.auction.removePlantAndResumeAuction(args);
+            return;
+        }
+
 		// TODO: compress the boolean logic
 		if(this.currentPlayer !== false && uid !== this.currentPlayer && this.currentAction != this.BID && this.currentAction != this.POWER){
 			// for now, we only support listening to the current player
@@ -447,6 +469,35 @@ exports.Engine = function(comms, cities, plants){
 		}
         this.broadcastGameState();
 	};
+
+    /**
+     * Moves resources from one plant to another.
+     * @param {Object} data
+     * @param {Player} player
+     */
+    this.moveResourcesBetweenPlants = function(data, player){
+        var sourcePlantCost = data['src'];
+        var destinationPlantCost = data['dst'];
+        var resources = data['resources'];
+
+        if(player.plants[sourcePlantCost] == undefined || player.plants[destinationPlantCost] == undefined || !this.auction.playerMustRemovePlant || (this.auction.playerMustRemovePlant && this.auction.currentBidLeader != player.uid) ){
+            comms.toPlayer(player, "Source or Destination plant not owned.");
+        }
+        else{
+            var sourcePlant = player.plants[sourcePlantCost];
+
+            // If the player has chosen the new plant as the destination, we need to select it, instead.
+            var destinationPlant = player.plants[destinationPlantCost] != undefined ? player.plants[destinationPlantCost]
+                : this.plants[destinationPlantCost];
+            if(sourcePlant.canAddResources(resources) && destinationPlant.canRemoveResources(resources)){
+                sourcePlant.addResources(resources);
+                destinationPlant.removeResources(resources);
+            }
+            else{
+                comms.toPlayer(player, "Can not move all resources. Source not enough or destination can't accept.");
+            }
+        }
+    };
 
     this.getPowerPlantFromActualAuction = function(plantCost){
         var index = 0;
@@ -757,6 +808,9 @@ exports.Engine = function(comms, cities, plants){
         score.gameWinnerByMoney = this.gameWinnerByMoney;
         score.gameEndedByMostCities = this.gameEndedByMostCities;
         score.gameEndedInTie = this.gameEndedInTie;
+
+        score.playerMustRemovePlant = this.auction.playerMustRemovePlant;
+
 
 		// Score is the current data
 		// Changes is an array of strings identifying what updated.

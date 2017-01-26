@@ -29,6 +29,7 @@ canvas.addEventListener('mouseup', function(event) {
         var btn = buttonArray[key];
         if(x > btn.x && x < (btn.x + btn.width) && y > btn.y && y < (btn.y + btn.height)) {
             btn.listener();
+            redraw(scorePanel);
             return;
         }
     }
@@ -47,7 +48,7 @@ canvas.addEventListener('mouseup', function(event) {
     }
 
     // Check if the player's own power plant was selected, used for buy resources phase and power phase
-    if(x > PLAYER_PLANTS_START_X && y > 50 && (scorePanel.args.data.currentAction == "buy" || scorePanel.args.data.currentAction == "power")) {
+    if(x > PLAYER_PLANTS_START_X && y > 50 && (currentActionState == "buy" || currentActionState == "power" || currentActionState == "remove")) {
         console.log("Clicked in player power plant region...");
 
         // Really lazy, but just search all 50 plants to see if any of them are in the spot where the player clicked
