@@ -14,7 +14,9 @@ var express = require('express'),
 
 // routing
 app.get("/", function(req, res) { res.sendFile(__dirname + '/index.html'); });
-app.get("/clientScripts/init.js", function(req, res) { res.sendFile(__dirname + '/clientScripts/init.js'); });
+app.get("/clientScripts/game.js", function(req, res) { res.sendFile(__dirname + '/clientScripts/game.js'); });
+app.get("/clientScripts/city.js", function(req, res) {	res.sendFile(__dirname + '/clientScripts/city.js'); });
+app.get("/clientScripts/plant.js", function(req, res) {	res.sendFile(__dirname + '/clientScripts/plant.js'); });
 app.get("/clientScripts/auction.js", function(req, res) { res.sendFile(__dirname + '/clientScripts/auction.js'); });
 app.get("/clientScripts/buttons.js", function(req, res) { res.sendFile(__dirname + '/clientScripts/buttons.js'); });
 app.get("/clientScripts/chat.js", function(req, res) { res.sendFile(__dirname + '/clientScripts/chat.js'); });
@@ -23,7 +25,6 @@ app.get("/clientScripts/clickHandler.js", function(req, res) { res.sendFile(__di
 app.get("/clientScripts/redraw.js", function(req, res) { res.sendFile(__dirname + '/clientScripts/redraw.js'); });
 app.get("/clientScripts/sockethandlers.js", function(req, res) { res.sendFile(__dirname + '/clientScripts/sockethandlers.js'); });
 app.get("/clientScripts/scorepanel.js", function(req, res) { res.sendFile(__dirname + '/clientScripts/scorepanel.js'); });
-app.get("/clientScripts/cardpositions.js", function(req, res) {	res.sendFile(__dirname + '/clientScripts/cardpositions.js'); });
 app.use('/data', express.static(__dirname+'/data'));
 
 var citiesDef = new citiesjs.Cities();

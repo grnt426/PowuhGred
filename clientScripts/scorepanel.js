@@ -1,3 +1,4 @@
+/* global gamejs, redrawjs */
 var scorePanel = {};
 
 function min(a,b) {
@@ -82,7 +83,7 @@ function drawScorePanel(data, ctx, ppp) {
         var resources = player.resources;
         var name = player.displayName;
 
-        var playerColorCode = colorNameToColorCode(player.color);
+        var playerColorCode = redrawjs.colorNameToColorCode(player.color);
 
         var p=anim.progress;
         var p1,p2,p3,p4,p5;
@@ -116,11 +117,11 @@ function drawScorePanel(data, ctx, ppp) {
         }
 
         // draw curved border
-        if(currentPlayer == player.uid && currentActionState != "power")
+        if(gamejs.currentPlayer == player.uid && gamejs.currentAction != "power")
             ctx.strokeStyle = "#3366FF";
-        else if(currentPlayer != player.uid && data.auction.currentBidder == player.uid)
+        else if(gamejs.currentPlayer != player.uid && data.auction.currentBidder == player.uid)
             ctx.strokeStyle = "#336633";
-        else if(currentActionState == "power" && playersPaid.indexOf(player.uid) == -1)
+        else if(gamejs.currentAction == "power" && playersPaid.indexOf(player.uid) == -1)
             ctx.strokeStyle = "#336633";
         else
             ctx.strokeStyle = "#111111";
@@ -161,7 +162,7 @@ function drawScorePanel(data, ctx, ppp) {
         ctx.fillText(cities.length, h1,h2+h/2-8);
 
         //draw money
-        ctx.fillStyle = GREEN;
+        ctx.fillStyle = redrawjs.GREEN;
         ctx.font = "34px monospace";
         ctx.textAlign = "center";
         ctx.fillText("$" + money, h1,h2+p_x *.8);
@@ -184,10 +185,10 @@ function drawScorePanel(data, ctx, ppp) {
             }
 
             // Draw the power plant card
-            ctx.drawImage(plantImg, ppp[cost].x * pppWidth, ppp[cost].y * pppHeight, pppWidth, pppHeight,
+            ctx.drawImage(redrawjs.plantImg, ppp[cost].x * pppWidth, ppp[cost].y * pppHeight, pppWidth, pppHeight,
                 t_x+(p_x*count), t_y+p_y+16, p_x, p_x);
             if(ppp[cost].selected){
-                ctx.strokeStyle = GREEN;
+                ctx.strokeStyle = redrawjs.GREEN;
                 ctx.lineWidth = 6;
                 ctx.strokeRect(t_x+(p_x*count), t_y+p_y+16, p_x, p_x);
             }
@@ -203,13 +204,13 @@ function drawScorePanel(data, ctx, ppp) {
             var highlightSelected = getSelectedResourceAmounts(ppp[cost].selectionIndex, plant.requires, plant.type);
             for(var type in availableResources){
                 for(var j = 0; j < availableResources[type]; j++){
-                    ctx.fillStyle = colorNameToColorCode(type);
+                    ctx.fillStyle = redrawjs.colorNameToColorCode(type);
                     ctx.fillRect(ppp[cost].curX + 15 + (20 * (drawn % 3)),
                         ppp[cost].curY + 55 - (20 * Math.floor(drawn / 3)),
                         10, 10);
 
-                    if(ppp[cost].selected && highlightSelected[type] > 0 && currentActionState == "power"){
-                        ctx.strokeStyle = GREEN;
+                    if(ppp[cost].selected && highlightSelected[type] > 0 && gamejs.currentAction == "power"){
+                        ctx.strokeStyle = redrawjs.GREEN;
                         ctx.lineWidth = 2;
                         ctx.strokeRect(ppp[cost].curX + 13 + (20 * (drawn % 3)),
                             ppp[cost].curY + 53 - (20 * Math.floor(drawn / 3)),

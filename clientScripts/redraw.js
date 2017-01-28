@@ -1,7 +1,57 @@
-var ctx = canvas.getContext("2d");  // ctx allows drawing on the canvas
+/* global $, gamejs, Image, cityjs, plantjs */
+var redrawjs = {};
+
+redrawjs.canvas = document.getElementById("canvas"); // canvas is the game area we can draw to
+
+
+/**
+ * The below is t_x + (p_x * count). For the first iteration (count 1), this will be 1300 + (95 * 1), or 1395.
+ * @type {number}
+ */
+redrawjs.PLAYER_PLANTS_START_X = 1394;
+
+//Used to transform between external and internal coordinates (must be for map)
+var externalX = function (x) { return x * 1.1 - 5;  };
+var externalY = function (y) { return y * 1.1 - 96; };
+redrawjs.internalX = function (x) { return (x + 5) / 1.1;  };
+redrawjs.internalY = function (y) { return (y + 96) / 1.1; };
+
+redrawjs.WHITE =     "#FFFFFF";
+redrawjs.BLACK =     "#000000";
+redrawjs.GRAY =      "#444444";
+redrawjs.BROWN =     "#452E17";
+redrawjs.BLUE =      "#0000FF";
+redrawjs.LTBLUE =    "#00B8E6";
+redrawjs.GREEN =     "#009900";
+redrawjs.YELLOW =    "#FFFF19";
+redrawjs.PINK =      "#FF6699";
+redrawjs.ORANGE =    "#DD6622";
+redrawjs.RED =		 "#E62E2E";
+redrawjs.PURPLE =    "#AF02C3";
+
+redrawjs.colorNameToColorCode = function(name){
+    var colorMap = {"red":redrawjs.RED, 
+                    "blue":redrawjs.BLUE, 
+                    "green":redrawjs.GREEN, 
+                    "yellow":redrawjs.YELLOW, 
+                    "purple":redrawjs.PURPLE, 
+                    "black":redrawjs.BLACK,
+                    "coal":redrawjs.BROWN, 
+                    "oil":redrawjs.BLACK, 
+                    "garbage":redrawjs.YELLOW, 
+                    "uranium":redrawjs.RED};
+    return colorMap[name];
+}
+
+var ctx = redrawjs.canvas.getContext("2d");  // ctx allows drawing on the canvas
 
 var bgImg = new Image();
 bgImg.src = "./data/germany.jpg";
+
+// Initialize images for PowerPlant Cards
+// Power Plant cards are located all in one .jpg with specific format labeled below
+redrawjs.plantImg = new Image();
+redrawjs.plantImg.src = "./data/plants.jpg";
 
 var animationFlags = [];
 var anim = {};
@@ -16,7 +66,6 @@ var animationTickLoop = function(){
 
         anim.progress = animationFlags["start_game_p"];
         clearRect(1300,0,380,1050);
-        drawScorePanel(scorePanel.args.data, ctx, ppp);
         redraw(scorePanel);
     }
 };
@@ -44,13 +93,13 @@ var redraw = function(scorePanel){
 	scorePanel = scorePanel.args.data;
 
 	// draw internal city map
-	$.each(citiesDef, function(key, city){
-		ctx.strokeStyle = GRAY;
-		ctx.fillStyle = WHITE;
+	$.each(cityjs.citiesDef, function(key, city){
+		ctx.strokeStyle = redrawjs.GRAY;
+		ctx.fillStyle = redrawjs.WHITE;
 		ctx.lineWidth = 2;
         var x = externalX(city.x);
         var y = externalY(city.y);
-		if(DEBUG){
+		if(gamejs.DEBUG){
 			ctx.beginPath();
 			ctx.arc(x, y, 20, 0, 360, false);
 			ctx.stroke();
@@ -61,7 +110,7 @@ var redraw = function(scorePanel){
 
         // Gray out a city if it is in an inactive region
         if(scorePanel.inactiveRegions.indexOf(city.region) != -1){
-            ctx.fillStyle = GRAY;
+            ctx.fillStyle = redrawjs.GRAY;
             ctx.globalAlpha = 0.6;
             ctx.beginPath();
             ctx.arc(x, y, 20, 0, 360, false);
@@ -74,25 +123,25 @@ var redraw = function(scorePanel){
 	var regular = 24;
 	var uranium = 12;
 	$.each(resourceGrid, function(key, box){
-		ctx.strokeStyle = BLUE;
+		ctx.strokeStyle = redrawjs.BLUE;
 		if(box.type === "coal"){
-			ctx.strokeStyle = ctx.fillStyle = BROWN;
+			ctx.strokeStyle = ctx.fillStyle = redrawjs.BROWN;
 		}
 		if(box.type === "oil"){
-			ctx.strokeStyle = ctx.fillStyle = BLACK;
+			ctx.strokeStyle = ctx.fillStyle = redrawjs.BLACK;
 		}
 		if(box.type === "uranium"){
-			ctx.strokeStyle = ctx.fillStyle = RED;
+			ctx.strokeStyle = ctx.fillStyle = redrawjs.RED;
 		}
 		if(box.type === "garbage"){
-			ctx.strokeStyle = ctx.fillStyle = YELLOW;
+			ctx.strokeStyle = ctx.fillStyle = redrawjs.YELLOW;
 		}
 		ctx.lineWidth = 1;
 
 		var x = externalX(box.x);
 		var y = externalY(box.y);
 
-		if(DEBUG){
+		if(gamejs.DEBUG){
 			ctx.beginPath();
 			ctx.rect(x, y, box.size, box.size);
 			ctx.stroke();
@@ -119,11 +168,11 @@ var redraw = function(scorePanel){
 
     // Draw resource replenishment rate box
     var replenishRate = scorePanel.replenishRate;
-    ctx.fillStyle = WHITE;
+    ctx.fillStyle = redrawjs.WHITE;
     ctx.globalAlpha = 0.8;
     ctx.fillRect(32, 860, 125, 80);
     ctx.globalAlpha = 1.0;
-    ctx.fillStyle = BLACK;
+    ctx.fillStyle = redrawjs.BLACK;
     ctx.font = "14px monospace";
     var replenishY = 935;
     ctx.fillText("   Coal", 35, replenishY);
@@ -142,10 +191,10 @@ var redraw = function(scorePanel){
         var perStep = replenishRate[step];
         for(var type in perStep){
             if(step == currentStep - 1){
-                ctx.fillStyle = ORANGE;
+                ctx.fillStyle = redrawjs.ORANGE;
             }
             else{
-                ctx.fillStyle = BLACK;
+                ctx.fillStyle = redrawjs.BLACK;
             }
             ctx.fillText(perStep[type], replenishX + (20 * (step - 1)), replenishY - (15 * repOffSet.indexOf(type)));
         }
@@ -156,7 +205,7 @@ var redraw = function(scorePanel){
     for(type in scorePanel.excessResources){
         var amt = scorePanel.excessResources[type];
         var startX = typeStartX[type];
-        ctx.fillStyle = colorNameToColorCode(type);
+        ctx.fillStyle = redrawjs.colorNameToColorCode(type);
         var amtDrawn = 0;
         while(amt > 0){
             ctx.fillRect(startX, 930 - (15 * amtDrawn), 10, 10);
@@ -171,7 +220,7 @@ var redraw = function(scorePanel){
         for(var city in player.cities){
             var city = player.cities[city];
             var pos = city.players.indexOf(player.uid);
-            ctx.fillStyle = colorNameToColorCode(player.color);
+            ctx.fillStyle = redrawjs.colorNameToColorCode(player.color);
             var posX = city.x;
             var posY = city.y;
             if(pos == 0){
@@ -187,19 +236,19 @@ var redraw = function(scorePanel){
     }
 
 	// highlight selected city
-    ctx.strokeStyle = ORANGE;
+    ctx.strokeStyle = redrawjs.ORANGE;
     ctx.lineWidth = 3;
-	if(selectedCity && currentActionState != "build"){
+	if(cityjs.selectedCity && gamejs.currentAction != "build"){
 		ctx.beginPath();
-		var x = externalX(selectedCity.x);
-		var y = externalY(selectedCity.y);
+		var x = externalX(cityjs.selectedCity.x);
+		var y = externalY(cityjs.selectedCity.y);
 		ctx.arc(x, y, 20, 0, 360, false);
 		ctx.stroke();
 	}
     else{
-        for(var key in selectedCities){
+        for(var key in cityjs.selectedCities){
             ctx.beginPath();
-            var city = citiesDef[selectedCities[key]];
+            var city = cityjs.citiesDef[cityjs.selectedCities[key]];
             var x = externalX(city.x);
             var y = externalY(city.y);
             ctx.arc(x, y, 20, 0, 360, false);
@@ -209,10 +258,10 @@ var redraw = function(scorePanel){
 
 	// Draw the player's power plants
 	var count = 0;
-	for(var p in playerData.self.ownedPlants){
-		var plant = playerData.self.ownedPlants[p];
+	for(var p in plantjs.ownedPlants){
+		var plant = plantjs.ownedPlants[p];
 		var cost = plant.cost;
-		ctx.drawImage(plantImg, ppp[cost].x * pppWidth, ppp[cost].y * pppHeight,
+		ctx.drawImage(redrawjs.plantImg, ppp[cost].x * pppWidth, ppp[cost].y * pppHeight,
 			pppWidth, pppHeight,
 				800 + count * 125, 150, pppWidth, pppHeight);
 		count += 1;
@@ -220,8 +269,8 @@ var redraw = function(scorePanel){
 
 	// Draw the actual market
 	count = 0;
-	ctx.strokeStyle = LTBLUE;
-    ctx.fillStyle = LTBLUE;
+	ctx.strokeStyle = redrawjs.LTBLUE;
+    ctx.fillStyle = redrawjs.LTBLUE;
 	ctx.lineWidth = 1;
     ctx.font = "12px Arial";
     ctx.fillText("Actual Market", 794, 284);
@@ -231,7 +280,7 @@ var redraw = function(scorePanel){
 		plant = actualMarket[p];
 		plant.drawnPosition = count;
 		cost = plant.cost;
-		ctx.drawImage(plantImg, ppp[cost].x * pppWidth, ppp[cost].y * pppHeight, pppWidth, pppHeight,
+		ctx.drawImage(redrawjs.plantImg, ppp[cost].x * pppWidth, ppp[cost].y * pppHeight, pppWidth, pppHeight,
 				800 + ((count % wrap) * 120), 300 + (125 * (currentStep == 3 && count > 2 ? 1 : 0)), pppWidth, pppHeight);
 		count += 1;
 	}
@@ -239,15 +288,15 @@ var redraw = function(scorePanel){
 	// Draw the future market
     if(currentStep != 3) {
         count = 0;
-        ctx.strokeStyle = PINK;
-        ctx.fillStyle = PINK;
+        ctx.strokeStyle = redrawjs.PINK;
+        ctx.fillStyle = redrawjs.PINK;
         ctx.font = "12px Arial";
         ctx.fillText("Future Market", 794, 434);
         ctx.strokeRect(794, 444, 4 * 120 + 7, 125);
         for (p in futureMarket) {
             plant = futureMarket[p];
             cost = plant.cost;
-            ctx.drawImage(plantImg, ppp[cost].x * pppWidth, ppp[cost].y * pppHeight,
+            ctx.drawImage(redrawjs.plantImg, ppp[cost].x * pppWidth, ppp[cost].y * pppHeight,
                 pppWidth, pppHeight,
                 800 + count * 120, 450, pppWidth, pppHeight);
             count += 1;
@@ -256,7 +305,7 @@ var redraw = function(scorePanel){
 
 	// draws a selection box on a plant if it's selected (not selected = -1)
 	if(selectedPlant >= 0 || scorePanel.auction.auctionRunning){
-		ctx.strokeStyle = ORANGE;
+		ctx.strokeStyle = redrawjs.ORANGE;
 		ctx.lineWidth = 5;
 		ctx.beginPath();
 		var highlightPlant;
@@ -281,12 +330,12 @@ var redraw = function(scorePanel){
 
     // Draw Phase header
     var yOffsetForButtons = 20;
-    ctx.fillStyle = BLACK;
+    ctx.fillStyle = redrawjs.BLACK;
     ctx.font = "20px monospace";
-    ctx.fillText(getPhaseName(currentActionState), 800, yOffsetForButtons);
+    ctx.fillText(getPhaseName(gamejs.currentAction), 800, yOffsetForButtons);
 
 	// draw buttons
-	ctx.fillStyle = WHITE;
+	ctx.fillStyle = redrawjs.WHITE;
 	var currentWidth = 800;
 	var bufferSpace = 10;
     var buttonsDrawn = 0;
@@ -295,15 +344,15 @@ var redraw = function(scorePanel){
 	for(var key in buttonArray){
 		var btn = buttonArray[key];
 
-		var cur = ACTIONS_FLAGS[currentActionState];
+		var cur = ACTIONS_FLAGS[gamejs.currentAction];
 		var flag = btn.flags;
     	btn.width = btn.disp.length * 10 + 8;
     	btn.height = 24;
     		
 		if((cur & flag) > 0){
             buttonsDrawn += 1;
-			ctx.fillStyle = GREEN;
-			ctx.strokeStyle = GREEN;
+			ctx.fillStyle = redrawjs.GREEN;
+			ctx.strokeStyle = redrawjs.GREEN;
 			ctx.lineWidth = 1;
             if((currentWidth+btn.width) >= 1280){
                 yOffsetForButtons += 30;
@@ -333,9 +382,9 @@ var redraw = function(scorePanel){
 	}
 
 	// Draw bid amount box
-	if((ACTIONS_FLAGS[currentActionState] & (AUCTION_F | BID_F)) > 0){
+	if((ACTIONS_FLAGS[gamejs.currentAction] & (AUCTION_F | BID_F)) > 0){
         yOffsetForButtons += 60;
-		ctx.strokeStyle = GREEN;
+		ctx.strokeStyle = redrawjs.GREEN;
 		ctx.font = "14px monospace";
 		ctx.fillText("Current Bid: " + selectedBid, 800, yOffsetForButtons);
 		if(scorePanel.auction.currentBid != 0){
@@ -345,14 +394,14 @@ var redraw = function(scorePanel){
 	}
 
     // Draw resource purchase amounts boxes
-    else if((ACTIONS_FLAGS[currentActionState] & BUY_F) > 0){
+    else if((ACTIONS_FLAGS[gamejs.currentAction] & BUY_F) > 0){
         yOffsetForButtons += 60;
-        ctx.strokeStyle = GREEN;
+        ctx.strokeStyle = redrawjs.GREEN;
         ctx.font = "14px monospace";
         var offset = 0;
 
         var playerPlants = [];
-        var playerOwnedPlantCosts = scorePanel.players[playerData.self.uid].plants;
+        var playerOwnedPlantCosts = scorePanel.players[gamejs.uid].plants;
 
         // TODO: Really should make the below a function....
         for(var i in playerOwnedPlantCosts){
@@ -386,12 +435,6 @@ var redraw = function(scorePanel){
         }
     }
 };
-
-function colorNameToColorCode(name){
-    var colorMap = {"red":RED, "blue":BLUE, "green":GREEN, "yellow":YELLOW, "purple":PURPLE, "black":BLACK,
-        "coal":BROWN, "oil":BLACK, "garbage": YELLOW, "uranium":RED};
-    return colorMap[name];
-}
 
 function getPhaseName(currentAction){
     if(gameOver){

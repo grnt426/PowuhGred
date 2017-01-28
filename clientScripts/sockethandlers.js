@@ -1,4 +1,5 @@
 // handles server -> client communications: initialization, game updates, chat
+/* global io, gamejs, cityjs, plantjs, $ */
 
 var socket = io();
 
@@ -9,7 +10,7 @@ var SOCKET_CHAT = 'updatechat';            // server -> client
 
 // store user id
 socket.on(SOCKET_USERID, function(data){
-	playerData.self.uid = data
+	gamejs.uid = data
 });
 
 // load up the city map right after connecting
@@ -17,7 +18,7 @@ socket.on(SOCKET_DEFINECITIES, function(data){
 
 	// get the dictionary of city.js objects (taken from cities.js)
 	$.each(data, function(key, value){
-		citiesDef[key] = value;
+		cityjs.citiesDef[key] = value;
 	});
 });
 
@@ -27,9 +28,16 @@ socket.on(SOCKET_UPDATES, function(data){
         scorePanel = data;
 
         // extract globals
-        var newData = scorePanel.args.data;
-        currentActionState = newData.currentAction;
-        currentPlayer = newData.playerOrder[newData.currentPlayerIndex];
+        var newData = data.args.data;
+        gamejs.currentAction = newData.currentAction;
+        gamejs.currentPlayer = newData.playerOrder[newData.currentPlayerIndex];
+        var playerSelf = newData.players[gamejs.uid];
+        if(playerSelf != undefined) {
+            plantjs.ownedPlants = playerSelf.plants
+        }
+        else {
+            plantjs.ownedPlants = [];
+        }
         resources = newData.resources;
         actualMarket = newData.actualMarket;
         futureMarket = newData.futuresMarket;
@@ -38,15 +46,15 @@ socket.on(SOCKET_UPDATES, function(data){
 
         // If we are the player the game is waiting on to choose a plant to remove, override the action state
         // to "remove" so the correct buttons appear
-        currentActionState = newData.playerMustRemovePlant && newData.auction.currentBidLeader == playerData.self.uid ? "remove"
-            : currentActionState;
+        gamejs.currentAction = newData.playerMustRemovePlant && newData.auction.currentBidLeader == gamejs.uid ? "remove"
+            : gamejs.currentAction;
 
 
         // Change the title of the browser window so the player knows it is their turn
-        if(currentActionState != "startGame" && !gameOver
-            && ((currentActionState == "bid" && playerData.self.uid == newData.auction.currentBidders[newData.auction.currentPlayerBidIndex])
-            || (currentActionState != "bid" && currentActionState != "power" && playerData.self.uid == currentPlayer)
-            || (currentActionState == "power" && scorePanel.args.data.playersPaid.indexOf(playerData.self.uid) == -1))){
+        if(gamejs.currentAction != "startGame" && !gameOver
+            && ((gamejs.currentAction == "bid" && gamejs.uid == newData.auction.currentBidders[newData.auction.currentPlayerBidIndex])
+            || (gamejs.currentAction != "bid" && gamejs.currentAction != "power" && gamejs.uid == gamejs.currentPlayer)
+            || (gamejs.currentAction == "power" && scorePanel.args.data.playersPaid.indexOf(gamejs.uid) == -1))){
             document.title = "* PowuhGred - Your Turn!";
         }
         else{
@@ -102,9 +110,6 @@ var updateHandler = function(data){
 	else if(data.group == "currentBidder"){
 		updateCurrentBidder(data.args);
 	}
-	else if(data.group == "displayName"){
-		updateDisplayName(data.args);
-	}
 	else if(data.group == "bidWinner"){
 		updateBidWin(data.args);
 	}
@@ -119,3 +124,37 @@ var updateHandler = function(data){
 socket.on(SOCKET_CHAT, function(data){
 	log(data.sender + ": " + data.msg, CHAT_O);
 });
+
+
+// Currently only outputs log
+var updatePlayerOrder = function(data){
+    log("Player Order: " + data, CONSOLE_O);
+};
+
+// Currently only outputs log
+var updateCurrentPlayer = function(data){
+    log("Current Player: " + data.uid, CONSOLE_O);
+    gamejs.currentPlayer = data.uid;
+};
+
+var updateCurrentAction = function(data){
+    log("Current Action: " + data, CONSOLE_O);
+    gamejs.currentAction = data;
+};
+
+// Currently only Outputs a Log
+var updateMoney = function(data){
+    log(data.uid + " now has " + data.money + " money", CONSOLE_O);
+};
+
+// Currently only Outputs a Log
+var updateNewPlayer = function(data){
+    log(data.uid + " has joined the game", CONSOLE_O);
+};
+
+// Currently only Outputs a Log
+var updatePlayerName = function(data){
+    log(data.uid + " has changed their name to " + data.displayName, CONSOLE_O);
+};
+
+

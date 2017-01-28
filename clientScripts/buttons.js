@@ -1,10 +1,9 @@
 // initializes buttonArray and function for making buttons
 // solely for buttons at top of window (start game, bidding, etc.)
+/* global gamejs, cityjs, plantjs */
 var buttonArray = {};
 
 var SOCKET_GAMEACTION = 'gameaction';  // client -> server
-
-var currentActionState = "startGame";
 
 var UNSTARTED_F =	1;              //bitwise 000001
 var AUCTION_F =		2;              //bitwise 000010
@@ -16,7 +15,7 @@ var REMOVE_F =      64;
 
 // Used for enabling/disabling buttons
 var ACTIONS_FLAGS = [];
-ACTIONS_FLAGS[currentActionState] = UNSTARTED_F;
+ACTIONS_FLAGS["startGame"] = UNSTARTED_F;
 ACTIONS_FLAGS["startAuction"] = AUCTION_F | BID_F;  //| is bitwise OR command, 000010 OR 000100 = 000110 => 6
 ACTIONS_FLAGS["bid"] = BID_F;
 ACTIONS_FLAGS["buy"] = BUY_F;
@@ -39,17 +38,17 @@ var createButton = function(disp,listener,flags) {
 
 
 var startGameButton = function(){
-    socket.emit(SOCKET_GAMEACTION, {uid:playerData.self.uid, cmd:"startGame", args:{}});
+    socket.emit(SOCKET_GAMEACTION, {uid:gamejs.uid, cmd:"startGame", args:{}});
     animStartGame();
 };
 
 var passButton = function(){
-    socket.emit(SOCKET_GAMEACTION, {uid:playerData.self.uid, cmd:currentActionState, args:"pass"});
+    socket.emit(SOCKET_GAMEACTION, {uid:gamejs.uid, cmd:gamejs.currentAction, args:"pass"});
 };
 
 var startAuctionButton = function(){
     if(selectedPlant != -1){
-        socket.emit(SOCKET_GAMEACTION, {uid: playerData.self.uid, cmd: "startAuction",
+        socket.emit(SOCKET_GAMEACTION, {uid: gamejs.uid, cmd: "startAuction",
             args: {cost: actualMarket[selectedPlant].cost, bid: selectedBid}});
     }
     else{
@@ -100,38 +99,38 @@ var resourceLess = function(type){
 };
 
 var confirmBidButton = function(){
-    socket.emit(SOCKET_GAMEACTION, {uid:playerData.self.uid, cmd:"bid", args:{bid:selectedBid}});
+    socket.emit(SOCKET_GAMEACTION, {uid:gamejs.uid, cmd:"bid", args:{bid:selectedBid}});
 };
 
 var confirmResourcePurchase = function(){
-    var playerOwnedPlantCosts = scorePanel.args.data.players[playerData.self.uid].plants;
+    var playerOwnedPlantCosts = scorePanel.args.data.players[gamejs.uid].plants;
     var resourceSelection = {};
     for(var i in playerOwnedPlantCosts){
-        resourceSelection[parseInt(i)] = ppp[parseInt(i)].resources;
+        resourceSelection[parseInt(i)] = plantjs.ppp[parseInt(i)].resources;
     }
-    socket.emit(SOCKET_GAMEACTION, {uid:playerData.self.uid, cmd:"buy", args:resourceSelection});
+    socket.emit(SOCKET_GAMEACTION, {uid:gamejs.uid, cmd:"buy", args:resourceSelection});
     deselectOwnPowerPlants();
 };
 
 var buildCities = function(){
-    socket.emit(SOCKET_GAMEACTION, {uid:playerData.self.uid, cmd:"build", args:selectedCities});
-    selectedCities = [];
-    selectedCity = false;
+    socket.emit(SOCKET_GAMEACTION, {uid:gamejs.uid, cmd:"build", args:cityjs.selectedCities});
+    cityjs.selectedCities = [];
+    cityjs.selectedCity = undefined;
 };
 
 var activatePlants = function(){
     var payload = {};
     for(var p in selectedPlants){
         var plantCost = selectedPlants[p];
-        var toBurn = ppp[plantCost].selectedToBurn;
+        var toBurn = plantjs.ppp[plantCost].selectedToBurn;
         payload[plantCost] = toBurn == undefined ? {} : toBurn;
     }
-    socket.emit(SOCKET_GAMEACTION, {uid:playerData.self.uid, cmd:"power", args:payload});
+    socket.emit(SOCKET_GAMEACTION, {uid:gamejs.uid, cmd:"power", args:payload});
     deselectOwnPowerPlants();
 };
 
 var removePowerPlant = function(){
-    socket.emit(SOCKET_GAMEACTION, {uid:playerData.self.uid, cmd:"remove", args:selectedOwnedPlant.cost});
+    socket.emit(SOCKET_GAMEACTION, {uid:gamejs.uid, cmd:"remove", args:selectedOwnedPlant.cost});
     deselectOwnPowerPlants();
 };
 
