@@ -26,6 +26,7 @@ redrawjs.canvas.addEventListener('mousemove', function(event) {
 redrawjs.canvas.addEventListener('mouseup', function(event) {
     var x = event.pageX - 8;
     var y = event.pageY - 8;
+    var plant = {};
 
     if(gamejs.DEBUG){
         log("Click: " + x + ", " + y, CONSOLE_O);
@@ -33,11 +34,12 @@ redrawjs.canvas.addEventListener('mouseup', function(event) {
     
     if(drag.currentlyDragging) {
         drag.currentlyDragging = false;
-        var plant = plantjs.ownedPlantAt(x,y);
+        plant = plantjs.ownedPlantAt(x,y);
         if(plant != undefined) {
             plantjs.attemptResourceMove(drag.startingPlant, plant, drag.resourceType)
             drag.startingPlant = null;
             drag.resourceType = null;
+            return;
         }
     }
 
@@ -68,7 +70,7 @@ redrawjs.canvas.addEventListener('mouseup', function(event) {
     if(x > redrawjs.PLAYER_PLANTS_START_X && y > 50 && (gamejs.currentAction == "buy" || gamejs.currentAction == "power" || gamejs.currentAction == "remove")) {
         console.log("Clicked in player power plant region...");
 
-        var ownedPlant = plantjs.ownedPlantAt(x,y);
+        var ownedPlant = plantjs.ownedPlantAt(x, y, plant);
         if(ownedPlant != undefined){
             console.log("Clicked on an owned power plant.");
 
