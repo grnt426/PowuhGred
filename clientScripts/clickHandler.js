@@ -26,7 +26,6 @@ redrawjs.canvas.addEventListener('mousemove', function(event) {
 redrawjs.canvas.addEventListener('mouseup', function(event) {
     var x = event.pageX - 8;
     var y = event.pageY - 8;
-    var plant = {};
 
     if(gamejs.DEBUG){
         log("Click: " + x + ", " + y, CONSOLE_O);
@@ -34,9 +33,9 @@ redrawjs.canvas.addEventListener('mouseup', function(event) {
     
     if(drag.currentlyDragging) {
         drag.currentlyDragging = false;
-        plant = plantjs.ownedPlantAt(x,y);
-        if(plant != undefined) {
-            plantjs.attemptResourceMove(drag.startingPlant, plant, drag.resourceType)
+        var endingPlant = plantjs.ownedPlantAt(x,y);
+        if(endingPlant != undefined) {
+            plantjs.attemptResourceMove(drag.startingPlant, endingPlant, drag.resourceType)
             drag.startingPlant = null;
             drag.resourceType = null;
             return;
@@ -48,30 +47,32 @@ redrawjs.canvas.addEventListener('mouseup', function(event) {
         var btn = buttonArray[key];
         if(x > btn.x && x < (btn.x + btn.width) && y > btn.y && y < (btn.y + btn.height)) {
             btn.listener();
-            redraw(scorePanel);
+            redrawjs.redraw();
             return;
         }
     }
 
     // Check if a plant was selected from the actual market
     // TODO: will need to change to support Step3
-    if(x > 800 && x < 1280 && y > 300 && y < 420 && scorePanel.args.data.currentAction == "startAuction"){
-        selectedPlant = 3-(Math.floor((1260 - x) / 114));
+    if(x > 800 && x < 1280 && y > 300 && y < 420 && gamejs.currentAction == "startAuction"){
+        plantjs.selectedPlant = 3-(Math.floor((1260 - x) / 114));
         cityjs.selectedCity = undefined;
-        selectedOwnedPlant = -1;
-        redraw(scorePanel);
+        plantjs.selectedOwnedPlant = undefined;
+        redrawjs.redraw();
         return;
     }
     else{
-        selectedPlant = -1;
+        plantjs.selectedPlant = -1;
     }
 
     // Check if the player's own power plant was selected, used for buy resources phase and power phase
     if(x > redrawjs.PLAYER_PLANTS_START_X && y > 50 && (gamejs.currentAction == "buy" || gamejs.currentAction == "power" || gamejs.currentAction == "remove")) {
         console.log("Clicked in player power plant region...");
 
+        var plant = {};
         var ownedPlant = plantjs.ownedPlantAt(x, y, plant);
         if(ownedPlant != undefined){
+            var p = plant.index;
             console.log("Clicked on an owned power plant.");
 
             // For power plants which can burn both coal and oil, we want different behavior
@@ -123,33 +124,33 @@ redrawjs.canvas.addEventListener('mouseup', function(event) {
                     // or the player has no valid selectable options (completely insufficient resources).
                     // TODO: We can detect the later case if we checked all three states and got back to 0, and then alert the user their selection was invalid.
                     plant.selected = plant.selectionIndex != 0;
-                    selectedPlants.push(p);
+                    plantjs.selectedPlants.push(p);
                 }
                 else{
                     plant.selected = false;
-                    selectedPlants.splice(selectedPlants.indexOf(p), 1);
+                    plantjs.selectedPlants.splice(plantjs.selectedPlants.indexOf(p), 1);
                     plant.selectedToBurn = {};
                 }
             }
             else {
                 plant.selected = plant.selected === undefined ? true : !plant.selected;
                 if (plant.selected) {
-                    if(selectedOwnedPlant !== undefined && gamejs.currentAction != "power")
-                        selectedOwnedPlant.selected = false;
-                    selectedOwnedPlant = plant;
+                    if(plantjs.selectedOwnedPlant !== undefined && gamejs.currentAction != "power")
+                        plantjs.selectedOwnedPlant.selected = false;
+                    plantjs.selectedOwnedPlant = plant;
                 }
                 else {
-                    selectedOwnedPlant = undefined;
+                    plantjs.selectedOwnedPlant = undefined;
                 }
 
                 // We can only select multiple plants if we are in the power phase. While it *might* make sense
                 // in the resource purchase phase, it would be somewhat confusing.
                 if(gamejs.currentAction == "power") {
-                    if (selectedPlants.indexOf(plant.cost) != -1) {
-                        selectedPlants.splice(selectedPlants.indexOf(p), 1);
+                    if (plantjs.selectedPlants.indexOf(plant.cost) != -1) {
+                        plantjs.selectedPlants.splice(plantjs.selectedPlants.indexOf(p), 1);
                     }
                     else {
-                        selectedPlants.push(p);
+                        plantjs.selectedPlants.push(p);
                     }
                 }
             }
@@ -161,29 +162,21 @@ redrawjs.canvas.addEventListener('mouseup', function(event) {
     // Deselect if selected
     // TODO: this is *really* bad, but it works for now
     else{
-        deselectOwnPowerPlants();
+        plantjs.deselectOwnPowerPlants();
     }
 
     // Otherwise, check if a city was clicked
     checkCityClick(event);
     
-    redraw(scorePanel);
+    redrawjs.redraw();
 },false);
-
-var deselectOwnPowerPlants = function(){
-    for(p in ppp){
-        ppp[p].selected = false;
-    }
-    selectedOwnedPlant = undefined;
-    selectedPlants = [];
-};
 
 var checkCityClick = function(event) {
     var x = redrawjs.internalX(event.pageX - 8);
     var y = redrawjs.internalY(event.pageY - 8);
     $.each(cityjs.citiesDef,function(key,city) {
         if(sqrDist(x,city.x,y,city.y)<500) {
-            if(scorePanel.args.data.inactiveRegions.indexOf(city.region) == -1) {
+            if(cityjs.isCityActive(city)) {
                 if(cityjs.selectedCity == city){
                     cityjs.selectedCity = undefined;
                 }

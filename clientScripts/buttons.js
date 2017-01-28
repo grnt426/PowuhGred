@@ -1,6 +1,6 @@
 // initializes buttonArray and function for making buttons
 // solely for buttons at top of window (start game, bidding, etc.)
-/* global gamejs, cityjs, plantjs */
+/* global gamejs, cityjs, plantjs, auctionjs */
 var buttonArray = {};
 
 var SOCKET_GAMEACTION = 'gameaction';  // client -> server
@@ -39,7 +39,7 @@ var createButton = function(disp,listener,flags) {
 
 var startGameButton = function(){
     socket.emit(SOCKET_GAMEACTION, {uid:gamejs.uid, cmd:"startGame", args:{}});
-    animStartGame();
+    redrawjs.animStartGame();
 };
 
 var passButton = function(){
@@ -47,9 +47,9 @@ var passButton = function(){
 };
 
 var startAuctionButton = function(){
-    if(selectedPlant != -1){
+    if(plantjs.selectedPlant != -1){
         socket.emit(SOCKET_GAMEACTION, {uid: gamejs.uid, cmd: "startAuction",
-            args: {cost: actualMarket[selectedPlant].cost, bid: selectedBid}});
+            args: {cost: auctionjs.actualMarket[plantjs.selectedPlant].cost, bid: auctionjs.selectedBid}});
     }
     else{
         log("Select a power plant first.", CONSOLE_O);
@@ -57,31 +57,31 @@ var startAuctionButton = function(){
 };
 
 var bidUpButton = function(){
-    selectedBid += 1;
-    log("Bid amount: $" + selectedBid, CONSOLE_O);
+    auctionjs.selectedBid += 1;
+    log("Bid amount: $" + auctionjs.selectedBid, CONSOLE_O);
 };
 
 var bidDownButton = function(){
-    if(selectedBid <= 0)
-        selectedBid = 0;
+    if(auctionjs.selectedBid <= 0)
+        auctionjs.selectedBid = 0;
     else
-        selectedBid -= 1;
-    log("Bid amount: $" + selectedBid, CONSOLE_O);
+        auctionjs.selectedBid -= 1;
+    log("Bid amount: $" + auctionjs.selectedBid, CONSOLE_O);
 };
 
 var resourceMore = function(type){
 
     // Don't increment if nothing is selected
-    if(selectedOwnedPlant == undefined){
+    if(plantjs.selectedOwnedPlant == undefined){
         return;
     }
 
-    var newAmt = selectedOwnedPlant.resources[type] + 1;
-    if(newAmt > resources[type]){
+    var newAmt = plantjs.selectedOwnedPlant.resources[type] + 1;
+    if(newAmt > gamejs.resources[type]){
         log("Not enough " + type + " to buy more", CONSOLE_O);
     }
     else {
-        selectedOwnedPlant.resources[type] = newAmt;
+        plantjs.selectedOwnedPlant.resources[type] = newAmt;
         log(newAmt + " " + type, CONSOLE_O);
     }
 };
@@ -89,27 +89,27 @@ var resourceMore = function(type){
 var resourceLess = function(type){
 
     // Don't decrement if nothing is selected
-    if(selectedOwnedPlant == undefined){
+    if(plantjs.selectedOwnedPlant == undefined){
         return;
     }
 
-    if(selectedOwnedPlant.resources[type] != undefined && selectedOwnedPlant.resources[type] > 0)
-        selectedOwnedPlant.resources[type] -= 1;
-    log(selectedOwnedPlant.resources[type] + " " + type, CONSOLE_O);
+    if(plantjs.selectedOwnedPlant.resources[type] != undefined && plantjs.selectedOwnedPlant.resources[type] > 0)
+        plantjs.selectedOwnedPlant.resources[type] -= 1;
+    log(plantjs.selectedOwnedPlant.resources[type] + " " + type, CONSOLE_O);
 };
 
 var confirmBidButton = function(){
-    socket.emit(SOCKET_GAMEACTION, {uid:gamejs.uid, cmd:"bid", args:{bid:selectedBid}});
+    socket.emit(SOCKET_GAMEACTION, {uid:gamejs.uid, cmd:"bid", args:{bid:auctionjs.selectedBid}});
 };
 
 var confirmResourcePurchase = function(){
-    var playerOwnedPlantCosts = scorePanel.args.data.players[gamejs.uid].plants;
+    var playerOwnedPlantCosts = plantjs.ownedPlants;
     var resourceSelection = {};
     for(var i in playerOwnedPlantCosts){
         resourceSelection[parseInt(i)] = plantjs.ppp[parseInt(i)].resources;
     }
     socket.emit(SOCKET_GAMEACTION, {uid:gamejs.uid, cmd:"buy", args:resourceSelection});
-    deselectOwnPowerPlants();
+    plantjs.deselectOwnPowerPlants();
 };
 
 var buildCities = function(){
@@ -120,18 +120,18 @@ var buildCities = function(){
 
 var activatePlants = function(){
     var payload = {};
-    for(var p in selectedPlants){
-        var plantCost = selectedPlants[p];
+    for(var p in plantjs.selectedPlants){
+        var plantCost = plantjs.selectedPlants[p];
         var toBurn = plantjs.ppp[plantCost].selectedToBurn;
         payload[plantCost] = toBurn == undefined ? {} : toBurn;
     }
     socket.emit(SOCKET_GAMEACTION, {uid:gamejs.uid, cmd:"power", args:payload});
-    deselectOwnPowerPlants();
+    plantjs.deselectOwnPowerPlants();
 };
 
 var removePowerPlant = function(){
-    socket.emit(SOCKET_GAMEACTION, {uid:gamejs.uid, cmd:"remove", args:selectedOwnedPlant.cost});
-    deselectOwnPowerPlants();
+    socket.emit(SOCKET_GAMEACTION, {uid:gamejs.uid, cmd:"remove", args:plantjs.selectedOwnedPlant.cost});
+    plantjs.deselectOwnPowerPlants();
 };
 
 // createButton( Display String, listener, buttons flags);

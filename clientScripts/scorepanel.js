@@ -1,5 +1,5 @@
-/* global gamejs, redrawjs */
-var scorePanel = {};
+/* global gamejs, redrawjs, plantjs, auctionjs */
+var scorepaneljs = {};
 
 function min(a,b) {
     if (a>b) return b;
@@ -30,7 +30,7 @@ function tween(x,start,end) {
     return norm(min(max(x -start,0),diff),diff)
 }
 
-function drawScorePanel(data, ctx, ppp) {
+scorepaneljs.drawScorePanel = function() {
 
     // currently expecting, though will need to change later:
     //  data.currentPlayerIndex
@@ -45,10 +45,7 @@ function drawScorePanel(data, ctx, ppp) {
     //           .activePlayer = i
     //           .activeWidth = #
 
-    if(!data) return;
-    if(!data.playerOrder) return;
-    if(!data.players)  return;
-    if(!ppp) return;
+    var ctx = redrawjs.ctx;
 
     var s_y1 = 10;
     var s_x1 = 1300;
@@ -70,17 +67,16 @@ function drawScorePanel(data, ctx, ppp) {
 
     var t_x = s_x1;
     var t_y = s_y1;
-    var playersPaid = data.playersPaid;
-    for(var i=0; i < data.playerOrder.length; i++) {
+    var playersPaid = gamejs.playersPaid;
+    for(var i=0; i < gamejs.playerOrder.length; i++) {
 
         t_x = s_x1;
 
-        if(!data.players[data.playerOrder[i]]) return;
-        var player = data.players[data.playerOrder[i]];
+        if(!gamejs.players[gamejs.playerOrder[i]]) return;
+        var player = gamejs.players[gamejs.playerOrder[i]];
         var money = player.money;
         var plants = player.plants;
         var cities = player.cities;
-        var resources = player.resources;
         var name = player.displayName;
 
         var playerColorCode = redrawjs.colorNameToColorCode(player.color);
@@ -98,7 +94,7 @@ function drawScorePanel(data, ctx, ppp) {
 
         // Draw player position on turn track
         ctx.fillStyle = playerColorCode;
-        ctx.fillRect(74 + (27 * data.playerOrder.indexOf(player.uid) * 1.01), 25, 13, 13);
+        ctx.fillRect(74 + (27 * gamejs.playerOrder.indexOf(player.uid) * 1.01), 25, 13, 13);
 
         // Draw position on city track
         var cityCount = cities.length;
@@ -119,7 +115,7 @@ function drawScorePanel(data, ctx, ppp) {
         // draw curved border
         if(gamejs.currentPlayer == player.uid && gamejs.currentAction != "power")
             ctx.strokeStyle = "#3366FF";
-        else if(gamejs.currentPlayer != player.uid && data.auction.currentBidder == player.uid)
+        else if(gamejs.currentPlayer != player.uid && auctionjs.auction.currentBidder == player.uid)
             ctx.strokeStyle = "#336633";
         else if(gamejs.currentAction == "power" && playersPaid.indexOf(player.uid) == -1)
             ctx.strokeStyle = "#336633";
@@ -175,45 +171,44 @@ function drawScorePanel(data, ctx, ppp) {
 
         //draw power plants
         var count = 1;
-        for(var p in plants){
-            var plant = plants[p];
-            var cost = parseInt(plant.cost);
-            console.log(JSON.stringify(plant));
-            if(!ppp[cost]) {
-                console.log("ERROR: Can't find plant '" + cost + "'!?");
+        for(var pIndex in plants){
+            var plant = plants[pIndex];
+            var plantDef = plantjs.ppp[parseInt(plant.cost)];
+            if(plantDef == undefined) {
+                console.log("ERROR: Can't find plant def for '" + plant.cost + "'!?");
                 return;
             }
 
             // Draw the power plant card
-            ctx.drawImage(redrawjs.plantImg, ppp[cost].x * pppWidth, ppp[cost].y * pppHeight, pppWidth, pppHeight,
+            ctx.drawImage(redrawjs.plantImg, plantDef.x * plantjs.pppWidth, plantDef.y * plantjs.pppHeight, plantjs.pppWidth, plantjs.pppHeight,
                 t_x+(p_x*count), t_y+p_y+16, p_x, p_x);
-            if(ppp[cost].selected){
+            if(plantDef.selected){
                 ctx.strokeStyle = redrawjs.GREEN;
                 ctx.lineWidth = 6;
                 ctx.strokeRect(t_x+(p_x*count), t_y+p_y+16, p_x, p_x);
             }
 
             // This is for setting up the click region for the card
-            ppp[cost].curX = t_x+(p_x*count);
-            ppp[cost].curY = t_y+p_y+16;
-            ppp[cost].length = p_x;
+            plantDef.curX = t_x+(p_x*count);
+            plantDef.curY = t_y+p_y+16;
+            plantDef.length = p_x;
 
             // Draw the resources on the card
             var availableResources = plant.resources;
             var drawn = 0;
-            var highlightSelected = getSelectedResourceAmounts(ppp[cost].selectionIndex, plant.requires, plant.type);
+            var highlightSelected = getSelectedResourceAmounts(plantDef.selectionIndex, plant.requires, plant.type);
             for(var type in availableResources){
                 for(var j = 0; j < availableResources[type]; j++){
                     ctx.fillStyle = redrawjs.colorNameToColorCode(type);
-                    ctx.fillRect(ppp[cost].curX + 15 + (20 * (drawn % 3)),
-                        ppp[cost].curY + 55 - (20 * Math.floor(drawn / 3)),
+                    ctx.fillRect(plantDef.curX + 15 + (20 * (drawn % 3)),
+                        plantDef.curY + 55 - (20 * Math.floor(drawn / 3)),
                         10, 10);
 
-                    if(ppp[cost].selected && highlightSelected[type] > 0 && gamejs.currentAction == "power"){
+                    if(plantDef.selected && highlightSelected[type] > 0 && gamejs.currentAction == "power"){
                         ctx.strokeStyle = redrawjs.GREEN;
                         ctx.lineWidth = 2;
-                        ctx.strokeRect(ppp[cost].curX + 13 + (20 * (drawn % 3)),
-                            ppp[cost].curY + 53 - (20 * Math.floor(drawn / 3)),
+                        ctx.strokeRect(plantDef.curX + 13 + (20 * (drawn % 3)),
+                            plantDef.curY + 53 - (20 * Math.floor(drawn / 3)),
                             14, 14);
                         highlightSelected[type] -= 1;
                     }
@@ -224,9 +219,9 @@ function drawScorePanel(data, ctx, ppp) {
         }
         t_y += y_pad + b_y;
     }
-}
+};
 
-function getSelectedResourceAmounts(selectionIndex, required, type) {
+var getSelectedResourceAmounts = function(selectionIndex, required, type) {
     if (type == "both") {
         if (selectionIndex == 1) {
             return resourceList(required, 0, 0, 0);
@@ -246,7 +241,7 @@ function getSelectedResourceAmounts(selectionIndex, required, type) {
         resources[type] = required;
         return resources;
     }
-}
+};
 
 /**
  * My JS greenhorn is showing: how to leverage the "server" version of util.js for client side?
@@ -257,7 +252,7 @@ function getSelectedResourceAmounts(selectionIndex, required, type) {
  * @param uranium
  * @returns {{}}
  */
-resourceList = function(coal, oil, garbage, uranium){
+var resourceList = function(coal, oil, garbage, uranium){
     var data = {};
     data['coal'] = coal;
     data['oil'] = oil;

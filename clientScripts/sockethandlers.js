@@ -1,5 +1,5 @@
 // handles server -> client communications: initialization, game updates, chat
-/* global io, gamejs, cityjs, plantjs, $ */
+/* global io, gamejs, cityjs, plantjs, redrawjs, auctionjs $ */
 
 var socket = io();
 
@@ -25,11 +25,13 @@ socket.on(SOCKET_DEFINECITIES, function(data){
 
 socket.on(SOCKET_UPDATES, function(data){
     if(data.group == "updateGameState"){
-        scorePanel = data;
 
         // extract globals
         var newData = data.args.data;
         gamejs.currentAction = newData.currentAction;
+        gamejs.players = newData.players;
+        gamejs.playersPaid = newData.playersPaid;
+        gamejs.playerOrder = newData.playerOrder;
         gamejs.currentPlayer = newData.playerOrder[newData.currentPlayerIndex];
         var playerSelf = newData.players[gamejs.uid];
         if(playerSelf != undefined) {
@@ -38,11 +40,16 @@ socket.on(SOCKET_UPDATES, function(data){
         else {
             plantjs.ownedPlants = [];
         }
-        resources = newData.resources;
-        actualMarket = newData.actualMarket;
-        futureMarket = newData.futuresMarket;
-        currentStep = newData.currentStep;
-        gameOver = newData.gameOver;
+        cityjs.inactiveRegions = newData.inactiveRegions;
+        gamejs.resources = newData.resources;
+        auctionjs.actualMarket = newData.actualMarket;
+        auctionjs.futureMarket = newData.futuresMarket;
+        auctionjs.auction = newData.auction;
+        gamejs.currentStep = newData.currentStep;
+        gamejs.replenishRate = newData.replenishRate;
+        gamejs.excessResources = newData.excessResources;
+        gamejs.gameOver = newData.gameOver;
+        gamejs.winner = newData.winner;
 
         // If we are the player the game is waiting on to choose a plant to remove, override the action state
         // to "remove" so the correct buttons appear
@@ -51,26 +58,27 @@ socket.on(SOCKET_UPDATES, function(data){
 
 
         // Change the title of the browser window so the player knows it is their turn
-        if(gamejs.currentAction != "startGame" && !gameOver
+        if(gamejs.currentAction != "startGame" && !gamejs.gameOver
             && ((gamejs.currentAction == "bid" && gamejs.uid == newData.auction.currentBidders[newData.auction.currentPlayerBidIndex])
             || (gamejs.currentAction != "bid" && gamejs.currentAction != "power" && gamejs.uid == gamejs.currentPlayer)
-            || (gamejs.currentAction == "power" && scorePanel.args.data.playersPaid.indexOf(gamejs.uid) == -1))){
+            || (gamejs.currentAction == "power" && newData.playersPaid.indexOf(gamejs.uid) == -1))){
             document.title = "* PowuhGred - Your Turn!";
         }
         else{
             document.title = "PowuhGred";
         }
 
-        for(var change in scorePanel.args.changes){
-            if(scorePanel.args.changes[change] == "startGame"){
-                animStartGame();
+        for(var change in data.args.changes){
+            if(data.args.changes[change] == "startGame"){
+                redrawjs.animStartGame();
             }
         }
     }
     else{
         updateHandler(data);
     }
-    redraw(scorePanel);
+    
+    redrawjs.redraw();
 });
 
 var updateHandler = function(data){
@@ -84,10 +92,10 @@ var updateHandler = function(data){
 		updateCurrentPlayer(data.args);
 	}
 	else if(data.group == "actualMarket"){
-		updateActualMarket(data.args);
+		auctionjs.updateActualMarket(data.args);
 	}
 	else if(data.group == "futureMarket"){
-		updateFutureMarket(data.args);
+		auctionjs.updateFutureMarket(data.args);
 	}
 	else if(data.group == "currentAction"){
 		updateCurrentAction(data.args);
@@ -102,20 +110,17 @@ var updateHandler = function(data){
 		updatePlayerName(data.args);
 	}
 	else if(data.group == "auctionStart"){
-		updateStartAuction(data.args);
+		auctionjs.updateStartAuction(data.args);
 	}
 	else if(data.group == "bid"){
-		updateNewBid(data.args);
+		auctionjs.updateNewBid(data.args);
 	}
 	else if(data.group == "currentBidder"){
-		updateCurrentBidder(data.args);
+		auctionjs.updateCurrentBidder(data.args);
 	}
 	else if(data.group == "bidWinner"){
-		updateBidWin(data.args);
+		auctionjs.updateBidWin(data.args);
 	}
-    else if(data.group == "playerPlants"){
-        updatePlayerPlants(data.args);
-    }
 	else{
 		log("'" + data.group + "' has no handler!", CONSOLE_O);
 	}

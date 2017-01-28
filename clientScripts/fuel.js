@@ -1,7 +1,6 @@
-/* global redrawjs */
+/* global redrawjs, gamejs */
 
 var resourceGrid = {};
-var resources = {};
 
 // TODO: right now these vars are hard coded to germany
 for(var i = 0; i < 24; i++) {
@@ -50,5 +49,5 @@ for(i = 0; i < 4; i++) {
 var updateResources = function(data){
     log("Oil: " + data.oil + " - Coal: " + data.coal
         + " - Garbage: " + data.garbage + " - Uranium: " + data.uranium, CONSOLE_O);
-    resources = data;
+    gamejs.resources = data;
 };
