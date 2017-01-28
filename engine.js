@@ -562,6 +562,7 @@ exports.Engine = function(comms, cities, plants){
 
 	this.nextAction = function(){
 		if(this.currentAction == this.START_AUCTION) {
+            this.auction.removeLowestPlant(true);
             this.checkForStep3();
             this.currentAction = this.BUY;
         }
@@ -624,7 +625,7 @@ exports.Engine = function(comms, cities, plants){
             this.currentAction = this.START_AUCTION;
             this.currentPlayerIndex = 0;
             this.currentPlayer = this.playerOrder[this.currentPlayerIndex];
-            this.currentAction = this.START_AUCTION;
+            this.auction.startNewRoundOfAuctions();
         }
 
 	};

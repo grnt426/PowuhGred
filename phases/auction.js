@@ -76,7 +76,22 @@ exports.Auction = function(engine, comms){
      */
     this.haveNotShuffledAfterStep3 = true;
 
+    /**
+     * When a player has more plants than they can store, they must choose a plant to discard. This flag is set
+     * when the auction phase is awaiting a player to discard a power plant.
+     * @type {boolean}
+     */
     this.playerMustRemovePlant = false;
+
+    /**
+     * If at least one player has bought a power plant, there is no need to discard the lowest cost power plant.
+     * @type {boolean}
+     */
+    this.powerPlantBoughtInRound = false;
+
+    this.startNewRoundOfAuctions = function(){
+        this.powerPlantBoughtInRound = false;
+    };
 
 	// TODO Should a different order be used?
 	this.nextBidder = function(pass){
@@ -151,6 +166,7 @@ exports.Auction = function(engine, comms){
 			this.engine.nextPlayer();
 		}
 		else{
+            this.powerPlantBoughtInRound = true;
 			console.info(data);
 			var player = this.engine.players[this.engine.currentPlayer];
 			var plant = data.cost;
