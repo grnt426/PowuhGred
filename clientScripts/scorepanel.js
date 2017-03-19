@@ -196,6 +196,7 @@ function drawScorePanel(data, ctx, ppp) {
             ppp[cost].curX = t_x+(p_x*count);
             ppp[cost].curY = t_y+p_y+16;
             ppp[cost].length = p_x;
+            ppp[cost].resourcePositions = [];
 
             // Draw the resources on the card
             var availableResources = plant.resources;
@@ -204,9 +205,13 @@ function drawScorePanel(data, ctx, ppp) {
             for(var type in availableResources){
                 for(var j = 0; j < availableResources[type]; j++){
                     ctx.fillStyle = colorNameToColorCode(type);
-                    ctx.fillRect(ppp[cost].curX + 15 + (20 * (drawn % 3)),
-                        ppp[cost].curY + 55 - (20 * Math.floor(drawn / 3)),
-                        10, 10);
+                    var resourceX = ppp[cost].curX + 15 + (20 * (drawn % 3));
+                    var resourceY = ppp[cost].curY + 55 - (20 * Math.floor(drawn / 3));
+                    var resourceSize = 10;
+                    ctx.fillRect(resourceX, resourceY, resourceSize, resourceSize);
+
+                    // setup click region for resource
+                    ppp[cost].resourcePositions.push({type:type, x:resourceX, y:resourceY, size:resourceSize});
 
                     if(ppp[cost].selected && highlightSelected[type] > 0 && currentActionState == "power"){
                         ctx.strokeStyle = GREEN;
@@ -222,6 +227,13 @@ function drawScorePanel(data, ctx, ppp) {
             count+=1;
         }
         t_y += y_pad + b_y;
+
+        // Draw the dragged resource, if any
+        if(resourceDragging){
+            ctx.fillStyle = colorNameToColorCode(resourceDragging.type);
+            ctx.fillRect(mouseX - (resourceDragging.size / 2), mouseY - (resourceDragging.size / 2),
+                resourceDragging.size, resourceDragging.size);
+        }
     }
 }
 

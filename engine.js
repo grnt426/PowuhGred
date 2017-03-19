@@ -486,7 +486,7 @@ exports.Engine = function(comms, cities, plants){
         var destinationPlantCost = data['dst'];
         var resources = data['resources'];
 
-        if(player.plants[sourcePlantCost] == undefined || player.plants[destinationPlantCost] == undefined || !this.auction.playerMustRemovePlant || (this.auction.playerMustRemovePlant && this.auction.currentBidLeader != player.uid) ){
+        if(player.plants[sourcePlantCost] == undefined || player.plants[destinationPlantCost] == undefined){
             comms.toPlayer(player, "Source or Destination plant not owned.");
         }
         else{
@@ -495,9 +495,9 @@ exports.Engine = function(comms, cities, plants){
             // If the player has chosen the new plant as the destination, we need to select it, instead.
             var destinationPlant = player.plants[destinationPlantCost] != undefined ? player.plants[destinationPlantCost]
                 : this.plants[destinationPlantCost];
-            if(sourcePlant.canAddResources(resources) && destinationPlant.canRemoveResources(resources)){
-                sourcePlant.addResources(resources);
-                destinationPlant.removeResources(resources);
+            if(sourcePlant.canRemoveResources(resources) && destinationPlant.canAddResources(resources)){
+                sourcePlant.removeResources(resources);
+                destinationPlant.addResources(resources);
             }
             else{
                 comms.toPlayer(player, "Can not move all resources. Source not enough or destination can't accept.");

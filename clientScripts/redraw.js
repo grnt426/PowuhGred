@@ -12,6 +12,7 @@ var animationTickLoop = function(){
         if(animationFlags["start_game_p"] > 1) {
             animationFlags["start_game_p"] = 1;
             animationFlags["start_game"]=false;
+            clearInterval(animation);
         }
 
         anim.progress = animationFlags["start_game_p"];
@@ -22,7 +23,7 @@ var animationTickLoop = function(){
 };
 
 // about 30 FPS
-setInterval(animationTickLoop,1000/30);
+var animation = setInterval(animationTickLoop,1000/30);
 
 var animStartGame = function() {
     animationFlags["start_game"] = true;

@@ -73,6 +73,8 @@ exports.PowerPlant = function(cost, type, requires, powers){
 
         // TODO: Should only check the only resource we can have on this power plant
         for(var r in resources){
+            if(resources[r] != 0 && r != this.type)
+                return false;
             if(this.resources[r] + resources[r] > this.requires * 2)
                 return false;
         }

@@ -42,7 +42,7 @@ exports.Building = function (engine, comms, cities) {
                 return;
             }
             
-            var totalCost = this.computeCost(data);
+            var totalCost = this.checkCost(this.engine.getCurrentPlayer(), data);
             var currentPlayer = this.engine.getCurrentPlayer();
             if(totalCost > currentPlayer.money){
                 this.comms.toCurrent("The selected set of cities cost $" + totalCost + ", and you only have $" + currentPlayer.money);
@@ -60,11 +60,6 @@ exports.Building = function (engine, comms, cities) {
                 engine.nextPlayer();
             }
         }
-    };
-
-    this.computeCost = function(requestedCities){
-        return this.cities.findOptimalPurchaseCostOrderOfCities(this.engine.getCurrentPlayer().cities, requestedCities) +
-                this.cities.getTotalCostToBuild(requestedCities);
     };
 
     this.checkCost = function(requestedCities, player){

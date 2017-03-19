@@ -15,13 +15,96 @@ var internalY = function (y) { return (y + 96) / 1.1; };
 
 var sqrDist = function(x1,x2,y1,y2) { return Math.pow(x1-x2,2)+Math.pow(y1-y2,2) };
 
-// Listen for clicks
+var dragging = false;
+var plantDraggedFrom = undefined;
+var resourceDragging = undefined;
+var mouseX = 0;
+var mouseY = 0;
+var redrawLoop = undefined;
+
+canvas.addEventListener('mousemove', function(e) {
+    mouseX = e.pageX - 8;
+    mouseY = e.pageY - 8;
+});
+
+// Drag event detection
+canvas.addEventListener('mousedown', function(event){
+    var x = event.pageX - 8;
+    var y = event.pageY - 8;
+
+    if(!dragging) {
+
+        if(x > PLAYER_PLANTS_START_X && y > 50){
+            var plant = findPlantClicked(x, y);
+            if (plant != undefined) {
+
+                // Now that we found a plant that matches the click location, only select this plant if we own it
+                var ownedPlant = scorePanel.args.data.players[playerData.self.uid].plants[parseInt(plant.cost)];
+                if (ownedPlant != undefined) {
+                    console.log("Checking if the player clicked on a draggable owned resource...");
+
+                    // Determine if we clicked on a resource
+                    var resource = undefined;
+                    for (var resPos in plant.resourcePositions) {
+                        var res = plant.resourcePositions[resPos];
+                        if(res.x <= x && res.x + res.size >= x && res.y <= y && res.y + res.size >= y){
+                            resource = res;
+                            break;
+                        }
+                    }
+                    console.log("Resource found: " + JSON.stringify(resource));
+                    if (resource != undefined) {
+                        dragging = true;
+                        plantDraggedFrom = plant;
+                        resourceDragging = resource;
+                        redrawLoop = setInterval(function(){redraw(scorePanel)}, 1000/30);
+                    }
+                }
+            }
+        }
+    }
+});
+
+// Listen for clicks, or in the case of dragging, resolve the drop action
 canvas.addEventListener('mouseup', function(event) {
+
+    // TODO: why is there an offset of 8?
     var x = event.pageX - 8;
     var y = event.pageY - 8;
 
     if(DEBUG){
         log("Click: " + x + ", " + y, CONSOLE_O);
+    }
+
+    if(dragging){
+        clearInterval(redrawLoop);
+
+        var plant = findPlantClicked(x, y);
+        if(plant != undefined){
+
+            if(plant.cost == plantDraggedFrom.cost){
+                console.log("Dragged back to self? Do nothing");
+            }
+            else {
+                var ownedPlant = scorePanel.args.data.players[playerData.self.uid].plants[parseInt(plant.cost)];
+                if (ownedPlant != undefined) {
+                    console.log("Dragged to: " + JSON.stringify(plant));
+                    var data = {src:plantDraggedFrom.cost, dst:plant.cost, resources:resourceList(0,0,0,0)};
+                    data.resources[resourceDragging.type] = 1;
+                    socket.emit(SOCKET_GAMEACTION, {uid:playerData.self.uid, cmd:"move", args:data});
+                }
+                else{
+                    console.log("Dragged to un-owned: " + JSON.stringify(plant));
+                }
+            }
+        }
+
+        // reset the dragging state, regardless of outcome of dragged object
+        dragging = false;
+        plantDraggedFrom = undefined;
+        resourceDragging = undefined;
+        redraw(scorePanel);
+        return;
     }
 
     // Check if an action button was pressed (buttons.js)
@@ -51,95 +134,91 @@ canvas.addEventListener('mouseup', function(event) {
     if(x > PLAYER_PLANTS_START_X && y > 50 && (currentActionState == "buy" || currentActionState == "power" || currentActionState == "remove")) {
         console.log("Clicked in player power plant region...");
 
-        // Really lazy, but just search all 50 plants to see if any of them are in the spot where the player clicked
-        for(var p in ppp){
-            var plant = ppp[p];
-            if(plant.curX <= x && plant.curX + plant.length >= x && plant.curY <= y && plant.curY + plant.length >= y){
-                console.log("Clicked on a power plant...");
+        var plant = findPlantClicked(x, y);
+        if(plant != undefined){
 
-                // Now that we found a plant that matches the click location, only select this plant if we own it
-                // TODO: this super long line is awful
-                var ownedPlant = scorePanel.args.data.players[playerData.self.uid].plants[parseInt(p)];
-                if(ownedPlant != undefined){
-                    console.log("Clicked on an owned power plant.");
+            // Now that we found a plant that matches the click location, only select this plant if we own it
+            // TODO: this super long line is awful
+            var ownedPlant = scorePanel.args.data.players[playerData.self.uid].plants[parseInt(plant.cost)];
+            if (ownedPlant != undefined) {
+                console.log("Clicked on an owned power plant.");
 
-                    // For power plants which can burn both coal and oil, we want different behavior
-                    if(ownedPlant.type == "both" && currentActionState == "power"){
+                // For power plants which can burn both coal and oil, we want different behavior
+                if (ownedPlant.type == "both" && currentActionState == "power") {
 
-                        /*
-                          The reason for modulo on N + 1, where N = the required number of resources to activate, is shown as followed:
-                          N = 1: 1 coal, or 1 oil
-                          N = 2: 2 coal, 2 oil, or 1 coal and 1 oil
-                          N = 3: 3 coal, 3 oil, 2 coal and 1 oil, or 2 oil and 1 coal
-                         */
-                        var selectedIndex = plant.selected ? (plant.selectionIndex + 1) % (ownedPlant.requires + 2) : 1;
-                        if(selectedIndex != 0) {
-                            while(selectedIndex != 0){
-                                if(selectedIndex == 1 && ownedPlant.resources['coal'] >= ownedPlant.requires){
-                                    plant.selectedToBurn = {'coal': ownedPlant.requires, 'oil':0};
-                                    break;
-                                }
-                                else if(selectedIndex == 2 && ownedPlant.resources['oil'] >= ownedPlant.requires){
-                                    plant.selectedToBurn = {'coal': 0, 'oil': ownedPlant.requires};
-                                    break;
-                                }
-
-                                 /*
-                                  I am overloading this one to compress the logic. If the plant needs a combination of 2 coal/oil,
-                                  Then the player needs at least 1 of each for a "mixed" selection. However, that would incorrectly
-                                  highlight the case for when the plant requires a combination of 3 coal/oil unless the explicit
-                                  check is made for the requires. By overloading, I avoid adding another state and complexity
-                                  with regards to how to loop properly over the selection possibilities. So the two are awkwardly
-                                  combined (mixed for 2, or 2 coal/1 oil for 3).
-                                  */
-                                else if(selectedIndex == 3 && (
-                                        (ownedPlant.resources['coal'] > 0 && ownedPlant.resources['oil'] > 0 && ownedPlant.requires == 2) ||
-                                        (ownedPlant.resources['coal'] > 1 && ownedPlant.resources['oil'] > 0 && ownedPlant.requires == 3))){
-                                    plant.selectedToBurn = {'coal': ownedPlant.requires - 1, 'oil': 1};
-                                    break;
-                                }
-                                else if(selectedIndex == 4 && ownedPlant.resources['oil'] > 1 && ownedPlant.resources['coal'] > 0
-                                        && ownedPlant.requires == 3){
-                                    plant.selectedToBurn = {'coal': 1, 'oil': 2};
-                                    break;
-                                }
-                                selectedIndex = (selectedIndex + 1) % (ownedPlant.requires + 2);
+                    /*
+                     The reason for modulo on N + 1, where N = the required number of resources to activate, is shown as followed:
+                     N = 1: 1 coal, or 1 oil
+                     N = 2: 2 coal, 2 oil, or 1 coal and 1 oil
+                     N = 3: 3 coal, 3 oil, 2 coal and 1 oil, or 2 oil and 1 coal
+                     */
+                    var selectedIndex = plant.selected ? (plant.selectionIndex + 1) % (ownedPlant.requires + 2) : 1;
+                    if (selectedIndex != 0) {
+                        while (selectedIndex != 0) {
+                            if (selectedIndex == 1 && ownedPlant.resources['coal'] >= ownedPlant.requires) {
+                                plant.selectedToBurn = {'coal': ownedPlant.requires, 'oil': 0};
+                                break;
                             }
-                            plant.selectionIndex = selectedIndex;
+                            else if (selectedIndex == 2 && ownedPlant.resources['oil'] >= ownedPlant.requires) {
+                                plant.selectedToBurn = {'coal': 0, 'oil': ownedPlant.requires};
+                                break;
+                            }
 
-                            // If we loop back around to a selection index of 0 (nothing), the plant is then not
-                            // selected, which can happen if we exhausted other possible options which weren't valid
-                            // or the player has no valid selectable options (completely insufficient resources).
-                            // TODO: We can detect the later case if we checked all three states and got back to 0, and then alert the user their selection was invalid.
-                            plant.selected = plant.selectionIndex != 0;
-                            selectedPlants.push(p);
+                            /*
+                             I am overloading this one to compress the logic. If the plant needs a combination of 2 coal/oil,
+                             Then the player needs at least 1 of each for a "mixed" selection. However, that would incorrectly
+                             highlight the case for when the plant requires a combination of 3 coal/oil unless the explicit
+                             check is made for the requires. By overloading, I avoid adding another state and complexity
+                             with regards to how to loop properly over the selection possibilities. So the two are awkwardly
+                             combined (mixed for 2, or 2 coal/1 oil for 3).
+                             */
+                            else if (selectedIndex == 3 && (
+                                (ownedPlant.resources['coal'] > 0 && ownedPlant.resources['oil'] > 0 && ownedPlant.requires == 2) ||
+                                (ownedPlant.resources['coal'] > 1 && ownedPlant.resources['oil'] > 0 && ownedPlant.requires == 3))) {
+                                plant.selectedToBurn = {'coal': ownedPlant.requires - 1, 'oil': 1};
+                                break;
+                            }
+                            else if (selectedIndex == 4 && ownedPlant.resources['oil'] > 1 && ownedPlant.resources['coal'] > 0
+                                && ownedPlant.requires == 3) {
+                                plant.selectedToBurn = {'coal': 1, 'oil': 2};
+                                break;
+                            }
+                            selectedIndex = (selectedIndex + 1) % (ownedPlant.requires + 2);
                         }
-                        else{
-                            plant.selected = false;
-                            selectedPlants.splice(selectedPlants.indexOf(p), 1);
-                            plant.selectedToBurn = {};
-                        }
+                        plant.selectionIndex = selectedIndex;
+
+                        // If we loop back around to a selection index of 0 (nothing), the plant is then not
+                        // selected, which can happen if we exhausted other possible options which weren't valid
+                        // or the player has no valid selectable options (completely insufficient resources).
+                        // TODO: We can detect the later case if we checked all three states and got back to 0, and then alert the user their selection was invalid.
+                        plant.selected = plant.selectionIndex != 0;
+                        selectedPlants.push(plant.cost);
                     }
                     else {
-                        plant.selected = plant.selected === undefined ? true : !plant.selected;
-                        if (plant.selected) {
-                            if(selectedOwnedPlant !== undefined && currentActionState != "power")
-                                selectedOwnedPlant.selected = false;
-                            selectedOwnedPlant = plant;
+                        plant.selected = false;
+                        selectedPlants.splice(selectedPlants.indexOf(plant.cost), 1);
+                        plant.selectedToBurn = {};
+                    }
+                }
+                else {
+                    plant.selected = plant.selected === undefined ? true : !plant.selected;
+                    if (plant.selected) {
+                        if (selectedOwnedPlant !== undefined && currentActionState != "power")
+                            selectedOwnedPlant.selected = false;
+                        selectedOwnedPlant = plant;
+                    }
+                    else {
+                        selectedOwnedPlant = undefined;
+                    }
+
+                    // We can only select multiple plants if we are in the power phase. While it *might* make sense
+                    // in the resource purchase phase, it would be somewhat confusing.
+                    if (currentActionState == "power") {
+                        if (selectedPlants.indexOf(plant.cost) != -1) {
+                            selectedPlants.splice(selectedPlants.indexOf(plant.cost), 1);
                         }
                         else {
-                            selectedOwnedPlant = undefined;
-                        }
-
-                        // We can only select multiple plants if we are in the power phase. While it *might* make sense
-                        // in the resource purchase phase, it would be somewhat confusing.
-                        if(currentActionState == "power") {
-                            if (selectedPlants.indexOf(plant.cost) != -1) {
-                                selectedPlants.splice(selectedPlants.indexOf(p), 1);
-                            }
-                            else {
-                                selectedPlants.push(p);
-                            }
+                            selectedPlants.push(plant.cost);
                         }
                     }
                 }
@@ -165,6 +244,23 @@ var deselectOwnPowerPlants = function(){
     }
     selectedOwnedPlant = undefined;
     selectedPlants = [];
+};
+
+var findPlantClicked = function(x, y){
+
+    var clickedPlant = undefined;
+
+    // Really lazy, but just search all 50 plants to see if any of them are in the spot where the player clicked
+    for(var p in ppp) {
+        var plant = ppp[p];
+        if (plant.curX <= x && plant.curX + plant.length >= x && plant.curY <= y && plant.curY + plant.length >= y) {
+            console.log("Clicked on a power plant...");
+            clickedPlant = plant;
+            break;
+        }
+    }
+
+    return clickedPlant;
 };
 
 var checkCityClick = function(event) {
