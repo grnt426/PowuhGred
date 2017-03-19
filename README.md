@@ -29,7 +29,7 @@ Starting the Game
 
 Start the server
 
-	node server.js
+	nodejs server.js
 	
 Connect to the server
 

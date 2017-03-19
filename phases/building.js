@@ -67,6 +67,11 @@ exports.Building = function (engine, comms, cities) {
                 this.cities.getTotalCostToBuild(requestedCities);
     };
 
+    this.checkCost = function(requestedCities, player){
+        return this.cities.findOptimalPurchaseCostOrderOfCities(player.cities, requestedCities) +
+            this.cities.getTotalCostToBuild(requestedCities);
+    };
+
     /**
      * Determines if the list of cities are all purchasable for that player.
      * @param {string[]} cities    The list of cities to check.
