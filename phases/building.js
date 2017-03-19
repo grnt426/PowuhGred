@@ -42,7 +42,7 @@ exports.Building = function (engine, comms, cities) {
                 return;
             }
             
-            var totalCost = this.checkCost(this.engine.getCurrentPlayer(), data);
+            var totalCost = this.checkCost(data, this.engine.getCurrentPlayer());
             var currentPlayer = this.engine.getCurrentPlayer();
             if(totalCost > currentPlayer.money){
                 this.comms.toCurrent("The selected set of cities cost $" + totalCost + ", and you only have $" + currentPlayer.money);
