@@ -65,7 +65,19 @@ function drawScorePanel(data, ctx, ppp) {
     ctx.fillStyle = "#DDDDDD";
     ctx.lineWidth=6;
 
-    var playerCityCount = {};
+    // tracks the number of players already drawn in a spot on the city track
+    var playersDrawnOnCityTrack = {};
+
+    // the number of total players that must share a given spot on the city track
+    var playersToFitOnCityTrackSpot = {};
+    for(var i = 0; i < data.playerOrder.length; i++) {
+
+        // This if-statement is useful in the beginning before everything has loaded
+        if (!data.players[data.playerOrder[i]]) return;
+        var player = data.players[data.playerOrder[i]];
+        playersToFitOnCityTrackSpot[player.cities.length] = playersToFitOnCityTrackSpot[player.cities.length] ?
+                playersToFitOnCityTrackSpot[player.cities.length] + 1 : 1;
+    }
 
     var t_x = s_x1;
     var t_y = s_y1;
@@ -73,6 +85,7 @@ function drawScorePanel(data, ctx, ppp) {
     for(var i=0; i < data.playerOrder.length; i++) {
 
         t_x = s_x1;
+
 
         if(!data.players[data.playerOrder[i]]) return;
         var player = data.players[data.playerOrder[i]];
@@ -101,19 +114,70 @@ function drawScorePanel(data, ctx, ppp) {
 
         // Draw position on city track
         var cityCount = cities.length;
+        var currentCount = playersDrawnOnCityTrack[cityCount] ? playersDrawnOnCityTrack[cityCount] : 0;
+        var mustFit = playersToFitOnCityTrackSpot[cityCount];
         if(cityCount > 0 && cityCount < 7){
             var x = 415;
             var y = 22;
-            var currentCount = playerCityCount[cityCount] == undefined ? 0 : playerCityCount[cityCount];
+
             ctx.fillStyle = playerColorCode;
             x = x + (50 * (cityCount - 1)) * 1.04 + (15 * (currentCount % 3));
             y = y + (13 * Math.floor(currentCount / 3));
             ctx.fillRect(x, y, 10, 10);
-            playerCityCount[cityCount] = playerCityCount[cityCount] == undefined ? 1 : playerCityCount[cityCount] + 1;
         }
-        else if(cityCount > 6){
 
+        // The physical spaces for the counts 7-21 are much smaller. To keep the UI as clean as possible, we compact
+        // the position of the houses only as much as needed.
+        else if(cityCount >= 7){
+
+            // position for the house within a cell
+            var x = 387;
+            var y = 55;
+
+            // Space around houses in same cell
+            var xBuffer;
+            var yBuffer;
+
+            // Space between adjacent cells
+            var xOffset = 25;
+
+            // padding from house to cell wall
+            var xPadding;
+
+            var size = 8;
+
+            if(mustFit <= 2){
+                xPadding = 6;
+                xBuffer = 0;
+                yBuffer = 12;
+            }
+            else if(mustFit <= 4){
+                xPadding = 2;
+                xBuffer = 8;
+                yBuffer = 8;
+                size = 8;
+            }
+            else{
+                xPadding = 2;
+                xBuffer = 7;
+                yBuffer = 7;
+                size = 7;
+            }
+
+            ctx.fillStyle = playerColorCode;
+            if(cityCount == 7){
+                x = 720 + xPadding;
+                y = 20 + (mustFit <= 2 ? 5 : mustFit <= 4 ? 5 : 3);
+                x = x + (xBuffer * (currentCount % 2));
+                y = y + (yBuffer * Math.floor((currentCount / (mustFit <= 2 ? 1 : 2))));
+            }
+            else {
+                x = x + (xOffset * (cityCount - 8)) * 1.04 + (xBuffer * (currentCount % 2)) + xPadding;
+                y = y + (yBuffer * Math.floor((currentCount / (mustFit <= 2 ? 1 : 2))));
+            }
+            ctx.fillRect(x, y, size, size);
         }
+        playersDrawnOnCityTrack[cityCount] = playersDrawnOnCityTrack[cityCount] ? playersDrawnOnCityTrack[cityCount] + 1 : 1;
 
         // draw curved border
         if(currentPlayer == player.uid && currentActionState != "power")

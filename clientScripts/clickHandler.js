@@ -65,6 +65,24 @@ canvas.addEventListener('mousedown', function(event){
     }
 });
 
+var P_KEY_CODE = 80;
+
+window.addEventListener('keydown', function(event){
+    console.log("Got key: " + event.keyCode);
+    switch(event.keyCode){
+        case P_KEY_CODE: handleP_KeyButton(event); break;
+    }
+}, true);
+
+function handleP_KeyButton(event){
+    console.log("P key pressed");
+    if(event.altKey){
+        console.log("hotkey for pass triggered.");
+        passButton();
+    }
+}
+
+
 // Listen for clicks, or in the case of dragging, resolve the drop action
 canvas.addEventListener('mouseup', function(event) {
 
