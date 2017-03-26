@@ -11,6 +11,13 @@ if (process.argv[1] == "debug") {
     server = httpServer.createServer(app);
 }
 else {
+    // Don't allow non-HTTPS connections
+    var unsecureHttpServer = require('http');
+    unsecureHttpServer.createServer(function (req, res) {
+        res.writeHead(301, { "Location": "https://" + req.headers['host'] + req.url });
+        res.end();
+    }).listen(8080);
+
     httpServer = require('https');
     var credentials = {
         key: fs.readFileSync('/etc/letsencrypt/live/granitegames.io/privkey.pem'),
