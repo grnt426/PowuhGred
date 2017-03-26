@@ -6,7 +6,7 @@ var httpServer,
     app = express(),
     server;
 
-if (process.argv[1] == "debug") {
+if (process.argv[2] == "debug") {
     httpServer = require('http');
     server = httpServer.createServer(app);
 }
@@ -37,7 +37,7 @@ var io = require('socket.io').listen(server),
 
 // routing
 app.get("/", function (req, res) {
-    res.sendFile(__dirname + '/index.html');
+    res.sendFile(__dirname + '/gameclient.html');
 });
 app.get("/clientScripts/init.js", function (req, res) {
     res.sendFile(__dirname + '/clientScripts/init.js');
