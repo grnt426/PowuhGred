@@ -1,7 +1,8 @@
 // Main entry point for the server. Init systems, sync client js and data, listen for connections
 
-var httpServer;
-var express = require('express'),
+var httpServer,
+    fs = require('fs'),
+    express = require('express'),
 	app = express();
 
 if(process.argv[1] == "debug"){
