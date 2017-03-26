@@ -7,7 +7,7 @@ viable playable game. A boardgame was chosen for its simplicity of design and
 implementation.
 
 Power Grid is a game of market superiority. Your goal is to power more cities
-than your opponents. Power plants are brough to auction for all players to bid
+than your opponents. Power plants are brought to auction for all players to bid
 on, powered by coal, oil, garbage or uranium or wind, they are the workhorses of
 your utility.  Resources are purchased in a market where prices are dominated by
 supply and demand.  Players build out their connections to more cities in a
