@@ -1,9 +1,19 @@
 // Main entry point for the server. Init systems, sync client js and data, listen for connections
 
+var httpServer;
 var express = require('express'),
-	http = require('http'),
-	app = express(),
-	server = http.createServer(app),
+	app = express();
+
+if(process.argv[1] == "debug"){
+    httpServer = require('http');
+}
+else{
+    httpServer = require('https');
+    app['key'] = fs.readFileSync('/etc/letsencrypt/keys/0000_key-certbot.pem');
+    app['cert'] = fs.readFileSync('/etc/letsencrypt/csr/0000_csr-certbot.pem');
+}
+
+var	server = httpServer.createServer(app),
 	io = require('socket.io').listen(server),
 	communicationsjs = require('./communications.js'),
 	comms = new communicationsjs.Communications(io),

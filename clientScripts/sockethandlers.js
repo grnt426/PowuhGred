@@ -53,6 +53,14 @@ socket.on(SOCKET_UPDATES, function(data){
             document.title = "PowuhGred";
         }
 
+        // un-select the resources selected from the buy phase
+        if(currentActionState == "build"){
+            var playerOwnedPlantCosts = scorePanel.args.data.players[playerData.self.uid].plants;
+            for(var i in playerOwnedPlantCosts){
+                ppp[parseInt(i)].resources = {};
+            }
+        }
+
         for(var change in scorePanel.args.changes){
             if(scorePanel.args.changes[change] == "startGame"){
                 animStartGame();

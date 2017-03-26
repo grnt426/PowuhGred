@@ -29,7 +29,7 @@ Starting the Game
 
 Start the server
 
-	nodejs server.js
+	nodejs server.js debug
 	
 Connect to the server
 
