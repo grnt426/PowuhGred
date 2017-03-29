@@ -2,16 +2,21 @@
   "name": "PowuhGred",
   "description": "Boardgame Clone",
   "version": "0.0.1",
-  "engines" : { 
-    "node" : ">=6.9.0" 
+  "engines": {
+    "node": ">=6.9.0"
   },
   "dependencies": {
-    "allcombinations": "^1.1.1",
+    "allcombinations": "1.1.1",
+    "body-parser": "^1.17.1",
     "express": "4.x",
+    "express-session": "1.15.1",
     "mocha": "3.2.0",
+    "pug": "2.0.0-beta11",
     "sinon": "1.17.6",
     "socket.io": "1.1.0",
-    "allcombinations": "1.1.1"
+    "bcrypt":"1.0.2",
+    "sqlite": "2.5.0",
+    "bluebird": "^3.5.0"
   },
   "scripts:": {
     "test": "mocha"

@@ -3,4 +3,5 @@ data/plants.jpg
 data/plants_t.jpg
 node_modules/*
 *.zip
-.idea/watcherTasks.xml
+.idea/*.xml
+*.sqlite

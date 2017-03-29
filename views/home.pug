@@ -1,0 +1,16 @@
+html
+    head
+        title PowerGrid Home
+    body
+        if session.authenticated
+            p you are logged in as #{session.username}
+            a(href='/logout') Logout
+        else
+            p you are not logged in.
+            form(method='POST' action='/login')
+                label(for='username') Username:
+                input(type='text', placeholder='Username', name='username')
+                label(for='password') Password:
+                input(type='password', name='password')
+                input(type='submit', value='Login')
+            a(href='/register') or Register!

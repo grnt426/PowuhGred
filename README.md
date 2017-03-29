@@ -24,6 +24,8 @@ Mocha https://mochajs.org/#installation
 
 	npm install
 
+Create a UUID for a secret session and place in `session.secret` one directory above where server.js was executed.
+
 Starting the Game
 -----------------
 
