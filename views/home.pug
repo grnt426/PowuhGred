@@ -25,12 +25,12 @@ html
                             th Players
                             th
                     tbody
-                            each game, i in games
-                                tr
-                                    td #{game.hostUser}
-                                    td #{game.maxPlayers}
-                                    td
-                                        if game.started == 0
-                                            a(href='/joingame/' + game.gameId) Join!
+                        each game, i in games
+                            tr
+                                td #{game.hostUser}
+                                td #{game.maxPlayers}
+                                td
+                                    if game.started == 0
+                                        a(href='/joingame/' + game.gameId) Join!
             else
                 p No games found!
