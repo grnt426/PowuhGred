@@ -1,7 +1,7 @@
 var ctx = canvas.getContext("2d");  // ctx allows drawing on the canvas
 
 var bgImg = new Image();
-bgImg.src = "./data/germany.jpg";
+bgImg.src = "../data/germany.jpg";
 
 var animationFlags = [];
 var anim = {};

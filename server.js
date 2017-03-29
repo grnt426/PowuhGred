@@ -10,21 +10,25 @@ let httpServer,
     bodyParser = require('body-parser'),
     bcrypt = require('bcrypt'),
     Promise = require('bluebird'),
-    db = require('sqlite');
+    db = require('sqlite'),
+    sessionFileStore = require('session-file-store')(session);
 
-app.use(bodyParser.json());       // to support JSON-encoded bodies
-app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
-    extended: true
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({
+    extended: false
 }));
 
 let sessionOptions = {cookie:{}, resave:false, saveUninitialized:false,
-    secret: fs.readFileSync('../session.secret').toString()};
+    secret: fs.readFileSync('../session.secret').toString(), autoSave:true,
+    store: new sessionFileStore()};
+let sessionObject;
 
 if (process.argv[2] === "debug") {
     console.info("Running as debug");
     sessionOptions.cookie.secure = false;
     httpServer = require('http');
-    app.use(session(sessionOptions));
+    sessionObject = session(sessionOptions);
+    app.use(sessionObject);
     server = httpServer.createServer(app);
 }
 else {
@@ -45,7 +49,8 @@ else {
         key: fs.readFileSync('/etc/letsencrypt/live/granitegames.io/privkey.pem'),
         cert: fs.readFileSync('/etc/letsencrypt/live/granitegames.io/fullchain.pem')
     };
-    app.use(session(sessionOptions));
+    sessionObject = session(sessionOptions);
+    app.use(sessionObject);
     server = httpServer.createServer(credentials, app);
 }
 
@@ -53,7 +58,6 @@ app.set('view engine', 'pug');
 
 var io = require('socket.io').listen(server),
     communicationsjs = require('./communications.js'),
-    comms = new communicationsjs.Communications(io),
     citiesjs = require('./cities.js'),
     powerplantjs = require('./powerplantreader.js'),
     enginejs = require('./engine.js'),
@@ -84,9 +88,12 @@ app.get("/", function (req, res) {
             console.error(error);
         });
 });
-app.get("/game", function (req, res) {
+app.get("/game/:gameId", function (req, res) {
     console.info("Request for game");
     console.info(req.session);
+
+    let gameId = req.params.gameId;
+    console.info("Game requested: " + gameId);
 
     // TODO: should instead just present a login page rather than this weird redirect
     if(!req.session || !req.session.authenticated){
@@ -96,8 +103,12 @@ app.get("/game", function (req, res) {
         res.end();
     }
     else{
+        req.session.joining = gameId;
         res.sendFile(__dirname + '/gameclient.html');
     }
+});
+app.post("/creategame", function(req, res){
+
 });
 app.post("/login", function(req, res){
     let username = req.body.username;
@@ -138,6 +149,7 @@ app.post("/login", function(req, res){
 });
 app.get("/logout", function(req, res){
     req.session.authenticated = false;
+    delete req.session.username;
     res.render('home');
 });
 app.post("/registeruser", function(req, res) {
@@ -198,27 +210,52 @@ citiesDef.parseCities("data/germany_connections.txt");
 let powerPlants = new powerplantjs.PowerPlantReader();
 powerPlants.parsePowerPlants("data/power_plants.txt");
 
-let engine = new enginejs.Engine(comms, citiesDef, powerPlants.powerPlants);
+var activeGames = [];
+
+var comms = new communicationsjs.Communications(io);
+var engine = new enginejs.Engine(comms, citiesDef, powerPlants.powerPlants);
 comms.engine = engine;
+engine.engineId = 'abc';
+activeGames['abc'] = engine;
+
+comms = new communicationsjs.Communications(io);
+engine = new enginejs.Engine(comms, citiesDef, powerPlants.powerPlants);
+comms.engine = engine;
+engine.engineId = 'abcd';
+activeGames['abcd'] = engine;
+
+// This exposes the session object from Express into Socket.IO
+io.use(function(socket, next){
+    sessionObject(socket.handshake, {}, next);
+});
 
 // connect to a player, listen
 // TODO: There seems to be an issue with a player joining, but the tab not gaining focus in FF, and the player not initializing the game correctly.
 io.sockets.on(comms.SOCKET_CONNECTION, function (socket) {
 
-    if (engine.gameStarted) {
+    let gameId = socket.handshake.session.joining;
+    console.info("Game attempting join: " + gameId);
+    let curGame = activeGames[gameId];
+
+    if (curGame && curGame.gameStarted) {
         console.info("A player tried to join after the game started!?");
         return;
     }
 
-    // a user connected, send the map down
-    engine.broadcastGameState();
-    let uid = 'player' + util.olen(engine.players);
+    // No longer trying to join. Free up so the player can join another.
+    delete socket.handshake.session.joining;
+
+    // For simplicity, bind the Engine object to the Socket
+    socket.engine = curGame;
+
+    let uid = 'player' + util.olen(curGame.players);
     socket.uid = uid;
     socket.emit(comms.SOCKET_USERID, uid);
-    engine.addPlayer(uid, socket);
+    curGame.addPlayer(uid, socket);
     socket.emit(comms.SOCKET_DEFINECITIES, citiesDef.cities);
     comms.toAll(uid + " has joined the game.");
     console.info(uid + " [" + socket.uid + "] has joined the game");
+    curGame.broadcastGameState();
 
     // When the client emits sendchat, this listens and executes
     // sendchat -> String
@@ -228,7 +265,7 @@ io.sockets.on(comms.SOCKET_CONNECTION, function (socket) {
         }
         else if (data.trim().length !== 0) {
             console.info("Chat message: " + data);
-            comms.toAllFrom(engine.reverseLookUp[socket.uid], data);
+            comms.toAllFrom(curGame.reverseLookUp[socket.uid], data);
         }
     });
 
@@ -236,13 +273,13 @@ io.sockets.on(comms.SOCKET_CONNECTION, function (socket) {
     // gameaction -> JsonObject
     socket.on(comms.SOCKET_GAMEACTION, function (data) {
         data.uid = socket.uid;
-        engine.resolveAction(data);
+        curGame.resolveAction(data);
     });
 
     // when the user disconnects
     socket.on(comms.SOCKET_DISCONNECT, function () {
         // TODO handle players leaving.
-        comms.toAll(engine.reverseLookUp[socket.uid].displayName + " has left the game.");
+        comms.toAll(curGame.reverseLookUp[socket.uid].displayName + " has left the game.");
     });
 });
 
@@ -253,9 +290,9 @@ function resolveCommand(socket, data) {
     if (command === "/name") {
         let name = data.substring(data.indexOf(' ') + 1);
         console.info("Name received: " + name);
-        let player = engine.reverseLookUp[socket.uid];
+        let player = socket.engine.reverseLookUp[socket.uid];
         player.displayName = name;
-        engine.broadcastGameState();
+        socket.engine.broadcastGameState();
     }
 }
 

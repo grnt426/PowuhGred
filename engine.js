@@ -16,6 +16,8 @@ var playerjs = require("./includes/Player.js"),
  */
 exports.Engine = function(comms, cities, plants){
 
+    this.engineId = 0;
+
     this.STARTING_MONEY = 500;
 
     // The Step Three card constant, for simple comparison.

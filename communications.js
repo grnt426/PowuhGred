@@ -42,7 +42,10 @@ exports.Communications = function(io, engine){
 	 * @param msg    The message to broadcast.
 	 */
 	this.toAll = function(msg){
-		this.io.sockets.emit(this.SOCKET_CHAT, {sender:this.SERVER, msg:msg});
+		for(const p in this.engine.players) {
+			const player = this.engine.players[p];
+            this.toPlayer(player, msg);
+        }
 	};
 
 	/**
@@ -74,7 +77,10 @@ exports.Communications = function(io, engine){
 	 */
 	this.toAllFrom = function(from, msg){
 		console.info(from.uid + " " + from.displayName);
-		this.io.sockets.emit(this.SOCKET_CHAT, {sender:from.displayName, msg:msg});
+        for(const p in this.engine.players) {
+            const player = this.engine.players[p];
+            player.socket.emit(this.SOCKET_CHAT, {sender: from.displayName, msg: msg});
+        }
 	};
 
 	/**
@@ -152,7 +158,10 @@ exports.Communications = function(io, engine){
 	 * @param dataObj   the data object to update the client with
 	 */
 	this.broadcastUpdate = function(dataObj){
-		this.io.sockets.emit(this.SOCKET_UPDATES, dataObj);
+        for(const p in this.engine.players) {
+            const player = this.engine.players[p];
+			player.socket.emit(this.SOCKET_UPDATES, dataObj);
+		}
 	};
 };
 

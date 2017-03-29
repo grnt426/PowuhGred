@@ -1,7 +1,7 @@
 // Initialize images for PowerPlant Cards
 // Power Plant cards are located all in one .jpg with specific format labeled below
 var plantImg = new Image();
-plantImg.src = "./data/plants.jpg";
+plantImg.src = "../data/plants.jpg";
 
 var actualMarket = [];
 var futureMarket = [];
