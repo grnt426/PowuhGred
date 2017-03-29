@@ -2,6 +2,7 @@ html
     head
         title PowerGrid Home
     body
+        h1 PowerGrid
         if session.authenticated
             p you are logged in as #{session.username}
             a(href='/logout') Logout
@@ -14,3 +15,22 @@ html
                 input(type='password', name='password')
                 input(type='submit', value='Login')
             a(href='/register') or Register!
+        h1 Lobby
+        div
+            if games.length > 0
+                table
+                    thead
+                        tr
+                            th Host
+                            th Players
+                            th
+                    tbody
+                            each game, i in games
+                                tr
+                                    td #{game.hostUser}
+                                    td #{game.maxPlayers}
+                                    td
+                                        if game.started == 0
+                                            a(href='/joingame/' + game.gameId) Join!
+            else
+                p No games found!

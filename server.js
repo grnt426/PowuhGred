@@ -69,7 +69,20 @@ app.use(function(req,res,next){
 app.get("/", function (req, res) {
     console.info("Request for home");
     console.info(req.session);
-    res.render('home');
+    Promise
+        .resolve(db.all('SELECT * FROM Games'))
+        .then(function(dbResult){
+            console.info(JSON.stringify(dbResult));
+            if(dbResult){
+                res.render('home', {games:dbResult});
+            }
+            else{
+                res.render('home');
+            }
+        })
+        .catch(function(error){
+            console.error(error);
+        });
 });
 app.get("/game", function (req, res) {
     console.info("Request for game");
@@ -254,4 +267,4 @@ Promise.resolve()
     // TODO comment out the below after first-run if you want data to persist with each run in dev.
     .then(() => db.migrate({force: 'last'}))
     .then(() => server.listen(process.env.PORT || 3000))
-    .catch((err) => console.error(err.stack));
+    .catch((err) => console.error("WHAT " + err.stack));
