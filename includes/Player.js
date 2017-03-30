@@ -8,7 +8,7 @@ var util = require("../util.js");
  * @constructor
  * @this {Player}
  */
-exports.Player = function(uid, comms, socket){
+exports.Player = function(uid, comms, socket) {
 
     /**
      * Used for binding a player uniquely.
@@ -54,37 +54,37 @@ exports.Player = function(uid, comms, socket){
      */
     this.color = undefined;
 
-    this.buildOnCity = function(city){
+    this.buildOnCity = function(city) {
         this.cities.push(city);
     };
 
-    this.getPowerPlantCosts = function(){
+    this.getPowerPlantCosts = function() {
         var costs = [];
-        for(var p in this.plants){
+        for(var p in this.plants) {
             costs.push(this.plants[p].cost);
         }
         return costs;
     };
 
-    this.removePowerPlant = function(cost){
+    this.removePowerPlant = function(cost) {
         delete this.plants[cost];
     };
 
-    this.getHighestCostPowerPlant = function(){
+    this.getHighestCostPowerPlant = function() {
         var high = 0;
-        for(var key in this.plants){
+        for(var key in this.plants) {
             if(key > high)
                 high = key;
         }
         return high;
     };
 
-    this.awardPlant = function(plant, bidCost){
+    this.awardPlant = function(plant, bidCost) {
         this.plants[plant.cost] = plant;
         this.money -= bidCost;
     };
 
-    this.getPlantCount = function(){
+    this.getPlantCount = function() {
         return util.olen(this.plants);
     };
 };

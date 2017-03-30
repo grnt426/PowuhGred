@@ -1,6 +1,6 @@
 var fs = require("fs"),
     allcombinations = require('allcombinations'),
-	cityjs = require("./city.js"),
+    cityjs = require("./city.js"),
     util = require("./util.js");
 
 /**
@@ -8,35 +8,35 @@ var fs = require("fs"),
  * @constructor
  * @this {Cities}
  */
-exports.Cities = function(){
+exports.Cities = function() {
 
-	/**
-	 * String (name of city) -> City
-	 * @type {Object<string, City>}
-	 */
-	this.cities = {};
-	
-	/**
-	 * String (name of city) -> City, which has been deactivated due to being part of a region that's not used by the current game
-	 * @type {Object<string, City>}
-	 */
-	this.deactivatedCities = {};
-	
-	/**
-	 * list of names of active regions for this game
-	 * @type {String[]}
-	 */
-	this.activeRegions = [];
-	
-	/**
-	 * String (name of city A) + String (name of city B) -> Distance
-	 * @type {Object<string, Object<string, number>>}
-	 */
+    /**
+     * String (name of city) -> City
+     * @type {Object<string, City>}
+     */
+    this.cities = {};
+
+    /**
+     * String (name of city) -> City, which has been deactivated due to being part of a region that's not used by the current game
+     * @type {Object<string, City>}
+     */
+    this.deactivatedCities = {};
+
+    /**
+     * list of names of active regions for this game
+     * @type {String[]}
+     */
+    this.activeRegions = [];
+
+    /**
+     * String (name of city A) + String (name of city B) -> Distance
+     * @type {Object<string, Object<string, number>>}
+     */
     this.cityDistDict = {};
 
-	this.addCity = function(city){
-		this.cities[city.name.toLowerCase()] = city;
-	};
+    this.addCity = function(city) {
+        this.cities[city.name.toLowerCase()] = city;
+    };
 
     /**
      * Computes the lowest cost route from start to end. Note: does NOT account for the cost of buying the city.
@@ -46,40 +46,40 @@ exports.Cities = function(){
      * @param {boolean} [debug=false]
      * @returns {Object}    The shortest route and its cost
      */
-	this.findCheapestRoute = function(start, end, debug = false){
+    this.findCheapestRoute = function(start, end, debug = false) {
         if(debug) console.info("PATH " + JSON.stringify(start) + " => " + JSON.stringify(end));
-	    
-	    var startDict = this.cityDistDict[start.name.toLowerCase()];
-	    if(startDict === undefined) 
-	    { 
-	        startDict = this.cityDistDict[start.name.toLowerCase()] = {};
-	    }
-	    if(startDict[end.name.toLowerCase()] !== undefined) 
-	    {
-	        return startDict[end.name.toLowerCase()];
-	    }
-	    
-		var cheapestRoutes = [];
-		var neighbors = start.connections;
-		var visited = [];
+
+        var startDict = this.cityDistDict[start.name.toLowerCase()];
+        if(startDict === undefined) {
+            startDict = this.cityDistDict[start.name.toLowerCase()] = {};
+        }
+        if(startDict[end.name.toLowerCase()] !== undefined) {
+            return startDict[end.name.toLowerCase()];
+        }
+
+        var cheapestRoutes = [];
+        var neighbors = start.connections;
+        var visited = [];
         var shortest = undefined;
-		visited[start.name.toLowerCase()] = 0;
+        visited[start.name.toLowerCase()] = 0;
 
-		// Add all our neighbors
-		for(var city in neighbors){
-			cheapestRoutes.push({
-				path : [city],
-				cost : neighbors[city]
-			});
-			visited[city] = neighbors[city];
-		}
+        // Add all our neighbors
+        for(var city in neighbors) {
+            cheapestRoutes.push({
+                path: [city],
+                cost: neighbors[city]
+            });
+            visited[city] = neighbors[city];
+        }
 
-		while(cheapestRoutes.length > 0){
+        while(cheapestRoutes.length > 0) {
 
             // We continuously re-evaluate which paths to look at by only looking at the currently cheapest path
-			cheapestRoutes.sort(function(a,b){return a.cost - b.cost});
-			shortest = cheapestRoutes.shift();
-            var lastCity = shortest.path[shortest.path.length-1];
+            cheapestRoutes.sort(function(a, b) {
+                return a.cost - b.cost
+            });
+            shortest = cheapestRoutes.shift();
+            var lastCity = shortest.path[shortest.path.length - 1];
             var endName = end.name.toLowerCase();
 
             // We only want to terminate searching *after* the path we found is returned to us as the shortest path.
@@ -89,10 +89,10 @@ exports.Cities = function(){
                 break;
 
             // Otherwise, we have to continue searching.
-			neighbors = this.cities[lastCity].connections;
+            neighbors = this.cities[lastCity].connections;
 
-			// Iterate through all the neighbors of this new path
-			for(city in neighbors){
+            // Iterate through all the neighbors of this new path
+            for(city in neighbors) {
 
                 var cost = neighbors[city] + shortest.cost;
 
@@ -106,13 +106,13 @@ exports.Cities = function(){
                 // for consideration later.
                 var newPath = util.deepCopy(shortest.path);
                 newPath.push(city);
-                cheapestRoutes.push({path:newPath, cost:cost});
+                cheapestRoutes.push({path: newPath, cost: cost});
                 visited[city] = cost;
-			}
-		}
-	    startDict[end.name.toLowerCase()] = shortest;
-		return shortest;
-	};
+            }
+        }
+        startDict[end.name.toLowerCase()] = shortest;
+        return shortest;
+    };
 
     /**
      * Finds the cheapest route from any of a player's cities to the destination city.
@@ -121,9 +121,9 @@ exports.Cities = function(){
      * @param dest  City to path to
      * @returns {number}    The lowest cost found.
      */
-    this.findArbitraryCheapestToDest = function(cities, dest){
+    this.findArbitraryCheapestToDest = function(cities, dest) {
         var lowestCost = 999, i;
-        for(i in cities){
+        for(i in cities) {
             var cost = this.findCheapestRoute(cities[i], dest).cost;
             if(cost < lowestCost)
                 lowestCost = cost;
@@ -138,11 +138,11 @@ exports.Cities = function(){
      * @param dests Destinations to purchase
      * @returns {number}    The cost to pay for connections to the given destinations.
      */
-    this.findOptimalPurchaseCostOrderOfCities = function(cities, dests){
+    this.findOptimalPurchaseCostOrderOfCities = function(cities, dests) {
 
         // In the very edge case of no existing cities and one destination city, this function
         // will not work simply. Instead, just return a cost of 0, as there are no connections to make.
-        if(dests.length == 1 && cities.length == 0){
+        if(dests.length == 1 && cities.length == 0) {
             return 0;
         }
 
@@ -150,18 +150,18 @@ exports.Cities = function(){
         var possibleOrderings = allcombinations(dests);
         var next;
         var bestOrder = [];
-        while(!(next = possibleOrderings.next()).done){
+        while(!(next = possibleOrderings.next()).done) {
             var cost = 0;
             var tempCities = util.deepCopy(cities);
             var comb = next.value;
 
             // In the special case where the player has no cities (beginning of the game), we need to seed the start
             // from the destination. This will mean every destination city will become a "start" city.
-            if(tempCities.length == 0){
+            if(tempCities.length == 0) {
                 tempCities.push(this.convertToCityObjects(comb.pop()));
             }
 
-            for(var i in comb){
+            for(var i in comb) {
 
                 // Find the cheapest cost for this city given the cities we already have
                 cost += this.findArbitraryCheapestToDest(tempCities, this.convertToCityObjects(comb[i]));
@@ -184,60 +184,60 @@ exports.Cities = function(){
      * @param {string[]} cityNames    The cities to purchase
      * @returns {number}    The cost to build.
      */
-    this.getTotalCostToBuild = function(cityNames){
+    this.getTotalCostToBuild = function(cityNames) {
         var cost = 0;
-        for(var name of cityNames){
+        for(var name of cityNames) {
             cost += this.costToBuildOnCity(name);
         }
         return cost;
     };
 
-    this.convertToCityObjects = function(cityNames){
-        if(!(cityNames instanceof Array)){
+    this.convertToCityObjects = function(cityNames) {
+        if(!(cityNames instanceof Array)) {
             return this.cities[cityNames.toLowerCase()];
         }
         var citiesO = [];
-        for(var name of cityNames){
+        for(var name of cityNames) {
             citiesO.push(this.cities[name.toLowerCase()]);
         }
         return citiesO;
     };
 
-	/**
-	 * Adds connections to the cities. Assumes that all cities have already been
-	 * processed and added to this.cities.
-	 * @param connections	The file to parse.
-	 */
-	this.parseCities = function(connections){
-		var data = fs.readFileSync(connections).toString().split('\n');
-		for(var line in data){
-			var cityData = data[line];
-			var cityArgs = cityData.split(' ');
-			var name = cityArgs[0];
-			var cost = parseInt(cityArgs[2]);
-			var conn = cityArgs[1];
-			var startCity = this.cities[name];
-			startCity.connections[conn] = cost;
+    /**
+     * Adds connections to the cities. Assumes that all cities have already been
+     * processed and added to this.cities.
+     * @param connections    The file to parse.
+     */
+    this.parseCities = function(connections) {
+        var data = fs.readFileSync(connections).toString().split('\n');
+        for(var line in data) {
+            var cityData = data[line];
+            var cityArgs = cityData.split(' ');
+            var name = cityArgs[0];
+            var cost = parseInt(cityArgs[2]);
+            var conn = cityArgs[1];
+            var startCity = this.cities[name];
+            startCity.connections[conn] = cost;
             this.cities[conn].connections[name] = cost;
-		}
-	};
+        }
+    };
 
-	/**
-	 * Reads in all the city names, their position, and region.
-	 * @param filename	The file to parse.
-	 */
-    this.parseCityList = function(filename){
-        if (!filename) filename = "data/germany_cities.txt";
+    /**
+     * Reads in all the city names, their position, and region.
+     * @param filename    The file to parse.
+     */
+    this.parseCityList = function(filename) {
+        if(!filename) filename = "data/germany_cities.txt";
         var fs = require('fs'), i;
         var array = fs.readFileSync(filename).toString().split("\n");
         for(i in array) {
-            if(array[i]){
+            if(array[i]) {
                 var oneLine = array[i].split(" ");
                 if(oneLine.length == 4) {
                     var newCity = new cityjs.City(oneLine[2]);
                     newCity.x = oneLine[0];
                     newCity.y = oneLine[1];
-                    newCity.region = oneLine[3].replace(/(\r\n|\n|\r)/gm,"");
+                    newCity.region = oneLine[3].replace(/(\r\n|\n|\r)/gm, "");
 
                     this.addCity(newCity);
                 }
@@ -249,7 +249,7 @@ exports.Cities = function(){
      * @param {string} cityName  Name of city to buy.
      * @param player    UID of Player
      */
-    this.purchaseCity = function(cityName, player){
+    this.purchaseCity = function(cityName, player) {
         this.cities[cityName.toLowerCase()].buildForPlayer(player);
     };
 
@@ -257,15 +257,15 @@ exports.Cities = function(){
      * @param {string} cityName  Name of city to check
      * @returns {number}    Cost to build there.
      */
-    this.costToBuildOnCity = function(cityName){
+    this.costToBuildOnCity = function(cityName) {
         return this.cities[cityName.toLowerCase()].costToBuild();
     }
-    
+
     /**
      * culls cities not included in this game
      * @param {string[]} names of active regions
      */
-    this.onlyUseTheseRegions = function(activeRegions){
+    this.onlyUseTheseRegions = function(activeRegions) {
         this.activeRegions = activeRegions;  // TODO: this should be picked (and validated against # players) before starting the game, hard coding for now
         for(var name in this.cities) {
             if(!this.activeRegions.includes(this.cities[name].region)) {
@@ -273,7 +273,7 @@ exports.Cities = function(){
             }
         }
     }
-    
+
     /**
      * deactives a single city, moving it to this.deactivatedCities and deleting connections to it
      * @param {string} cityName name of the city to deactivate
@@ -285,7 +285,7 @@ exports.Cities = function(){
         }
         delete this.cities[cityName];
     }
-    
+
     /**
      * deactives a single city, moving it to this.deactivatedCities and deleting connections to it
      * @param {string} cityName name of the city to check

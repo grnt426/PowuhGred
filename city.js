@@ -5,12 +5,12 @@
  * @constructor
  * @this {City}
  */
-exports.City = function(name){
+exports.City = function(name) {
 
-	this.connections = {};
+    this.connections = {};
 
     // String
-	this.name = name;
+    this.name = name;
     this.x = 0;
     this.y = 0;
 
@@ -20,11 +20,11 @@ exports.City = function(name){
     // String, PlayerID
     this.players = [];
 
-    this.costToBuild = function(){
+    this.costToBuild = function() {
         return 10 + (5 * this.players.length);
     };
 
-    this.isThereFreeSpace = function(playerId, step){
+    this.isThereFreeSpace = function(playerId, step) {
         return this.players.length < step;
     };
 
@@ -32,7 +32,7 @@ exports.City = function(name){
         return this.players.indexOf(playerId) != -1;
     }
 
-    this.buildForPlayer = function(player){
+    this.buildForPlayer = function(player) {
         this.players.push(player);
     };
 };

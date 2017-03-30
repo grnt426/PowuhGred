@@ -8,7 +8,7 @@ var util = require("../util.js");
  * @constructor
  * @this {Power}
  */
-exports.Power = function (engine, comms, powerPlants) {
+exports.Power = function(engine, comms, powerPlants) {
 
     /**
      * @type {Engine}
@@ -38,28 +38,28 @@ exports.Power = function (engine, comms, powerPlants) {
      * @param {Player} player The player that requested what power plants to activate
      * @param {number[]} data Cost of plants to activate
      */
-    this.powerCities = function (player, data) {
-        if(this.playersPaid.indexOf(player.uid) != -1){
+    this.powerCities = function(player, data) {
+        if(this.playersPaid.indexOf(player.uid) != -1) {
             // Alert player they can't make change their choice afterwards
         }
-        else{
+        else {
             var powerPlants = this.convertDataToPowerPlants(data);
-            if(!this.ownsAllPlants(player, powerPlants)){
+            if(!this.ownsAllPlants(player, powerPlants)) {
                 this.comms.toCurrent("You do not own all the power plants selected...?");
             }
-            else if(!this.canActivateAll(powerPlants)){
+            else if(!this.canActivateAll(powerPlants)) {
                 this.comms.toCurrent("Not all the plants selected can be activated.");
             }
-            else{
+            else {
                 var powerableCities = 0;
                 var resourcesConsumed = util.resourceList(0, 0, 0, 0);
-                for(var p in powerPlants){
+                for(var p in powerPlants) {
                     var plant = powerPlants[p];
-                    if(plant.type == "both"){
+                    if(plant.type == "both") {
                         resourcesConsumed['coal'] += plant.selectedToBurn['coal'];
                         resourcesConsumed['oil'] += plant.selectedToBurn['oil'];
                     }
-                    else{
+                    else {
                         resourcesConsumed[plant.type] += plant.requires;
                     }
                     powerableCities += plant.activate();
@@ -73,7 +73,7 @@ exports.Power = function (engine, comms, powerPlants) {
                 this.playersPaid.push(player.uid);
                 this.engine.returnUsedResources(resourcesConsumed);
 
-                if(this.playersPaid.length == this.engine.getPlayerCount()){
+                if(this.playersPaid.length == this.engine.getPlayerCount()) {
                     this.playersPaid = [];
                     this.engine.removePowerPlantFromRoundEnd();
                     this.engine.nextAction();
@@ -87,20 +87,20 @@ exports.Power = function (engine, comms, powerPlants) {
      * @param {number[]} data list of costs of the power plant
      * @returns {boolean|PowerPlant[]}
      */
-    this.convertDataToPowerPlants = function(data){
+    this.convertDataToPowerPlants = function(data) {
 
         /**
          * @type {PowerPlant[]}
          */
         var plants = [];
-        for(var d in data){
+        for(var d in data) {
             var cost = d;
             var plant = this.powerPlants[cost];
-            if(plant != undefined){
+            if(plant != undefined) {
                 plants.push(plant);
                 plant.selectedToBurn = data[d];
             }
-            else{
+            else {
                 return false;
             }
         }
@@ -112,9 +112,9 @@ exports.Power = function (engine, comms, powerPlants) {
      * @param {PowerPlant[]} plants
      * @returns {boolean}
      */
-    this.canActivateAll = function(plants){
+    this.canActivateAll = function(plants) {
         var activateAll = true;
-        for(var p in plants){
+        for(var p in plants) {
             activateAll &= plants[p].canActivate();
         }
         return activateAll;
@@ -125,32 +125,32 @@ exports.Power = function (engine, comms, powerPlants) {
      * @param {PowerPlant[]} plants
      * @returns {boolean}
      */
-    this.ownsAllPlants = function(player, plants){
+    this.ownsAllPlants = function(player, plants) {
         var ownsAll = true;
-        for(var p in plants){
+        for(var p in plants) {
             ownsAll &= player.plants[plants[p].cost] != undefined;
         }
         return ownsAll;
     };
 
-    this.whoCanPowerTheMost = function(){
+    this.whoCanPowerTheMost = function() {
         var mostPowered = [];
         var mostPowerableAmount = -1;
-        for(var p in this.engine.players){
+        for(var p in this.engine.players) {
             var player = this.engine.players[p];
             var canPower = 0;
-            for(var plantCost in player.plants){
+            for(var plantCost in player.plants) {
                 var plant = player.plants[plantCost];
-                if(plant.canActivate()){
+                if(plant.canActivate()) {
                     canPower += plant.powers;
                 }
             }
             canPower = Math.min(player.cities.length, canPower);
-            if(canPower > mostPowerableAmount){
+            if(canPower > mostPowerableAmount) {
                 mostPowered = [player];
                 mostPowerableAmount = canPower;
             }
-            else if(canPower >= mostPowerableAmount){
+            else if(canPower >= mostPowerableAmount) {
                 mostPowered.push(player);
             }
         }

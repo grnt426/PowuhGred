@@ -7,23 +7,23 @@ var res = require("./State/Resources.js");
  * @param array    Array to shuffle.
  * @returns {*}
  */
-exports.shuffle = function(array){
-	var currentIndex = array.length, temporaryValue, randomIndex;
+exports.shuffle = function(array) {
+    var currentIndex = array.length, temporaryValue, randomIndex;
 
-	// While there remain elements to shuffle...
-	while(0 !== currentIndex){
+    // While there remain elements to shuffle...
+    while(0 !== currentIndex) {
 
-		// Pick a remaining element...
-		randomIndex = Math.floor(Math.random() * currentIndex);
-		currentIndex -= 1;
+        // Pick a remaining element...
+        randomIndex = Math.floor(Math.random() * currentIndex);
+        currentIndex -= 1;
 
-		// And swap it with the current element.
-		temporaryValue = array[currentIndex];
-		array[currentIndex] = array[randomIndex];
-		array[randomIndex] = temporaryValue;
-	}
+        // And swap it with the current element.
+        temporaryValue = array[currentIndex];
+        array[currentIndex] = array[randomIndex];
+        array[randomIndex] = temporaryValue;
+    }
 
-	return array;
+    return array;
 };
 
 /**
@@ -32,7 +32,7 @@ exports.shuffle = function(array){
  * @returns {number} The number of keys (length) in the object
  */
 exports.olen = function(obj) {
-    if(typeof obj == "object"){
+    if(typeof obj == "object") {
         return Object.keys(obj).length;
     }
     return 0;
@@ -43,18 +43,18 @@ exports.olen = function(obj) {
  * @param {Object} obj The object to deep-copy
  * @returns {Object} A deep-copy of the object
  */
-exports.deepCopy = function(obj){
+exports.deepCopy = function(obj) {
 
     // Seems to be an issue with the else-block on empty arrays, so we need to handle this special-case
     if(obj.constructor === Array && obj.length == 0) {
         return [];
     }
-    else{
+    else {
         return JSON.parse(JSON.stringify(obj));
     }
 };
 
-exports.resourceList = function(coal, oil, garbage, uranium){
+exports.resourceList = function(coal, oil, garbage, uranium) {
     var data = {};
     data[res.COAL] = coal;
     data[res.OIL] = oil;

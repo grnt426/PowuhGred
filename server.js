@@ -18,12 +18,14 @@ app.use(bodyParser.urlencoded({
     extended: false
 }));
 
-let sessionOptions = {cookie:{}, resave:false, saveUninitialized:false,
-    secret: fs.readFileSync('../session.secret').toString(), autoSave:true,
-    store: new sessionFileStore()};
+let sessionOptions = {
+    cookie: {}, resave: false, saveUninitialized: false,
+    secret: fs.readFileSync('../session.secret').toString(), autoSave: true,
+    store: new sessionFileStore()
+};
 let sessionObject;
 
-if (process.argv[2] === "debug") {
+if(process.argv[2] === "debug") {
     console.info("Running as debug");
     sessionOptions.cookie.secure = false;
     httpServer = require('http');
@@ -39,8 +41,8 @@ else {
 
     // Don't allow non-HTTPS connections
     let unsecureHttpServer = require('http');
-    unsecureHttpServer.createServer(function (req, res) {
-        res.writeHead(301, { "Location": "https://" + req.headers['host'] + req.url });
+    unsecureHttpServer.createServer(function(req, res) {
+        res.writeHead(301, {"Location": "https://" + req.headers['host'] + req.url});
         res.end();
     }).listen(8080);
 
@@ -64,31 +66,31 @@ var io = require('socket.io').listen(server),
     util = require('./util.js');
 
 // This exposes the session object to Pug (Jade) to all Pug templates
-app.use(function(req,res,next){
+app.use(function(req, res, next) {
     res.locals.session = req.session;
     next();
 });
 
 // routing
-app.get("/", function (req, res) {
+app.get("/", function(req, res) {
     console.info("Request for home");
     console.info(req.session);
     Promise
         .resolve(db.all('SELECT * FROM Games'))
-        .then(function(dbResult){
+        .then(function(dbResult) {
             console.info(JSON.stringify(dbResult));
-            if(dbResult){
-                res.render('home', {games:dbResult});
+            if(dbResult) {
+                res.render('home', {games: dbResult});
             }
-            else{
+            else {
                 res.render('home');
             }
         })
-        .catch(function(error){
+        .catch(function(error) {
             console.error(error);
         });
 });
-app.get("/game/:gameId", function (req, res) {
+app.get("/game/:gameId", function(req, res) {
     console.info("Request for game");
     console.info(req.session);
 
@@ -96,58 +98,58 @@ app.get("/game/:gameId", function (req, res) {
     console.info("Game requested: " + gameId);
 
     // TODO: should instead just present a login page rather than this weird redirect
-    if(!req.session || !req.session.authenticated){
+    if(!req.session || !req.session.authenticated) {
         console.info("no session data, going back home");
         let type = process.argv[2] === "debug" ? "http" : "https";
-        res.writeHead(303, { "Location": type + "://" + req.headers['host']});
+        res.writeHead(303, {"Location": type + "://" + req.headers['host']});
         res.end();
     }
-    else{
+    else {
         req.session.joining = gameId;
         res.sendFile(__dirname + '/gameclient.html');
     }
 });
-app.post("/creategame", function(req, res){
+app.post("/creategame", function(req, res) {
 
 });
-app.post("/login", function(req, res){
+app.post("/login", function(req, res) {
     let username = req.body.username;
     let password = req.body.password;
     console.info(username + " " + password);
     Promise
         .resolve(db.get('SELECT password FROM Users WHERE username = ?', username))
-        .then(function(dbResult){
+        .then(function(dbResult) {
             console.info("DB Result: " + JSON.stringify(dbResult));
-            if(dbResult){
+            if(dbResult) {
                 let retrievedPassword = dbResult.password;
                 return bcrypt.compare(password, retrievedPassword);
             }
-            else{
+            else {
                 return Promise.reject("Invalid username and password.");
             }
         })
-        .then(function(matches){
-            if(matches){
+        .then(function(matches) {
+            if(matches) {
                 req.session.authenticated = true;
                 req.session.username = username;
                 console.info("Session: " + JSON.stringify(req.session));
                 res.render('home');
             }
-            else{
+            else {
                 res.send("INVALID_USER");
             }
         })
-        .catch(function(err){
+        .catch(function(err) {
             console.error(err);
-            if(err === "INVALID_USER"){
+            if(err === "INVALID_USER") {
                 res.send("Invalid username and password combination");
             }
-            else{
+            else {
                 res.send("Error in logging you in. Try again.");
             }
         });
 });
-app.get("/logout", function(req, res){
+app.get("/logout", function(req, res) {
     req.session.authenticated = false;
     delete req.session.username;
     res.render('home');
@@ -157,49 +159,49 @@ app.post("/registeruser", function(req, res) {
     let username = req.body.username;
     let email = req.body.email;
     bcrypt.hash(req.body.password, 10)
-        .then(function(hash){
+        .then(function(hash) {
             console.info("Hash " + hash);
             return db.run('INSERT INTO Users (username, email, password) VALUES (?, ?, ?)', username, email, hash);
         })
-        .then(function(){
+        .then(function() {
             res.send("Registered!");
         })
-        .catch(function(err){
+        .catch(function(err) {
             console.error(err);
             res.send("Error in registration!");
         });
 });
-app.get("/register", function(req, res){
+app.get("/register", function(req, res) {
     res.render('register');
 });
-app.get("/clientScripts/init.js", function (req, res) {
+app.get("/clientScripts/init.js", function(req, res) {
     res.sendFile(__dirname + '/clientScripts/init.js');
 });
-app.get("/clientScripts/auction.js", function (req, res) {
+app.get("/clientScripts/auction.js", function(req, res) {
     res.sendFile(__dirname + '/clientScripts/auction.js');
 });
-app.get("/clientScripts/buttons.js", function (req, res) {
+app.get("/clientScripts/buttons.js", function(req, res) {
     res.sendFile(__dirname + '/clientScripts/buttons.js');
 });
-app.get("/clientScripts/chat.js", function (req, res) {
+app.get("/clientScripts/chat.js", function(req, res) {
     res.sendFile(__dirname + '/clientScripts/chat.js');
 });
-app.get("/clientScripts/fuel.js", function (req, res) {
+app.get("/clientScripts/fuel.js", function(req, res) {
     res.sendFile(__dirname + '/clientScripts/fuel.js');
 });
-app.get("/clientScripts/clickHandler.js", function (req, res) {
+app.get("/clientScripts/clickHandler.js", function(req, res) {
     res.sendFile(__dirname + '/clientScripts/clickHandler.js');
 });
-app.get("/clientScripts/redraw.js", function (req, res) {
+app.get("/clientScripts/redraw.js", function(req, res) {
     res.sendFile(__dirname + '/clientScripts/redraw.js');
 });
-app.get("/clientScripts/sockethandlers.js", function (req, res) {
+app.get("/clientScripts/sockethandlers.js", function(req, res) {
     res.sendFile(__dirname + '/clientScripts/sockethandlers.js');
 });
-app.get("/clientScripts/scorepanel.js", function (req, res) {
+app.get("/clientScripts/scorepanel.js", function(req, res) {
     res.sendFile(__dirname + '/clientScripts/scorepanel.js');
 });
-app.get("/clientScripts/cardpositions.js", function (req, res) {
+app.get("/clientScripts/cardpositions.js", function(req, res) {
     res.sendFile(__dirname + '/clientScripts/cardpositions.js');
 });
 app.use('/data', express.static(__dirname + '/data'));
@@ -225,19 +227,19 @@ engine.engineId = 'abcd';
 activeGames['abcd'] = engine;
 
 // This exposes the session object from Express into Socket.IO
-io.use(function(socket, next){
+io.use(function(socket, next) {
     sessionObject(socket.handshake, {}, next);
 });
 
 // connect to a player, listen
 // TODO: There seems to be an issue with a player joining, but the tab not gaining focus in FF, and the player not initializing the game correctly.
-io.sockets.on(comms.SOCKET_CONNECTION, function (socket) {
+io.sockets.on(comms.SOCKET_CONNECTION, function(socket) {
 
     let gameId = socket.handshake.session.joining;
     console.info("Game attempting join: " + gameId);
     let curGame = activeGames[gameId];
 
-    if (curGame && curGame.gameStarted) {
+    if(curGame && curGame.gameStarted) {
         console.info("A player tried to join after the game started!?");
         return;
     }
@@ -259,11 +261,11 @@ io.sockets.on(comms.SOCKET_CONNECTION, function (socket) {
 
     // When the client emits sendchat, this listens and executes
     // sendchat -> String
-    socket.on(comms.SOCKET_SENDCHAT, function (data) {
-        if (data[0] === '/') {
+    socket.on(comms.SOCKET_SENDCHAT, function(data) {
+        if(data[0] === '/') {
             resolveCommand(socket, data);
         }
-        else if (data.trim().length !== 0) {
+        else if(data.trim().length !== 0) {
             console.info("Chat message: " + data);
             comms.toAllFrom(curGame.reverseLookUp[socket.uid], data);
         }
@@ -271,13 +273,13 @@ io.sockets.on(comms.SOCKET_CONNECTION, function (socket) {
 
     // When the player does any action
     // gameaction -> JsonObject
-    socket.on(comms.SOCKET_GAMEACTION, function (data) {
+    socket.on(comms.SOCKET_GAMEACTION, function(data) {
         data.uid = socket.uid;
         curGame.resolveAction(data);
     });
 
     // when the user disconnects
-    socket.on(comms.SOCKET_DISCONNECT, function () {
+    socket.on(comms.SOCKET_DISCONNECT, function() {
         // TODO handle players leaving.
         comms.toAll(curGame.reverseLookUp[socket.uid].displayName + " has left the game.");
     });
@@ -287,7 +289,7 @@ io.sockets.on(comms.SOCKET_CONNECTION, function (socket) {
 function resolveCommand(socket, data) {
     console.info(data);
     let command = data.substring(0, data.indexOf(' '));
-    if (command === "/name") {
+    if(command === "/name") {
         let name = data.substring(data.indexOf(' ') + 1);
         console.info("Name received: " + name);
         let player = socket.engine.reverseLookUp[socket.uid];

@@ -4,13 +4,13 @@
  * @param {string} filename, defaults to "data/germany_regions.txt"
  * @returns {string[],string[]} region names. First index is selected, second index is unselected.
  */
-exports.selectRegions = function(numPlayers, filename){
-    if (!filename) filename = "data/germany_regions.txt";
+exports.selectRegions = function(numPlayers, filename) {
+    if(!filename) filename = "data/germany_regions.txt";
     var regions = {};
     this.importRegions(filename, regions);
     var selected = this.randomSelection(this.howManyRegions(numPlayers), regions);
     var unselected = [];
-    for(var name in regions){
+    for(var name in regions) {
         if(selected.indexOf(name) == -1)
             unselected.push(name);
     }
@@ -26,13 +26,13 @@ exports.importRegions = function(filename, regions) {
     var fs = require("fs");
     var args, startName, endName;
     var data = fs.readFileSync(filename).toString().split('\n');
-	for(var i in data){
-		args = data[i].split(' ');
-		startName = args[0];
-		endName = args[1].trim();
-		
-		this.addConnection(startName, endName, regions);
-	}
+    for(var i in data) {
+        args = data[i].split(' ');
+        startName = args[0];
+        endName = args[1].trim();
+
+        this.addConnection(startName, endName, regions);
+    }
 };
 
 /**
@@ -42,12 +42,12 @@ exports.importRegions = function(filename, regions) {
  * @param {Object<Object>} regions region[regionName].connections = [list of region names]
  */
 exports.addConnection = function(startName, endName, regions) {
-    if(regions[startName] === undefined) { 
-        regions[startName] = {}; 
+    if(regions[startName] === undefined) {
+        regions[startName] = {};
         regions[startName].connections = [];
     }
-    if(regions[endName] === undefined) { 
-        regions[endName] = {}; 
+    if(regions[endName] === undefined) {
+        regions[endName] = {};
         regions[endName].connections = [];
     }
     regions[startName].connections.push(endName);
@@ -60,11 +60,21 @@ exports.addConnection = function(startName, endName, regions) {
  * @returns {number} number of regions
  */
 exports.howManyRegions = function(numPlayers) {
-    if(numPlayers == 2) { return 3; }
-    if(numPlayers == 3) { return 3; }
-    if(numPlayers == 4) { return 4; }
-    if(numPlayers == 5) { return 5; }
-    if(numPlayers == 6) { return 5; }
+    if(numPlayers == 2) {
+        return 3;
+    }
+    if(numPlayers == 3) {
+        return 3;
+    }
+    if(numPlayers == 4) {
+        return 4;
+    }
+    if(numPlayers == 5) {
+        return 5;
+    }
+    if(numPlayers == 6) {
+        return 5;
+    }
     return 3; //just for solo debugging
 };
 
@@ -76,12 +86,12 @@ exports.howManyRegions = function(numPlayers) {
  */
 exports.randomSelection = function(num, regions) {
     var numLeft, regionCount = 0, fullRegionArray = [], valid, regionIx, selectedRegions;
-    
+
     for(var regionName in regions) {
         fullRegionArray.push(regionName);
         regionCount += 1;
     }
-    
+
     valid = false;
     while(valid == false) {
         numLeft = num;
@@ -89,15 +99,15 @@ exports.randomSelection = function(num, regions) {
         while(numLeft > 0) {
             regionIx = Math.floor((Math.random() * regionCount));
             regionName = fullRegionArray[regionIx];
-            if(!selectedRegions.includes(regionName)) { 
+            if(!selectedRegions.includes(regionName)) {
                 selectedRegions.push(regionName);
-                numLeft-=1;
+                numLeft -= 1;
             }
         }
-        
+
         valid = this.isSelectionValid(selectedRegions, regions);
     }
-    
+
     return selectedRegions;
 };
 
@@ -110,11 +120,13 @@ exports.randomSelection = function(num, regions) {
 exports.isSelectionValid = function(selectedRegions, regions) {
     var start = selectedRegions[0];
     var visited = [];
-    
+
     this.explore(start, visited, selectedRegions, regions);
-    
+
     for(var regionName of selectedRegions) {
-        if(!visited.includes(regionName)) { return false; }
+        if(!visited.includes(regionName)) {
+            return false;
+        }
     }
     return true;
 };
