@@ -313,6 +313,6 @@ Promise.resolve()
 
     // TODO: the below should not be done on production (???) but is fine for now
     // TODO comment out the below after first-run if you want data to persist with each run in dev.
-    .then(() => db.migrate({force: (process.argv[2] === "debug" ? 'last' : false)c}))
+    .then(() => db.migrate({force: (process.argv[2] === "debug" ? 'last' : false)}))
     .then(() => server.listen(process.env.PORT || 3000))
     .catch((err) => console.error("WHAT " + err.stack));
