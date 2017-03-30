@@ -6,13 +6,13 @@ var SOCKET_GAMEACTION = 'gameaction';  // client -> server
 
 var currentActionState = "startGame";
 
-var UNSTARTED_F =	1;              //bitwise 000001
-var AUCTION_F =		2;              //bitwise 000010
-var BID_F = 		4;              //bitwise 000100
-var BUY_F = 	    8;              //bitwise 001000
-var BUILD_F =		16;             //bitwise 010000
-var POWER_F =		32;             //bitwise 100000
-var REMOVE_F =      64;
+var UNSTARTED_F = 1;              //bitwise 000001
+var AUCTION_F = 2;              //bitwise 000010
+var BID_F = 4;              //bitwise 000100
+var BUY_F = 8;              //bitwise 001000
+var BUILD_F = 16;             //bitwise 010000
+var POWER_F = 32;             //bitwise 100000
+var REMOVE_F = 64;
 
 // Used for enabling/disabling buttons
 var ACTIONS_FLAGS = [];
@@ -24,7 +24,7 @@ ACTIONS_FLAGS["build"] = BUILD_F;
 ACTIONS_FLAGS["power"] = POWER_F;
 ACTIONS_FLAGS["remove"] = REMOVE_F;
 
-var createButton = function(disp,listener,flags) {
+var createButton = function(disp, listener, flags) {
     var button = {};
     button.disp = disp;
 
@@ -38,31 +38,33 @@ var createButton = function(disp,listener,flags) {
 };
 
 
-var startGameButton = function(){
-    socket.emit(SOCKET_GAMEACTION, {uid:playerData.self.uid, cmd:"startGame", args:{}});
+var startGameButton = function() {
+    socket.emit(SOCKET_GAMEACTION, {uid: playerData.self.uid, cmd: "startGame", args: {}});
     animStartGame();
 };
 
-var passButton = function(){
-    socket.emit(SOCKET_GAMEACTION, {uid:playerData.self.uid, cmd:currentActionState, args:"pass"});
+var passButton = function() {
+    socket.emit(SOCKET_GAMEACTION, {uid: playerData.self.uid, cmd: currentActionState, args: "pass"});
 };
 
-var startAuctionButton = function(){
-    if(selectedPlant != -1){
-        socket.emit(SOCKET_GAMEACTION, {uid: playerData.self.uid, cmd: "startAuction",
-            args: {cost: actualMarket[selectedPlant].cost, bid: selectedBid}});
+var startAuctionButton = function() {
+    if(selectedPlant != -1) {
+        socket.emit(SOCKET_GAMEACTION, {
+            uid: playerData.self.uid, cmd: "startAuction",
+            args: {cost: actualMarket[selectedPlant].cost, bid: selectedBid}
+        });
     }
-    else{
+    else {
         log("Select a power plant first.", CONSOLE_O);
     }
 };
 
-var bidUpButton = function(){
+var bidUpButton = function() {
     selectedBid += 1;
     log("Bid amount: $" + selectedBid, CONSOLE_O);
 };
 
-var bidDownButton = function(){
+var bidDownButton = function() {
     if(selectedBid <= 0)
         selectedBid = 0;
     else
@@ -70,15 +72,15 @@ var bidDownButton = function(){
     log("Bid amount: $" + selectedBid, CONSOLE_O);
 };
 
-var resourceMore = function(type){
+var resourceMore = function(type) {
 
     // Don't increment if nothing is selected
-    if(selectedOwnedPlant == undefined){
+    if(selectedOwnedPlant == undefined) {
         return;
     }
 
     var newAmt = selectedOwnedPlant.resources[type] + 1;
-    if(newAmt > resources[type]){
+    if(newAmt > resources[type]) {
         log("Not enough " + type + " to buy more", CONSOLE_O);
     }
     else {
@@ -87,10 +89,10 @@ var resourceMore = function(type){
     }
 };
 
-var resourceLess = function(type){
+var resourceLess = function(type) {
 
     // Don't decrement if nothing is selected
-    if(selectedOwnedPlant == undefined){
+    if(selectedOwnedPlant == undefined) {
         return;
     }
 
@@ -99,44 +101,44 @@ var resourceLess = function(type){
     log(selectedOwnedPlant.resources[type] + " " + type, CONSOLE_O);
 };
 
-var confirmBidButton = function(){
-    socket.emit(SOCKET_GAMEACTION, {uid:playerData.self.uid, cmd:"bid", args:{bid:selectedBid}});
+var confirmBidButton = function() {
+    socket.emit(SOCKET_GAMEACTION, {uid: playerData.self.uid, cmd: "bid", args: {bid: selectedBid}});
 };
 
-var confirmResourcePurchase = function(){
+var confirmResourcePurchase = function() {
     var playerOwnedPlantCosts = scorePanel.args.data.players[playerData.self.uid].plants;
     var resourceSelection = {};
-    for(var i in playerOwnedPlantCosts){
+    for(var i in playerOwnedPlantCosts) {
         resourceSelection[parseInt(i)] = ppp[parseInt(i)].resources;
     }
-    socket.emit(SOCKET_GAMEACTION, {uid:playerData.self.uid, cmd:"buy", args:resourceSelection});
+    socket.emit(SOCKET_GAMEACTION, {uid: playerData.self.uid, cmd: "buy", args: resourceSelection});
     deselectOwnPowerPlants();
 };
 
-var buildCities = function(){
-    socket.emit(SOCKET_GAMEACTION, {uid:playerData.self.uid, cmd:"build", args:selectedCities});
+var buildCities = function() {
+    socket.emit(SOCKET_GAMEACTION, {uid: playerData.self.uid, cmd: "build", args: selectedCities});
     selectedCities = [];
     selectedCity = false;
 };
 
-var activatePlants = function(){
+var activatePlants = function() {
     var payload = {};
-    for(var p in selectedPlants){
+    for(var p in selectedPlants) {
         var plantCost = selectedPlants[p];
         var toBurn = ppp[plantCost].selectedToBurn;
         payload[plantCost] = toBurn == undefined ? {} : toBurn;
     }
-    socket.emit(SOCKET_GAMEACTION, {uid:playerData.self.uid, cmd:"power", args:payload});
+    socket.emit(SOCKET_GAMEACTION, {uid: playerData.self.uid, cmd: "power", args: payload});
     deselectOwnPowerPlants();
 };
 
-var removePowerPlant = function(){
-    socket.emit(SOCKET_GAMEACTION, {uid:playerData.self.uid, cmd:"remove", args:selectedOwnedPlant.cost});
+var removePowerPlant = function() {
+    socket.emit(SOCKET_GAMEACTION, {uid: playerData.self.uid, cmd: "remove", args: selectedOwnedPlant.cost});
     deselectOwnPowerPlants();
 };
 
-var checkPowerBuildCost = function(){
-    socket.emit(SOCKET_GAMEACTION, {uid:playerData.self.uid, cmd:"checkbuild", args:selectedCities});
+var checkPowerBuildCost = function() {
+    socket.emit(SOCKET_GAMEACTION, {uid: playerData.self.uid, cmd: "checkbuild", args: selectedCities});
 };
 
 // createButton( Display String, listener, buttons flags);
@@ -149,14 +151,30 @@ createButton("Raise", confirmBidButton, BID_F);
 
 // The below is awful, but a good enough placeholder
 createButton("Purchase", confirmResourcePurchase, BUY_F);
-createButton("Coal +", function(){resourceMore('coal');}, BUY_F);
-createButton("Coal -", function(){resourceLess('coal');}, BUY_F);
-createButton("Oil +", function(){resourceMore('oil');}, BUY_F);
-createButton("Oil -", function(){resourceLess('oil');}, BUY_F);
-createButton("Garbage +", function(){resourceMore('garbage');}, BUY_F);
-createButton("Garbage -", function(){resourceLess('garbage');}, BUY_F);
-createButton("Uranium +", function(){resourceMore('uranium');}, BUY_F);
-createButton("Uranium -", function(){resourceLess('uranium');}, BUY_F);
+createButton("Coal +", function() {
+    resourceMore('coal');
+}, BUY_F);
+createButton("Coal -", function() {
+    resourceLess('coal');
+}, BUY_F);
+createButton("Oil +", function() {
+    resourceMore('oil');
+}, BUY_F);
+createButton("Oil -", function() {
+    resourceLess('oil');
+}, BUY_F);
+createButton("Garbage +", function() {
+    resourceMore('garbage');
+}, BUY_F);
+createButton("Garbage -", function() {
+    resourceLess('garbage');
+}, BUY_F);
+createButton("Uranium +", function() {
+    resourceMore('uranium');
+}, BUY_F);
+createButton("Uranium -", function() {
+    resourceLess('uranium');
+}, BUY_F);
 
 createButton("Build Cities", buildCities, BUILD_F);
 createButton("Check Cost", checkPowerBuildCost, BUILD_F);

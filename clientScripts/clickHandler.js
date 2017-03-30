@@ -8,12 +8,22 @@
 var PLAYER_PLANTS_START_X = 1394;
 
 //Used to transform between external and internal coordinates (must be for map)
-var externalX = function (x) { return x * 1.1 - 5;  };
-var externalY = function (y) { return y * 1.1 - 96; };
-var internalX = function (x) { return (x + 5) / 1.1;  };
-var internalY = function (y) { return (y + 96) / 1.1; };
+var externalX = function(x) {
+    return x * 1.1 - 5;
+};
+var externalY = function(y) {
+    return y * 1.1 - 96;
+};
+var internalX = function(x) {
+    return (x + 5) / 1.1;
+};
+var internalY = function(y) {
+    return (y + 96) / 1.1;
+};
 
-var sqrDist = function(x1,x2,y1,y2) { return Math.pow(x1-x2,2)+Math.pow(y1-y2,2) };
+var sqrDist = function(x1, x2, y1, y2) {
+    return Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2)
+};
 
 var dragging = false;
 var plantDraggedFrom = undefined;
@@ -28,36 +38,38 @@ canvas.addEventListener('mousemove', function(e) {
 });
 
 // Drag event detection
-canvas.addEventListener('mousedown', function(event){
+canvas.addEventListener('mousedown', function(event) {
     var x = event.pageX - 8;
     var y = event.pageY - 8;
 
     if(!dragging) {
 
-        if(x > PLAYER_PLANTS_START_X && y > 50){
+        if(x > PLAYER_PLANTS_START_X && y > 50) {
             var plant = findPlantClicked(x, y);
-            if (plant != undefined) {
+            if(plant != undefined) {
 
                 // Now that we found a plant that matches the click location, only select this plant if we own it
                 var ownedPlant = scorePanel.args.data.players[playerData.self.uid].plants[parseInt(plant.cost)];
-                if (ownedPlant != undefined) {
+                if(ownedPlant != undefined) {
                     console.log("Checking if the player clicked on a draggable owned resource...");
 
                     // Determine if we clicked on a resource
                     var resource = undefined;
-                    for (var resPos in plant.resourcePositions) {
+                    for(var resPos in plant.resourcePositions) {
                         var res = plant.resourcePositions[resPos];
-                        if(res.x <= x && res.x + res.size >= x && res.y <= y && res.y + res.size >= y){
+                        if(res.x <= x && res.x + res.size >= x && res.y <= y && res.y + res.size >= y) {
                             resource = res;
                             break;
                         }
                     }
                     console.log("Resource found: " + JSON.stringify(resource));
-                    if (resource != undefined) {
+                    if(resource != undefined) {
                         dragging = true;
                         plantDraggedFrom = plant;
                         resourceDragging = resource;
-                        redrawLoop = setInterval(function(){redraw(scorePanel)}, 1000/30);
+                        redrawLoop = setInterval(function() {
+                            redraw(scorePanel)
+                        }, 1000 / 30);
                     }
                 }
             }
@@ -67,16 +79,18 @@ canvas.addEventListener('mousedown', function(event){
 
 var P_KEY_CODE = 80;
 
-window.addEventListener('keydown', function(event){
+window.addEventListener('keydown', function(event) {
     console.log("Got key: " + event.keyCode);
-    switch(event.keyCode){
-        case P_KEY_CODE: handleP_KeyButton(event); break;
+    switch(event.keyCode) {
+        case P_KEY_CODE:
+            handleP_KeyButton(event);
+            break;
     }
 }, true);
 
-function handleP_KeyButton(event){
+function handleP_KeyButton(event) {
     console.log("P key pressed");
-    if(event.altKey){
+    if(event.altKey) {
         console.log("hotkey for pass triggered.");
         passButton();
     }
@@ -90,28 +104,28 @@ canvas.addEventListener('mouseup', function(event) {
     var x = event.pageX - 8;
     var y = event.pageY - 8;
 
-    if(DEBUG){
+    if(DEBUG) {
         log("Click: " + x + ", " + y, CONSOLE_O);
     }
 
-    if(dragging){
+    if(dragging) {
         clearInterval(redrawLoop);
 
         var plant = findPlantClicked(x, y);
-        if(plant != undefined){
+        if(plant != undefined) {
 
-            if(plant.cost == plantDraggedFrom.cost){
+            if(plant.cost == plantDraggedFrom.cost) {
                 console.log("Dragged back to self? Do nothing");
             }
             else {
                 var ownedPlant = scorePanel.args.data.players[playerData.self.uid].plants[parseInt(plant.cost)];
-                if (ownedPlant != undefined) {
+                if(ownedPlant != undefined) {
                     console.log("Dragged to: " + JSON.stringify(plant));
-                    var data = {src:plantDraggedFrom.cost, dst:plant.cost, resources:resourceList(0,0,0,0)};
+                    var data = {src: plantDraggedFrom.cost, dst: plant.cost, resources: resourceList(0, 0, 0, 0)};
                     data.resources[resourceDragging.type] = 1;
-                    socket.emit(SOCKET_GAMEACTION, {uid:playerData.self.uid, cmd:"move", args:data});
+                    socket.emit(SOCKET_GAMEACTION, {uid: playerData.self.uid, cmd: "move", args: data});
                 }
-                else{
+                else {
                     console.log("Dragged to un-owned: " + JSON.stringify(plant));
                 }
             }
@@ -137,14 +151,14 @@ canvas.addEventListener('mouseup', function(event) {
 
     // Check if a plant was selected from the actual market
     // TODO: will need to change to support Step3
-    if(x > 800 && x < 1280 && y > 300 && y < 420 && scorePanel.args.data.currentAction == "startAuction"){
-        selectedPlant = 3-(Math.floor((1260 - x) / 114));
+    if(x > 800 && x < 1280 && y > 300 && y < 420 && scorePanel.args.data.currentAction == "startAuction") {
+        selectedPlant = 3 - (Math.floor((1260 - x) / 114));
         selectedCity = null;
         selectedOwnedPlant = -1;
         redraw(scorePanel);
         return;
     }
-    else{
+    else {
         selectedPlant = -1;
     }
 
@@ -153,16 +167,16 @@ canvas.addEventListener('mouseup', function(event) {
         console.log("Clicked in player power plant region...");
 
         var plant = findPlantClicked(x, y);
-        if(plant != undefined){
+        if(plant != undefined) {
 
             // Now that we found a plant that matches the click location, only select this plant if we own it
             // TODO: this super long line is awful
             var ownedPlant = scorePanel.args.data.players[playerData.self.uid].plants[parseInt(plant.cost)];
-            if (ownedPlant != undefined) {
+            if(ownedPlant != undefined) {
                 console.log("Clicked on an owned power plant.");
 
                 // For power plants which can burn both coal and oil, we want different behavior
-                if (ownedPlant.type == "both" && currentActionState == "power") {
+                if(ownedPlant.type == "both" && currentActionState == "power") {
 
                     /*
                      The reason for modulo on N + 1, where N = the required number of resources to activate, is shown as followed:
@@ -171,13 +185,13 @@ canvas.addEventListener('mouseup', function(event) {
                      N = 3: 3 coal, 3 oil, 2 coal and 1 oil, or 2 oil and 1 coal
                      */
                     var selectedIndex = plant.selected ? (plant.selectionIndex + 1) % (ownedPlant.requires + 2) : 1;
-                    if (selectedIndex != 0) {
-                        while (selectedIndex != 0) {
-                            if (selectedIndex == 1 && ownedPlant.resources['coal'] >= ownedPlant.requires) {
+                    if(selectedIndex != 0) {
+                        while(selectedIndex != 0) {
+                            if(selectedIndex == 1 && ownedPlant.resources['coal'] >= ownedPlant.requires) {
                                 plant.selectedToBurn = {'coal': ownedPlant.requires, 'oil': 0};
                                 break;
                             }
-                            else if (selectedIndex == 2 && ownedPlant.resources['oil'] >= ownedPlant.requires) {
+                            else if(selectedIndex == 2 && ownedPlant.resources['oil'] >= ownedPlant.requires) {
                                 plant.selectedToBurn = {'coal': 0, 'oil': ownedPlant.requires};
                                 break;
                             }
@@ -190,13 +204,13 @@ canvas.addEventListener('mouseup', function(event) {
                              with regards to how to loop properly over the selection possibilities. So the two are awkwardly
                              combined (mixed for 2, or 2 coal/1 oil for 3).
                              */
-                            else if (selectedIndex == 3 && (
+                            else if(selectedIndex == 3 && (
                                 (ownedPlant.resources['coal'] > 0 && ownedPlant.resources['oil'] > 0 && ownedPlant.requires == 2) ||
                                 (ownedPlant.resources['coal'] > 1 && ownedPlant.resources['oil'] > 0 && ownedPlant.requires == 3))) {
                                 plant.selectedToBurn = {'coal': ownedPlant.requires - 1, 'oil': 1};
                                 break;
                             }
-                            else if (selectedIndex == 4 && ownedPlant.resources['oil'] > 1 && ownedPlant.resources['coal'] > 0
+                            else if(selectedIndex == 4 && ownedPlant.resources['oil'] > 1 && ownedPlant.resources['coal'] > 0
                                 && ownedPlant.requires == 3) {
                                 plant.selectedToBurn = {'coal': 1, 'oil': 2};
                                 break;
@@ -220,8 +234,8 @@ canvas.addEventListener('mouseup', function(event) {
                 }
                 else {
                     plant.selected = plant.selected === undefined ? true : !plant.selected;
-                    if (plant.selected) {
-                        if (selectedOwnedPlant !== undefined && currentActionState != "power")
+                    if(plant.selected) {
+                        if(selectedOwnedPlant !== undefined && currentActionState != "power")
                             selectedOwnedPlant.selected = false;
                         selectedOwnedPlant = plant;
                     }
@@ -231,8 +245,8 @@ canvas.addEventListener('mouseup', function(event) {
 
                     // We can only select multiple plants if we are in the power phase. While it *might* make sense
                     // in the resource purchase phase, it would be somewhat confusing.
-                    if (currentActionState == "power") {
-                        if (selectedPlants.indexOf(plant.cost) != -1) {
+                    if(currentActionState == "power") {
+                        if(selectedPlants.indexOf(plant.cost) != -1) {
                             selectedPlants.splice(selectedPlants.indexOf(plant.cost), 1);
                         }
                         else {
@@ -246,32 +260,32 @@ canvas.addEventListener('mouseup', function(event) {
 
     // Deselect if selected
     // TODO: this is *really* bad, but it works for now
-    else{
+    else {
         deselectOwnPowerPlants();
     }
 
     // Otherwise, check if a city was clicked
     checkCityClick(event);
-    
-    redraw(scorePanel);
-},false);
 
-var deselectOwnPowerPlants = function(){
-    for(p in ppp){
+    redraw(scorePanel);
+}, false);
+
+var deselectOwnPowerPlants = function() {
+    for(p in ppp) {
         ppp[p].selected = false;
     }
     selectedOwnedPlant = undefined;
     selectedPlants = [];
 };
 
-var findPlantClicked = function(x, y){
+var findPlantClicked = function(x, y) {
 
     var clickedPlant = undefined;
 
     // Really lazy, but just search all 50 plants to see if any of them are in the spot where the player clicked
     for(var p in ppp) {
         var plant = ppp[p];
-        if (plant.curX <= x && plant.curX + plant.length >= x && plant.curY <= y && plant.curY + plant.length >= y) {
+        if(plant.curX <= x && plant.curX + plant.length >= x && plant.curY <= y && plant.curY + plant.length >= y) {
             console.log("Clicked on a power plant...");
             clickedPlant = plant;
             break;
@@ -284,22 +298,22 @@ var findPlantClicked = function(x, y){
 var checkCityClick = function(event) {
     var x = internalX(event.pageX - 8);
     var y = internalY(event.pageY - 8);
-    $.each(citiesDef,function(key,city) {
-        if(sqrDist(x,city.x,y,city.y)<500) {
+    $.each(citiesDef, function(key, city) {
+        if(sqrDist(x, city.x, y, city.y) < 500) {
             if(scorePanel.args.data.inactiveRegions.indexOf(city.region) == -1) {
-                if(selectedCity == city){
+                if(selectedCity == city) {
                     selectedCity = undefined;
                 }
                 else {
-                    if (scorePanel.args.data.currentAction == "build") {
-                        if (selectedCities.indexOf(key) != -1) {
+                    if(scorePanel.args.data.currentAction == "build") {
+                        if(selectedCities.indexOf(key) != -1) {
                             selectedCities.splice(selectedCities.indexOf(key), 1);
                         }
                         else {
                             selectedCities.push(key);
                         }
                     }
-                    else{
+                    else {
                         selectedCity = city;
                     }
                 }
