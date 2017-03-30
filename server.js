@@ -144,7 +144,7 @@ app.post("/login", function(req, res) {
                 return bcrypt.compare(password, retrievedPassword);
             }
             else {
-                return Promise.reject("Invalid username and password.");
+                return Promise.reject("INVALID_USER");
             }
         })
         .then(function(matches) {
@@ -155,7 +155,7 @@ app.post("/login", function(req, res) {
                 res.redirect('/');
             }
             else {
-                res.send("INVALID_USER");
+                return Promise.reject("INVALID_USER");
             }
         })
         .catch(function(err) {
@@ -171,7 +171,7 @@ app.post("/login", function(req, res) {
 app.get("/logout", function(req, res) {
     req.session.authenticated = false;
     delete req.session.username;
-    res.render('home');
+    res.redirect('/');
 });
 app.post("/registeruser", function(req, res) {
     console.info(req.body.username + " " + req.body.password + " " + req.body.email);
@@ -183,7 +183,9 @@ app.post("/registeruser", function(req, res) {
             return db.run('INSERT INTO Users (username, email, password) VALUES (?, ?, ?)', username, email, hash);
         })
         .then(function() {
-            res.send("Registered!");
+            req.session.authenticated = true;
+            req.session.username = username;
+            res.redirect('/');
         })
         .catch(function(err) {
             console.error(err);
