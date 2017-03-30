@@ -307,8 +307,8 @@ exports.Engine = function(comms, cities, plants) {
         this.currentAction = this.START_AUCTION;
     };
 
-    this.addPlayer = function(uid, socket) {
-        var player = new playerjs.Player(uid, this.comms, socket);
+    this.addPlayer = function(uid, name, socket) {
+        var player = new playerjs.Player(uid, name, this.comms, socket);
         this.players[uid] = player;
         this.playerOrder.push(uid);
         this.reverseLookUp[socket.uid] = player;

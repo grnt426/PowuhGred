@@ -15,7 +15,13 @@ html
                 input(type='password', name='password')
                 input(type='submit', value='Login')
             a(href='/register') or Register!
-        h1 Lobby
+        h2 Create Game
+        div
+            form(method='POST' action='/creategame')
+                label(for='maxplayers') Max Players:
+                input(type='text', value='4', name='maxplayers')
+                input(type='submit', value='Create')
+        h2 Lobby
         div
             if games && games.length > 0
                 table
@@ -31,6 +37,6 @@ html
                                 td #{game.maxPlayers}
                                 td
                                     if game.started == 0
-                                        a(href='/joingame/' + game.gameId) Join!
+                                        a(href='/game/' + game.gameId) Join!
             else
                 p No games found!

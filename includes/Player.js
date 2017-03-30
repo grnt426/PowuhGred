@@ -3,12 +3,13 @@ var util = require("../util.js");
 /**
  *
  * @param uid {string}
+ * @param name {string}
  * @param comms {Communications}
  * @param socket {Socket}
  * @constructor
  * @this {Player}
  */
-exports.Player = function(uid, comms, socket) {
+exports.Player = function(uid, name, comms, socket) {
 
     /**
      * Used for binding a player uniquely.
@@ -25,7 +26,7 @@ exports.Player = function(uid, comms, socket) {
      * Name shown to all players in chats and in public.
      * @type {string}
      */
-    this.displayName = uid;
+    this.displayName = name;
 
     /**
      * @type {Socket}

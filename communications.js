@@ -5,12 +5,12 @@
  * @constructor
  * @this {Communications}
  */
-exports.Communications = function(io, engine) {
+exports.Communications = function(io) {
 
     // Used to broadcast to channels
     this.io = io;
 
-    this.engine = engine;
+    this.engine = {};
 
     // Init sequence
     this.SOCKET_CONNECTION = 'connection';      // client -> server
@@ -35,6 +35,10 @@ exports.Communications = function(io, engine) {
     // Debug control
     this.CONSOLE_ALL_OFF = false;
     this.CHAT_ALL_OFF = false;
+
+    this.setEngine = function(engine) {
+        this.engine = engine;
+    };
 
     /**
      * Broadcasts a message on SOCKET_CHAT channel to all players in the game, from

@@ -110,7 +110,26 @@ app.get("/game/:gameId", function(req, res) {
     }
 });
 app.post("/creategame", function(req, res) {
+    let hostUser = req.session.username;
+    let maxPlayers = req.body.maxplayers;
+    let started = 0;
+    Promise
 
+    // TODO: Should make sure the game name hasn't already been generated before.
+        .resolve(db.run('INSERT INTO Games (hostUser, maxPlayers, started) VALUES (?, ?, ?)',
+            hostUser, maxPlayers, started))
+        .then(function(dbResult){
+            console.info("Result: " + JSON.stringify(dbResult));
+            let id = dbResult.stmt.lastID;
+            console.info("Id: " + id);
+            req.session.joining = id;
+            const comms = new communicationsjs.Communications(io);
+            const engine = new enginejs.Engine(comms, citiesDef, powerPlants.powerPlants);
+            comms.setEngine(engine);
+            engine.engineId = id;
+            activeGames[id] = engine;
+            res.redirect('/game/' + id);
+        });
 });
 app.post("/login", function(req, res) {
     let username = req.body.username;
@@ -133,7 +152,7 @@ app.post("/login", function(req, res) {
                 req.session.authenticated = true;
                 req.session.username = username;
                 console.info("Session: " + JSON.stringify(req.session));
-                res.render('home');
+                res.redirect('/');
             }
             else {
                 res.send("INVALID_USER");
@@ -145,7 +164,7 @@ app.post("/login", function(req, res) {
                 res.send("Invalid username and password combination");
             }
             else {
-                res.send("Error in logging you in. Try again.");
+                res.send("Error logging you in. Try again.");
             }
         });
 });
@@ -214,18 +233,6 @@ powerPlants.parsePowerPlants("data/power_plants.txt");
 
 var activeGames = [];
 
-var comms = new communicationsjs.Communications(io);
-var engine = new enginejs.Engine(comms, citiesDef, powerPlants.powerPlants);
-comms.engine = engine;
-engine.engineId = 'abc';
-activeGames['abc'] = engine;
-
-comms = new communicationsjs.Communications(io);
-engine = new enginejs.Engine(comms, citiesDef, powerPlants.powerPlants);
-comms.engine = engine;
-engine.engineId = 'abcd';
-activeGames['abcd'] = engine;
-
 // This exposes the session object from Express into Socket.IO
 io.use(function(socket, next) {
     sessionObject(socket.handshake, {}, next);
@@ -233,9 +240,10 @@ io.use(function(socket, next) {
 
 // connect to a player, listen
 // TODO: There seems to be an issue with a player joining, but the tab not gaining focus in FF, and the player not initializing the game correctly.
-io.sockets.on(comms.SOCKET_CONNECTION, function(socket) {
+io.sockets.on('connection', function(socket) {
 
     let gameId = socket.handshake.session.joining;
+    let username = socket.handshake.session.username;
     console.info("Game attempting join: " + gameId);
     let curGame = activeGames[gameId];
 
@@ -249,14 +257,15 @@ io.sockets.on(comms.SOCKET_CONNECTION, function(socket) {
 
     // For simplicity, bind the Engine object to the Socket
     socket.engine = curGame;
+    let comms = curGame.comms;
 
     let uid = 'player' + util.olen(curGame.players);
     socket.uid = uid;
     socket.emit(comms.SOCKET_USERID, uid);
-    curGame.addPlayer(uid, socket);
+    curGame.addPlayer(uid, username, socket);
     socket.emit(comms.SOCKET_DEFINECITIES, citiesDef.cities);
-    comms.toAll(uid + " has joined the game.");
-    console.info(uid + " [" + socket.uid + "] has joined the game");
+    comms.toAll(username + " has joined the game.");
+    console.info(username + " [" + socket.uid + "] has joined the game");
     curGame.broadcastGameState();
 
     // When the client emits sendchat, this listens and executes
