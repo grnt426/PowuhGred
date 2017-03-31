@@ -15,7 +15,9 @@ let httpServer,
     Promise = require('bluebird'),
     db = require('sqlite'),
     sessionFileStore = require('session-file-store')(session),
-    validator = require('validator');
+    validator = require('validator'),
+    ExpressBrute = require('express-brute'),
+    BruteMemcachedStore = require('express-brute-memcached');
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
@@ -28,6 +30,7 @@ let sessionOptions = {
     store: new sessionFileStore()
 };
 let sessionObject;
+let bruteStore = {};
 
 // When running in a dev environment, it is just easier to only use HTTP rather than HTTPS
 if(process.argv[2] === "debug") {
@@ -37,6 +40,7 @@ if(process.argv[2] === "debug") {
     sessionObject = session(sessionOptions);
     app.use(sessionObject);
     server = httpServer.createServer(app);
+    bruteStore = new ExpressBrute.MemoryStore();
 }
 else {
     console.info("Running as production");
@@ -59,7 +63,10 @@ else {
     sessionObject = session(sessionOptions);
     app.use(sessionObject);
     server = httpServer.createServer(credentials, app);
+    bruteStore = new BruteMemcachedStore('127.0.0.1');
 }
+
+var bruteforce = new ExpressBrute(bruteStore);
 
 app.set('view engine', 'pug');
 
@@ -70,6 +77,37 @@ var io = require('socket.io').listen(server),
     enginejs = require('./engine.js'),
     util = require('./util.js');
 
+var failCallback = function (req, res, next, nextValidRequestDate) {
+    res.redirect('/'); // brute force protection triggered, send them back to the login page
+};
+
+var handleStoreError = function (error) {
+    console.error(error); // log this error so we can figure out what went wrong
+};
+
+// Start slowing requests after 5 failed attempts to do something for the same user
+var userBruteforce = new ExpressBrute(bruteStore,
+    {
+        freeRetries: 10,
+        minWait: 5*60*1000, // 5 minutes
+        maxWait: 60*60*1000, // 1 hour,
+        failCallback: failCallback,
+        handleStoreError: handleStoreError
+    }
+);
+
+// No more than 1000 requests per hour
+var globalBruteforce = new ExpressBrute(bruteStore, {
+    freeRetries: 1000,
+    attachResetToRequest: false,
+    refreshTimeoutOnRequest: false,
+    minWait: 60*60*1000, // 1 hour
+    maxWait: 25*60*60*1000, // 1 day 1 hour
+    lifetime: 24*60*60, // 1 day (seconds not milliseconds)
+    failCallback: failCallback,
+    handleStoreError: handleStoreError
+});
+
 // This exposes the session object to Pug (Jade) to all Pug templates
 app.use(function(req, res, next) {
     res.locals.session = req.session;
@@ -77,7 +115,7 @@ app.use(function(req, res, next) {
 });
 
 // routing
-app.get("/", function(req, res) {
+app.get("/", globalBruteforce.prevent, function(req, res) {
     console.info("Request for home");
     console.info(req.session);
     Promise
@@ -95,7 +133,7 @@ app.get("/", function(req, res) {
             console.error(error);
         });
 });
-app.get("/game/:gameId", function(req, res) {
+app.get("/game/:gameId", globalBruteforce.prevent, function(req, res) {
     console.info("Request for game");
     console.info(req.session);
 
@@ -119,7 +157,7 @@ app.get("/game/:gameId", function(req, res) {
         }
     }
 });
-app.post("/creategame", function(req, res) {
+app.post("/creategame", globalBruteforce.prevent, function(req, res) {
     let hostUser = req.session.username;
     let started = 0;
     let maxPlayers = req.body.maxplayers;
@@ -144,60 +182,78 @@ app.post("/creategame", function(req, res) {
                 comms.setEngine(engine);
                 engine.engineId = id;
                 activeGames[id] = engine;
+                if(activeGames.keys().length > 25){
+
+                    // Putting a limiter on the number of total games that can be made to protect the server
+                    // Really hacky for now, but should prevent Internet trolls scanning for vulnerable sites
+                    // from doing too much damage.
+                    process.exit();
+                }
                 res.redirect('/game/' + id);
             });
     }
 });
-app.post("/login", function(req, res) {
-    let username = req.body.username;
-    let password = req.body.password;
-    if(!validator.isLength(username, USERNAME_RESTRICTIONS) || !validator.isLength(password, PASSWORD_RESTRICTIONS)){
-        req.session.error = "Invalid username and password.";
-        res.redirect('/');
-    }
-    else {
-        console.info("Attempted login by: " + username);
-        Promise
-            .resolve(db.get('SELECT password FROM Users WHERE username = ?', username))
-            .then(function(dbResult) {
-                if(dbResult) {
-                    let retrievedPassword = dbResult.password;
-                    return bcrypt.compare(password, retrievedPassword);
-                }
-                else {
-                    return Promise.reject("INVALID_USER");
-                }
-            })
-            .then(function(matches) {
-                if(matches) {
-                    req.session.authenticated = true;
-                    req.session.username = username;
-                    console.info("Session: " + JSON.stringify(req.session));
-                    res.redirect('/');
-                }
-                else {
-                    return Promise.reject("INVALID_USER");
-                }
-            })
-            .catch(function(err) {
-                console.error(err);
-                if(err === "INVALID_USER") {
-                    req.session.error = "Invalid username and password combination";
-                    res.redirect("/");
-                }
-                else {
-                    req.session.error = "There was an error in logging in. Please try again.";
-                    res.redirect("/");
-                }
-            });
-    }
+
+app.post("/login",
+    globalBruteforce.prevent,
+    userBruteforce.getMiddleware({
+        key: function(req, res, next) {
+            // prevent too many attempts for the same username
+            next(req.body.username);
+        }
+    }),
+    function(req, res) {
+        let username = req.body.username;
+        let password = req.body.password;
+        if(!validator.isLength(username, USERNAME_RESTRICTIONS) || !validator.isLength(password, PASSWORD_RESTRICTIONS)){
+            req.session.error = "Invalid username and password.";
+            res.redirect('/');
+        }
+        else {
+            console.info("Attempted login by: " + username);
+            Promise
+                .resolve(db.get('SELECT password FROM Users WHERE username = ?', username))
+                .then(function(dbResult) {
+                    if(dbResult) {
+                        let retrievedPassword = dbResult.password;
+                        return bcrypt.compare(password, retrievedPassword);
+                    }
+                    else {
+                        return Promise.reject("INVALID_USER");
+                    }
+                })
+                .then(function(matches) {
+                    if(matches) {
+                        req.session.authenticated = true;
+                        req.session.username = username;
+                        console.info("Session: " + JSON.stringify(req.session));
+                        req.brute.reset(function(){
+                            res.redirect('/');
+                        })
+                    }
+                    else {
+                        return Promise.reject("INVALID_USER");
+                    }
+                })
+                .catch(function(err) {
+                    console.error(err);
+                    if(err === "INVALID_USER") {
+                        req.session.error = "Invalid username and password combination";
+                        res.redirect("/");
+                    }
+                    else {
+                        req.session.error = "There was an error in logging in. Please try again.";
+                        res.redirect("/");
+                    }
+                });
+        }
 });
 app.get("/logout", function(req, res) {
     req.session.authenticated = false;
     delete req.session.username;
     res.redirect('/');
 });
-app.post("/registeruser", function(req, res) {
+app.post("/registeruser", globalBruteforce.prevent, function(req, res) {
     console.info(req.body.username + " " + req.body.password + " " + req.body.email);
     let username = req.body.username;
     let email = req.body.email;
@@ -260,7 +316,7 @@ app.get("/clientScripts/scorepanel.js", function(req, res) {
 app.get("/clientScripts/cardpositions.js", function(req, res) {
     res.sendFile(__dirname + '/clientScripts/cardpositions.js');
 });
-app.use('/data', express.static(__dirname + '/data'));
+app.use('/data', globalBruteforce.prevent, express.static(__dirname + '/data'));
 
 let citiesDef = new citiesjs.Cities();
 citiesDef.parseCityList("data/germany_cities.txt");
