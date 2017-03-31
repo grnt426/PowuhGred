@@ -63,7 +63,7 @@ else {
     sessionObject = session(sessionOptions);
     app.use(sessionObject);
     server = httpServer.createServer(credentials, app);
-    bruteStore = new BruteMemcachedStore('127.0.0.1');
+    bruteStore = new BruteMemcachedStore('127.0.0.1:11211');
 }
 
 var bruteforce = new ExpressBrute(bruteStore);
