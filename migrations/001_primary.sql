@@ -5,10 +5,6 @@ CREATE TABLE Games (gameId INTEGER PRIMARY KEY, hostUser TEXT NOT NULL, maxPlaye
 CREATE TABLE UsersInGames (gameId_username TEXT PRIMARY KEY, gameId TEXT NOT NULL, username TEXT NOT NULL);
 CREATE INDEX gameId_UsersInGames_index ON UsersInGames (gameId);
 
--- Password is 123
-INSERT INTO Users (username, password) VALUES('derp', '$2a$10$wZVrOam9qNkSweAh6DebWeVG8OfVubyEbBLKFXExVvklSJM1Qz.yS');
-INSERT INTO Users (username, password) VALUES('grnt', '$2a$10$wZVrOam9qNkSweAh6DebWeVG8OfVubyEbBLKFXExVvklSJM1Qz.yS');
-
 -- Down
 DROP TABLE Users;
 DROP TABLE Sessions;

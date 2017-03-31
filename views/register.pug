@@ -2,6 +2,10 @@ html
     head
         title PowerGrid Register
     body
+        if session.error
+            p #{session.error}
+            - delete session.error
+        p Username length 3-50, password length 8-50. Email optional.
         form(method='POST' action='/registeruser')
             label(for='username') Username:
             input(type='text', placeholder='Username', name='username')

@@ -1,5 +1,8 @@
 // Main entry point for the server. Init systems, sync client js and data, listen for connections
 
+const USERNAME_RESTRICTIONS = {min:3, max:50};
+const PASSWORD_RESTRICTIONS = {min:8, max:50};
+
 let httpServer,
     fs = require('fs'),
     express = require('express'),
@@ -11,7 +14,8 @@ let httpServer,
     bcrypt = require('bcrypt'),
     Promise = require('bluebird'),
     db = require('sqlite'),
-    sessionFileStore = require('session-file-store')(session);
+    sessionFileStore = require('session-file-store')(session),
+    validator = require('validator');
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
@@ -25,6 +29,7 @@ let sessionOptions = {
 };
 let sessionObject;
 
+// When running in a dev environment, it is just easier to only use HTTP rather than HTTPS
 if(process.argv[2] === "debug") {
     console.info("Running as debug");
     sessionOptions.cookie.secure = false;
@@ -95,78 +100,97 @@ app.get("/game/:gameId", function(req, res) {
     console.info(req.session);
 
     let gameId = req.params.gameId;
-    console.info("Game requested: " + gameId);
-
-    // TODO: should instead just present a login page rather than this weird redirect
-    if(!req.session || !req.session.authenticated) {
-        console.info("no session data, going back home");
-        let type = process.argv[2] === "debug" ? "http" : "https";
-        res.writeHead(303, {"Location": type + "://" + req.headers['host']});
-        res.end();
+    if(!validator.isInt(gameId, {min:1, allow_leading_zeroes: false})){
+        req.session.error = "Game id is not valid.";
+        res.redirect("/");
     }
     else {
-        req.session.joining = gameId;
-        res.sendFile(__dirname + '/gameclient.html');
+        console.info("Game requested: " + gameId);
+
+        // TODO: should instead just present a login page rather than this weird redirect
+        if(!req.session || !req.session.authenticated) {
+            console.info("no session data, going back home");
+            req.session.error = "You need to be logged in to play a game.";
+            res.redirect("/");
+        }
+        else {
+            req.session.joining = gameId;
+            res.sendFile(__dirname + '/gameclient.html');
+        }
     }
 });
 app.post("/creategame", function(req, res) {
     let hostUser = req.session.username;
-    let maxPlayers = req.body.maxplayers;
     let started = 0;
-    Promise
+    let maxPlayers = req.body.maxplayers;
+    if(!validator.isInt(maxPlayers, {min:1, max:6, allow_leading_zeroes:false})){
+        req.session.error = "You need to be logged in to play a game.";
+        res.redirect("/");
+    }
+    else {
 
-    // TODO: Should make sure the game name hasn't already been generated before.
-        .resolve(db.run('INSERT INTO Games (hostUser, maxPlayers, started) VALUES (?, ?, ?)',
-            hostUser, maxPlayers, started))
-        .then(function(dbResult){
-            console.info("Result: " + JSON.stringify(dbResult));
-            let id = dbResult.stmt.lastID;
-            console.info("Id: " + id);
-            req.session.joining = id;
-            const comms = new communicationsjs.Communications(io);
-            const engine = new enginejs.Engine(comms, citiesDef, powerPlants.powerPlants);
-            comms.setEngine(engine);
-            engine.engineId = id;
-            activeGames[id] = engine;
-            res.redirect('/game/' + id);
-        });
+        Promise
+
+        // TODO: Should make sure the game name hasn't already been generated before.
+            .resolve(db.run('INSERT INTO Games (hostUser, maxPlayers, started) VALUES (?, ?, ?)',
+                hostUser, maxPlayers, started))
+            .then(function(dbResult) {
+                console.info("Result: " + JSON.stringify(dbResult));
+                let id = dbResult.stmt.lastID;
+                console.info("Id: " + id);
+                req.session.joining = id;
+                const comms = new communicationsjs.Communications(io);
+                const engine = new enginejs.Engine(comms, citiesDef, powerPlants.powerPlants);
+                comms.setEngine(engine);
+                engine.engineId = id;
+                activeGames[id] = engine;
+                res.redirect('/game/' + id);
+            });
+    }
 });
 app.post("/login", function(req, res) {
     let username = req.body.username;
     let password = req.body.password;
-    console.info(username + " " + password);
-    Promise
-        .resolve(db.get('SELECT password FROM Users WHERE username = ?', username))
-        .then(function(dbResult) {
-            console.info("DB Result: " + JSON.stringify(dbResult));
-            if(dbResult) {
-                let retrievedPassword = dbResult.password;
-                return bcrypt.compare(password, retrievedPassword);
-            }
-            else {
-                return Promise.reject("INVALID_USER");
-            }
-        })
-        .then(function(matches) {
-            if(matches) {
-                req.session.authenticated = true;
-                req.session.username = username;
-                console.info("Session: " + JSON.stringify(req.session));
-                res.redirect('/');
-            }
-            else {
-                return Promise.reject("INVALID_USER");
-            }
-        })
-        .catch(function(err) {
-            console.error(err);
-            if(err === "INVALID_USER") {
-                res.send("Invalid username and password combination");
-            }
-            else {
-                res.send("Error logging you in. Try again.");
-            }
-        });
+    if(!validator.isLength(username, USERNAME_RESTRICTIONS) || !validator.isLength(password, PASSWORD_RESTRICTIONS)){
+        req.session.error = "Invalid username and password.";
+        res.redirect('/');
+    }
+    else {
+        console.info("Attempted login by: " + username);
+        Promise
+            .resolve(db.get('SELECT password FROM Users WHERE username = ?', username))
+            .then(function(dbResult) {
+                if(dbResult) {
+                    let retrievedPassword = dbResult.password;
+                    return bcrypt.compare(password, retrievedPassword);
+                }
+                else {
+                    return Promise.reject("INVALID_USER");
+                }
+            })
+            .then(function(matches) {
+                if(matches) {
+                    req.session.authenticated = true;
+                    req.session.username = username;
+                    console.info("Session: " + JSON.stringify(req.session));
+                    res.redirect('/');
+                }
+                else {
+                    return Promise.reject("INVALID_USER");
+                }
+            })
+            .catch(function(err) {
+                console.error(err);
+                if(err === "INVALID_USER") {
+                    req.session.error = "Invalid username and password combination";
+                    res.redirect("/");
+                }
+                else {
+                    req.session.error = "There was an error in logging in. Please try again.";
+                    res.redirect("/");
+                }
+            });
+    }
 });
 app.get("/logout", function(req, res) {
     req.session.authenticated = false;
@@ -177,23 +201,34 @@ app.post("/registeruser", function(req, res) {
     console.info(req.body.username + " " + req.body.password + " " + req.body.email);
     let username = req.body.username;
     let email = req.body.email;
-    bcrypt.hash(req.body.password, 10)
-        .then(function(hash) {
-            console.info("Hash " + hash);
-            return db.run('INSERT INTO Users (username, email, password) VALUES (?, ?, ?)', username, email, hash);
-        })
-        .then(function() {
-            req.session.authenticated = true;
-            req.session.username = username;
-            res.redirect('/');
-        })
-        .catch(function(err) {
-            console.error(err);
-            res.send("Error in registration!");
-        });
+    let password = req.body.password;
+
+    // Emails are optional (and even if I did take them, nothing is done with them anyway).
+    if(!validator.isLength(username, USERNAME_RESTRICTIONS) || (!validator.isEmpty(email) && !validator.isEmail(email))
+            || !validator.isLength(password, PASSWORD_RESTRICTIONS)){
+        req.session.error = "Please enter valid information.";
+        res.redirect("/register");
+    }
+    else {
+        bcrypt.hash(password, 10)
+            .then(function(hash) {
+                return db.run('INSERT INTO Users (username, email, password) VALUES (?, ?, ?)',
+                    username, email, hash);
+            })
+            .then(function() {
+                req.session.authenticated = true;
+                req.session.username = username;
+                res.redirect('/');
+            })
+            .catch(function(err) {
+                console.error("Registration Error: " + err);
+                res.session.error = "Error in registration. Try again.";
+                res.redirect("/register");
+            });
+    }
 });
 app.get("/register", function(req, res) {
-    res.render('register');
+    res.render('register', {});
 });
 app.get("/clientScripts/init.js", function(req, res) {
     res.sendFile(__dirname + '/clientScripts/init.js');
