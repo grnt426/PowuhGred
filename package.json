@@ -21,7 +21,8 @@
     "validator": "7.0.0",
     "express-brute": "1.0.1",
     "memcached": "2.2.2",
-    "express-brute-memcached": "0.0.1"
+    "express-brute-memcached": "0.0.1",
+    "connect-memcached": "0.2.0"
   },
   "scripts:": {
     "test": "mocha"

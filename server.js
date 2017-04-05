@@ -17,7 +17,8 @@ let httpServer,
     sessionFileStore = require('session-file-store')(session),
     validator = require('validator'),
     ExpressBrute = require('express-brute'),
-    BruteMemcachedStore = require('express-brute-memcached');
+    BruteMemcachedStore = require('express-brute-memcached'),
+    SessionMemcachedStore = require('connect-memcached')(session);
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
@@ -26,8 +27,7 @@ app.use(bodyParser.urlencoded({
 
 let sessionOptions = {
     cookie: {}, resave: false, saveUninitialized: false,
-    secret: fs.readFileSync('../session.secret').toString(), autoSave: true,
-    store: new sessionFileStore()
+    secret: fs.readFileSync('../session.secret').toString(), autoSave: true
 };
 let sessionObject;
 let bruteStore = {};
@@ -36,6 +36,7 @@ let bruteStore = {};
 if(process.argv[2] === "debug") {
     console.info("Running as debug");
     sessionOptions.cookie.secure = false;
+    sessionOptions.store = new sessionFileStore();
     httpServer = require('http');
     sessionObject = session(sessionOptions);
     app.use(sessionObject);
@@ -47,6 +48,8 @@ else {
 
     // Secure cookies can only be used with HTTPS
     sessionOptions.cookie.secure = true;
+
+    sessionOptions.store = new SessionMemcachedStore({hosts:'127.0.0.1:11211'});
 
     // Don't allow non-HTTPS connections
     let unsecureHttpServer = require('http');
