@@ -161,8 +161,12 @@ app.post("/creategame", globalBruteforce.prevent, function(req, res) {
     let hostUser = req.session.username;
     let started = 0;
     let maxPlayers = req.body.maxplayers;
-    if(!validator.isInt(maxPlayers, {min:1, max:6, allow_leading_zeroes:false})){
-        req.session.error = "You need to be logged in to play a game.";
+    if(!req.session || !req.session.authenticated){
+        req.session.error = "Need to be logged in.";
+        res.redirect("/");
+    }
+    else if(!validator.isInt(maxPlayers, {min:1, max:6, allow_leading_zeroes:false})){
+        req.session.error = "Valid number!";
         res.redirect("/");
     }
     else {
@@ -176,7 +180,6 @@ app.post("/creategame", globalBruteforce.prevent, function(req, res) {
                 console.info("Result: " + JSON.stringify(dbResult));
                 let id = dbResult.stmt.lastID;
                 console.info("Id: " + id);
-                req.session.joining = id;
                 const comms = new communicationsjs.Communications(io);
                 const engine = new enginejs.Engine(comms, citiesDef, powerPlants.powerPlants);
                 comms.setEngine(engine);
@@ -400,11 +403,19 @@ function resolveCommand(socket, data) {
     }
 }
 
+/**
+ * Given the current state of the game, which causes constant downtime/crashes, the previous games are still
+ * stored in the DB and referenced when the server restarts. Since there is also no game restore feature, or any
+ * automatic game pruning, it is easier to just purge all games.
+ */
+function removeDeadGames(){
+    db.run('DELETE FROM Games');
+}
+
 // All setup is finished, start listening for connections.
 Promise.resolve()
     .then(() => db.open('../database.sqlite', {Promise}))
-
-    // TODO: the below should not be done on production (???) but is fine for now
+    .then(() => removeDeadGames())
     // TODO comment out the below after first-run if you want data to persist with each run in dev.
     .then(() => db.migrate({force: (process.argv[2] === "debug" ? 'last' : false)}))
     .then(() => server.listen(process.env.PORT || 3000))
