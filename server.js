@@ -113,16 +113,24 @@ var globalBruteforce = new ExpressBrute(bruteStore, {
 
 // This exposes the session object to Pug (Jade) to all Pug templates
 app.use(function(req, res, next) {
-    res.locals.session = req.session;
+
+    console.info("Before: " + JSON.stringify(req.session));
 
     // If joining is set, the WebSocket connection likely altered the Session (and so deleted the value). We need to
     // reload from the SessionStore to get the latest data.
     if(req.session && req.session.joining){
 
+        console.info("Reloading session...");
+
         // After loading, go ahead and proceed
-        req.session.reload(next);
+        req.session.reload(function(){
+            console.info("After: " + JSON.stringify(req.session));
+            res.locals.session = req.session;
+            next();
+        });
     }
     else{
+        res.locals.session = req.session;
         next();
     }
 });
@@ -302,36 +310,7 @@ app.post("/registeruser", globalBruteforce.prevent, function(req, res) {
 app.get("/register", function(req, res) {
     res.render('register', {});
 });
-app.get("/clientScripts/init.js", function(req, res) {
-    res.sendFile(__dirname + '/clientScripts/init.js');
-});
-app.get("/clientScripts/auction.js", function(req, res) {
-    res.sendFile(__dirname + '/clientScripts/auction.js');
-});
-app.get("/clientScripts/buttons.js", function(req, res) {
-    res.sendFile(__dirname + '/clientScripts/buttons.js');
-});
-app.get("/clientScripts/chat.js", function(req, res) {
-    res.sendFile(__dirname + '/clientScripts/chat.js');
-});
-app.get("/clientScripts/fuel.js", function(req, res) {
-    res.sendFile(__dirname + '/clientScripts/fuel.js');
-});
-app.get("/clientScripts/clickHandler.js", function(req, res) {
-    res.sendFile(__dirname + '/clientScripts/clickHandler.js');
-});
-app.get("/clientScripts/redraw.js", function(req, res) {
-    res.sendFile(__dirname + '/clientScripts/redraw.js');
-});
-app.get("/clientScripts/sockethandlers.js", function(req, res) {
-    res.sendFile(__dirname + '/clientScripts/sockethandlers.js');
-});
-app.get("/clientScripts/scorepanel.js", function(req, res) {
-    res.sendFile(__dirname + '/clientScripts/scorepanel.js');
-});
-app.get("/clientScripts/cardpositions.js", function(req, res) {
-    res.sendFile(__dirname + '/clientScripts/cardpositions.js');
-});
+app.use('/clientScripts', globalBruteforce.prevent, express.static(__dirname + '/clientScripts'));
 app.use('/data', globalBruteforce.prevent, express.static(__dirname + '/data'));
 
 let citiesDef = new citiesjs.Cities();
@@ -364,6 +343,7 @@ io.sockets.on('connection', function(socket) {
 
     // No longer trying to join. Free up so the player can join another.
     delete session.joining;
+    console.info(JSON.stringify(session));
     session.save(function(err){if(err){console.info("error saving session: : " + err);}});
 
     // For simplicity, bind the Engine object to the Socket
