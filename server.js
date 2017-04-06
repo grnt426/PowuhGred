@@ -114,7 +114,17 @@ var globalBruteforce = new ExpressBrute(bruteStore, {
 // This exposes the session object to Pug (Jade) to all Pug templates
 app.use(function(req, res, next) {
     res.locals.session = req.session;
-    next();
+
+    // If joining is set, the WebSocket connection likely altered the Session (and so deleted the value). We need to
+    // reload from the SessionStore to get the latest data.
+    if(req.session && req.session.joining){
+
+        // After loading, go ahead and proceed
+        req.session.reload(next);
+    }
+    else{
+        next();
+    }
 });
 
 // routing
@@ -341,8 +351,9 @@ io.use(function(socket, next) {
 // TODO: There seems to be an issue with a player joining, but the tab not gaining focus in FF, and the player not initializing the game correctly.
 io.sockets.on('connection', function(socket) {
 
-    let gameId = socket.handshake.session.joining;
-    let username = socket.handshake.session.username;
+    let session = socket.handshake.session;
+    let gameId = session.joining;
+    let username = session.username;
     console.info("Game attempting join: " + gameId);
     let curGame = activeGames[gameId];
 
@@ -352,7 +363,8 @@ io.sockets.on('connection', function(socket) {
     }
 
     // No longer trying to join. Free up so the player can join another.
-    delete socket.handshake.session.joining;
+    delete session.joining;
+    session.save(function(err){if(err){console.info("error saving session: : " + err);}});
 
     // For simplicity, bind the Engine object to the Socket
     socket.engine = curGame;
