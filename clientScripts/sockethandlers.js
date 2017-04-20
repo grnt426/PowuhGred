@@ -23,7 +23,7 @@ socket.on(SOCKET_DEFINECITIES, function(data) {
 
 
 socket.on(SOCKET_UPDATES, function(data) {
-    if(data.group == "updateGameState") {
+    if(data.group === "updateGameState") {
         scorePanel = data;
 
         // extract globals
@@ -38,15 +38,15 @@ socket.on(SOCKET_UPDATES, function(data) {
 
         // If we are the player the game is waiting on to choose a plant to remove, override the action state
         // to "remove" so the correct buttons appear
-        currentActionState = newData.playerMustRemovePlant && newData.auction.currentBidLeader == playerData.self.uid ? "remove"
+        currentActionState = newData.playerMustRemovePlant && newData.auction.currentBidLeader === playerData.self.uid ? "remove"
             : currentActionState;
 
 
         // Change the title of the browser window so the player knows it is their turn
-        if(currentActionState != "startGame" && !gameOver
-            && ((currentActionState == "bid" && playerData.self.uid == newData.auction.currentBidders[newData.auction.currentPlayerBidIndex])
-            || (currentActionState != "bid" && currentActionState != "power" && playerData.self.uid == currentPlayer)
-            || (currentActionState == "power" && scorePanel.args.data.playersPaid.indexOf(playerData.self.uid) == -1))) {
+        if(currentActionState !== "startGame" && !gameOver
+            && ((currentActionState === "bid" && playerData.self.uid === newData.auction.currentBidders[newData.auction.currentPlayerBidIndex])
+            || (currentActionState !== "bid" && currentActionState !== "power" && playerData.self.uid === currentPlayer)
+            || (currentActionState === "power" && scorePanel.args.data.playersPaid.indexOf(playerData.self.uid) === -1))) {
             document.title = "* PowuhGred - Your Turn!";
         }
         else {
@@ -54,7 +54,7 @@ socket.on(SOCKET_UPDATES, function(data) {
         }
 
         // un-select the resources selected from the buy phase
-        if(currentActionState == "build") {
+        if(currentActionState === "build") {
             var playerOwnedPlantCosts = scorePanel.args.data.players[playerData.self.uid].plants;
             for(var i in playerOwnedPlantCosts) {
                 ppp[parseInt(i)].resources = {};
@@ -62,7 +62,7 @@ socket.on(SOCKET_UPDATES, function(data) {
         }
 
         for(var change in scorePanel.args.changes) {
-            if(scorePanel.args.changes[change] == "startGame") {
+            if(scorePanel.args.changes[change] === "startGame") {
                 animStartGame();
             }
         }
@@ -74,49 +74,49 @@ socket.on(SOCKET_UPDATES, function(data) {
 });
 
 var updateHandler = function(data) {
-    if(data.group == "resourcePool") {
+    if(data.group === "resourcePool") {
         updateResources(data.args);
     }
-    else if(data.group == "playerOrder") {
+    else if(data.group === "playerOrder") {
         updatePlayerOrder(data.args);
     }
-    else if(data.group == "currentPlayer") {
+    else if(data.group === "currentPlayer") {
         updateCurrentPlayer(data.args);
     }
-    else if(data.group == "actualMarket") {
+    else if(data.group === "actualMarket") {
         updateActualMarket(data.args);
     }
-    else if(data.group == "futureMarket") {
+    else if(data.group === "futureMarket") {
         updateFutureMarket(data.args);
     }
-    else if(data.group == "currentAction") {
+    else if(data.group === "currentAction") {
         updateCurrentAction(data.args);
     }
-    else if(data.group == "money") {
+    else if(data.group === "money") {
         updateMoney(data.args);
     }
-    else if(data.group == "newPlayer") {
+    else if(data.group === "newPlayer") {
         updateNewPlayer(data.args);
     }
-    else if(data.group == "name") {
+    else if(data.group === "name") {
         updatePlayerName(data.args);
     }
-    else if(data.group == "auctionStart") {
+    else if(data.group === "auctionStart") {
         updateStartAuction(data.args);
     }
-    else if(data.group == "bid") {
+    else if(data.group === "bid") {
         updateNewBid(data.args);
     }
-    else if(data.group == "currentBidder") {
+    else if(data.group === "currentBidder") {
         updateCurrentBidder(data.args);
     }
-    else if(data.group == "displayName") {
+    else if(data.group === "displayName") {
         updateDisplayName(data.args);
     }
-    else if(data.group == "bidWinner") {
+    else if(data.group === "bidWinner") {
         updateBidWin(data.args);
     }
-    else if(data.group == "playerPlants") {
+    else if(data.group === "playerPlants") {
         updatePlayerPlants(data.args);
     }
     else {

@@ -307,6 +307,13 @@ exports.Engine = function(comms, cities, plants) {
         this.currentAction = this.START_AUCTION;
     };
 
+    /**
+     * Creates a new player that will participate in the given game.
+     * @param uid   Used to uniquely distinguish this player from others.
+     * @param name  The name this player wants to be called, and used for chat messages.
+     * @param socket    The protocol for communicating with the player's client, and with the player.
+     * @returns {Player}    The Player object constructed by this function.
+     */
     this.addPlayer = function(uid, name, socket) {
         var player = new playerjs.Player(uid, name, this.comms, socket);
         this.players[uid] = player;
@@ -314,6 +321,7 @@ exports.Engine = function(comms, cities, plants) {
         this.reverseLookUp[socket.uid] = player;
         player.money = this.STARTING_MONEY;
         player.color = this.colorsAvailable.pop();
+        return player;
     };
 
     /**

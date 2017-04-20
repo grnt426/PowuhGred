@@ -78,7 +78,9 @@ var io = require('socket.io').listen(server),
     citiesjs = require('./cities.js'),
     powerplantjs = require('./powerplantreader.js'),
     enginejs = require('./engine.js'),
-    util = require('./util.js');
+    util = require('./util.js'),
+    socketInterceptor = require('./ai/socketinterceptor.js'),
+    dummyPlayer = require('./ai/dummyplayer');
 
 var failCallback = function (req, res, next, nextValidRequestDate) {
     res.redirect('/'); // brute force protection triggered, send them back to the login page
@@ -346,6 +348,10 @@ io.sockets.on('connection', function(socket) {
     console.info(JSON.stringify(session));
     session.save(function(err){if(err){console.info("error saving session: : " + err);}});
 
+    processNewPlayer(socket, curGame, username);
+});
+
+function processNewPlayer(socket, curGame, username){
     // For simplicity, bind the Engine object to the Socket
     socket.engine = curGame;
     let comms = curGame.comms;
@@ -363,7 +369,7 @@ io.sockets.on('connection', function(socket) {
     // sendchat -> String
     socket.on(comms.SOCKET_SENDCHAT, function(data) {
         if(data[0] === '/') {
-            resolveCommand(socket, data);
+            resolveCommand(socket, comms, curGame, data);
         }
         else if(data.trim().length !== 0) {
             console.info("Chat message: " + data);
@@ -383,18 +389,34 @@ io.sockets.on('connection', function(socket) {
         // TODO handle players leaving.
         comms.toAll(curGame.reverseLookUp[socket.uid].displayName + " has left the game.");
     });
-});
+}
 
 // handles user chat commands
-function resolveCommand(socket, data) {
+function resolveCommand(socket, comms, curGame, data) {
     console.info(data);
     let command = data.substring(0, data.indexOf(' '));
+    let args = data.substring(data.indexOf(' ') + 1);
     if(command === "/name") {
-        let name = data.substring(data.indexOf(' ') + 1);
+        let name = args;
         console.info("Name received: " + name);
         let player = socket.engine.reverseLookUp[socket.uid];
         player.displayName = name;
         socket.engine.broadcastGameState();
+    }
+    else if(command === "/addai"){
+        addNewAi(comms, curGame, args);
+    }
+}
+
+function addNewAi(comms, curGame, aiLevel){
+    if(aiLevel === "dummy"){
+        let socket = new socketInterceptor.SocketInterceptor(comms, comms.engine);
+        let dummy = new dummyPlayer.DummyPlayer(socket);
+        let name = "EZ-27";
+        processNewPlayer(socket, curGame, name);
+    }
+    else{
+        comms.toAll("AI level not supported: " + aiLevel);
     }
 }
 
