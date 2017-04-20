@@ -88,4 +88,8 @@ exports.Player = function(uid, name, comms, socket) {
     this.getPlantCount = function() {
         return util.olen(this.plants);
     };
+
+    this.getMoney = function() {
+        return this.money;
+    }
 };

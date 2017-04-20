@@ -1,3 +1,5 @@
+let Promise = require('bluebird');
+
 /**
  * Clients using this SocketInterceptor should minimally call registerListenerForGameUpdates.
  * @param {Communications} comms
@@ -20,7 +22,7 @@ exports.SocketInterceptor = function(comms, engine){
     /**
      * @type {String}
      */
-    this.uid;
+    this.uid = undefined;
 
     /**
      * Maps various different kinds of messages from the server to an appropriate listener for a client.
@@ -28,26 +30,28 @@ exports.SocketInterceptor = function(comms, engine){
      */
     this.channelMapper = {};
 
+    this.client = undefined;
+
     /**
      * Simply maps specific types of messages to handlers.
-     * TODO: We need to perform this call asynchronously so the callback doesn't hold up everything.
      * @param channel
      * @param payload
      */
     this.emit = function(channel, payload){
         console.info(channel + " " + payload);
-        this.channelMapper[channel](payload);
+        Promise.resolve(this.channelMapper[channel](this.client, payload))
+            .catch((err) => console.error("Error in talking to client " + err));
     };
 
     /**
      * Allows the client to send an action to the server.
-     * TODO: Should also be asynchronous so the client can receive other messages from the server.
      * @param action
      * @param data
      */
     this.sendGameAction = function(action, data){
         let payload = {uid:this.uid, cmd:action, args:data};
-        this.channelMapper[comms.SOCKET_GAMEACTION](payload);
+        Promise.resolve(this.channelMapper[comms.SOCKET_GAMEACTION](payload))
+            .catch((err) => console.error("Error in talking to server " + err));
     };
 
     /**
@@ -55,7 +59,8 @@ exports.SocketInterceptor = function(comms, engine){
      * @param message
      */
     this.sendChatMessage = function(message){
-        this.channelMapper[this.comms.SOCKET_SENDCHAT](message);
+        Promise.resolve(this.channelMapper[this.comms.SOCKET_SENDCHAT](message))
+            .catch((err) => console.error("Error in sending chat message to server " + err));
     };
 
     this.registerListenerForGameUpdates = function(callback){

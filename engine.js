@@ -434,31 +434,31 @@ exports.Engine = function(comms, cities, plants) {
         }
 
         // Any player may move their resources around at any time.
-        else if(action == "move") {
+        else if(action === "move") {
             this.moveResourcesBetweenPlants(args, player);
             this.broadcastGameState();
             return;
         }
 
         // If a player needs to remove a plant from mat, that is also a short-circuiting action
-        else if(action == "remove" && this.auction.playerMustRemovePlant && uid == this.auction.currentBidLeader) {
+        else if(action === "remove" && this.auction.playerMustRemovePlant && uid === this.auction.currentBidLeader) {
             this.auction.removePlantAndResumeAuction(args);
             return;
         }
 
-        else if(action == "checkbuild") {
+        else if(action === "checkbuild") {
             var totalCost = this.building.checkCost(args, player);
             this.comms.toPlayer(player, "Cost of: " + JSON.stringify(args) + " is $" + totalCost);
             return;
         }
 
         // TODO: compress the boolean logic
-        else if(this.currentPlayer !== false && uid !== this.currentPlayer && this.currentAction != this.BID && this.currentAction != this.POWER) {
+        else if(this.currentPlayer !== false && uid !== this.currentPlayer && this.currentAction !== this.BID && this.currentAction !== this.POWER) {
             // for now, we only support listening to the current player
             console.info(uid + " tried taking their turn when not theirs! Currently, it is " + this.getCurrentPlayer().uid + "'s turn.");
             this.comms.toPlayer(player, "Not your turn.");
         }
-        else if(this.currentAction == this.BID && uid != this.auction.currentBidder) {
+        else if(this.currentAction === this.BID && uid !== this.auction.currentBidder) {
             // for now, we only support listening to the current player
             console.info(uid + " tried taking their turn when not theirs!");
             this.comms.toPlayer(player, "Not your turn.");
@@ -471,22 +471,22 @@ exports.Engine = function(comms, cities, plants) {
                 return;
             }
 
-            if(this.START_GAME == action) {
+            if(this.START_GAME === action) {
                 this.startGame();
             }
-            else if(this.START_AUCTION == action) {
+            else if(this.START_AUCTION === action) {
                 this.auction.startAuction(data.args);
             }
-            else if(this.BID == action) {
+            else if(this.BID === action) {
                 this.auction.placeBid(data.args);
             }
-            else if(this.BUY == action) {
+            else if(this.BUY === action) {
                 this.market.buyResources(data.args);
             }
-            else if(this.BUILD == action) {
+            else if(this.BUILD === action) {
                 this.building.buildCities(data.args);
             }
-            else if(this.POWER == action) {
+            else if(this.POWER === action) {
                 this.power.powerCities(player, data.args);
             }
 

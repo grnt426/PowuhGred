@@ -359,7 +359,7 @@ function processNewPlayer(socket, curGame, username){
     let uid = 'player' + util.olen(curGame.players);
     socket.uid = uid;
     socket.emit(comms.SOCKET_USERID, uid);
-    curGame.addPlayer(uid, username, socket);
+    let player = curGame.addPlayer(uid, username, socket);
     socket.emit(comms.SOCKET_DEFINECITIES, citiesDef.cities);
     comms.toAll(username + " has joined the game.");
     console.info(username + " [" + socket.uid + "] has joined the game");
@@ -389,6 +389,8 @@ function processNewPlayer(socket, curGame, username){
         // TODO handle players leaving.
         comms.toAll(curGame.reverseLookUp[socket.uid].displayName + " has left the game.");
     });
+
+    return player;
 }
 
 // handles user chat commands
@@ -412,8 +414,10 @@ function addNewAi(comms, curGame, aiLevel){
     if(aiLevel === "dummy"){
         let socket = new socketInterceptor.SocketInterceptor(comms, comms.engine);
         let dummy = new dummyPlayer.DummyPlayer(socket);
+        dummy.setup();
+        socket.client = dummy;
         let name = "EZ-27";
-        processNewPlayer(socket, curGame, name);
+        dummy.setOwnPlayer(processNewPlayer(socket, curGame, name));
     }
     else{
         comms.toAll("AI level not supported: " + aiLevel);
