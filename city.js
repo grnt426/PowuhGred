@@ -29,8 +29,8 @@ exports.City = function(name) {
     };
 
     this.isPlayerHere = function(playerId) {
-        return this.players.indexOf(playerId) != -1;
-    }
+        return this.players.indexOf(playerId) !== -1;
+    };
 
     this.buildForPlayer = function(player) {
         this.players.push(player);

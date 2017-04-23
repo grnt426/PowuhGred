@@ -415,6 +415,7 @@ function addNewAi(comms, curGame, aiLevel){
         let socket = new socketInterceptor.SocketInterceptor(comms, comms.engine);
         let dummy = new dummyPlayer.DummyPlayer(socket);
         dummy.setup();
+        dummy.engine = curGame;
         socket.client = dummy;
         let name = "EZ-27";
         dummy.setOwnPlayer(processNewPlayer(socket, curGame, name));

@@ -75,7 +75,7 @@ var bidDownButton = function() {
 var resourceMore = function(type) {
 
     // Don't increment if nothing is selected
-    if(selectedOwnedPlant == undefined) {
+    if(selectedOwnedPlant === undefined) {
         return;
     }
 
@@ -92,11 +92,11 @@ var resourceMore = function(type) {
 var resourceLess = function(type) {
 
     // Don't decrement if nothing is selected
-    if(selectedOwnedPlant == undefined) {
+    if(selectedOwnedPlant === undefined) {
         return;
     }
 
-    if(selectedOwnedPlant.resources[type] != undefined && selectedOwnedPlant.resources[type] > 0)
+    if(selectedOwnedPlant.resources[type] !== undefined && selectedOwnedPlant.resources[type] > 0)
         selectedOwnedPlant.resources[type] -= 1;
     log(selectedOwnedPlant.resources[type] + " " + type, CONSOLE_O);
 };

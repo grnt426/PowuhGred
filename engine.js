@@ -259,7 +259,7 @@ exports.Engine = function(comms, cities, plants) {
      */
     this.getCurrentStep = function(phase) {
         if(this.step3Triggered) {
-            if(phase == "power" || phase == "build") {
+            if(phase === "power" || phase === "build") {
                 return this.currentStep;
             }
             else {
@@ -550,7 +550,7 @@ exports.Engine = function(comms, cities, plants) {
         // Controls the direction of player turn order. Negative means we are advancing to the first player, starting
         // with the last. Positive means we are advancing to the last player starting from the first.
         var turnOrder = -1;
-        if(this.currentAction == this.START_AUCTION)
+        if(this.currentAction === this.START_AUCTION)
             turnOrder = 1;
 
         this.currentPlayerIndex = this.currentPlayerIndex + turnOrder;
@@ -577,7 +577,7 @@ exports.Engine = function(comms, cities, plants) {
 
             // Once we advance past to the "START_AUCTION" phase again, we must recompute turn order and point to
             // player position 1, as the first player must now start the auction first.
-            if(this.currentAction == this.START_AUCTION) {
+            if(this.currentAction === this.START_AUCTION) {
                 this.resolveTurnOrder();
                 this.currentPlayer = this.playerOrder[0];
             }
@@ -585,14 +585,14 @@ exports.Engine = function(comms, cities, plants) {
     };
 
     this.nextAction = function() {
-        if(this.currentAction == this.START_AUCTION) {
+        if(this.currentAction === this.START_AUCTION) {
             this.auction.removeLowestPlant(true);
             this.checkForStep3();
             this.currentAction = this.BUY;
         }
-        else if(this.currentAction == this.BUY)
+        else if(this.currentAction === this.BUY)
             this.currentAction = this.BUILD;
-        else if(this.currentAction == this.BUILD) {
+        else if(this.currentAction === this.BUILD) {
 
             // TODO: Check if game is over
             // YES, this is performed AFTER the build phase BEFORE the power phase.
@@ -618,7 +618,7 @@ exports.Engine = function(comms, cities, plants) {
 
                 // While very rare/bizarre, it is possible for players to progress to Step 3 before progressing to
                 // Step 2. If so, we don't want to permanently revert, so we check here just to make sure.
-                if(this.currentStep == 3) {
+                if(this.currentStep === 3) {
                     this.comms.toAll("Step 2 triggered, but the game is already in Step 3.");
                     this.comms.toAll("Only the lowest cost power plant is removed, and the game stays in Step 3");
                 }
@@ -635,7 +635,7 @@ exports.Engine = function(comms, cities, plants) {
 
             this.currentAction = this.POWER;
         }
-        else if(this.currentAction == this.POWER) {
+        else if(this.currentAction === this.POWER) {
 
             this.market.replenishResources();
 

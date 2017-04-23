@@ -98,13 +98,13 @@ exports.Auction = function(engine, comms) {
 
         // award the power plant if the last bidder passed, or if there is only
         // one bidder at the start of the bid.
-        if((this.currentBidders.length == 2 && pass) || this.currentBidders.length == 1) {
+        if((this.currentBidders.length === 2 && pass) || this.currentBidders.length === 1) {
             var bidWinner = this.currentBidLeader;
             this.finishedAuctions.push(bidWinner);
             var player = this.engine.players[bidWinner];
             this.comms.toAll(player.displayName + " won power plant " + this.engine.plants[this.currentBidChoice].cost
                 + " for $" + this.currentBid);
-            if(player.getPlantCount() == this.engine.getMaxPowerPlantsPerPlayer()) {
+            if(player.getPlantCount() === this.engine.getMaxPowerPlantsPerPlayer()) {
                 this.playerMustRemovePlant = true;
                 this.comms.toAll(player.displayName + " must first discard a power plant before accepting the new plant.");
                 this.engine.broadcastGameState();
@@ -136,7 +136,7 @@ exports.Auction = function(engine, comms) {
     this.removePlantAndResumeAuction = function(removePlantCost) {
         var player = this.engine.players[this.currentBidLeader];
         var plantToRemove = player.plants[removePlantCost];
-        if(plantToRemove == undefined) {
+        if(plantToRemove === undefined) {
             this.comms.toPlayer(player, "You can't remove a plant you don't own.");
         }
         else {
@@ -241,7 +241,7 @@ exports.Auction = function(engine, comms) {
     this.removeAuctionedPlant = function() {
         var index = 0;
         for(var plant in this.engine.currentMarket) {
-            if(this.engine.currentMarket[plant].cost == this.currentBidChoice) {
+            if(this.engine.currentMarket[plant].cost === this.currentBidChoice) {
                 break;
             }
             index += 1;
@@ -259,7 +259,7 @@ exports.Auction = function(engine, comms) {
     this.removeLowestPlant = function(replaceLowest) {
         var lowestIndex = -1;
         for(var p in this.engine.currentMarket) {
-            if(lowestIndex == -1 || this.engine.currentMarket[p].cost < this.engine.currentMarket[lowestIndex].cost) {
+            if(lowestIndex === -1 || this.engine.currentMarket[p].cost < this.engine.currentMarket[lowestIndex].cost) {
                 lowestIndex = p;
             }
         }
@@ -282,13 +282,13 @@ exports.Auction = function(engine, comms) {
      */
     this.addNewAndReorder = function() {
         var unsortedPlants = this.engine.currentMarket.concat(this.engine.futuresMarket);
-        if(this.engine.plantCosts.length != 0) {
+        if(this.engine.plantCosts.length !== 0) {
             var nextCost = this.engine.plantCosts.splice(0, 1);
             var newPlant = this.engine.plants[nextCost];
             unsortedPlants = unsortedPlants.concat(newPlant);
         }
         unsortedPlants.sort(function(plantA, plantB) {
-            if(plantA.cost == "step3") return 100; else return plantA.cost - plantB.cost
+            if(plantA.cost === "step3") return 100; else return plantA.cost - plantB.cost
         });
         if(unsortedPlants.length <= 6) {
             this.engine.currentMarket = unsortedPlants;
@@ -296,7 +296,7 @@ exports.Auction = function(engine, comms) {
         else {
             this.engine.currentMarket = unsortedPlants.splice(0, 4);
             this.engine.futuresMarket = unsortedPlants.splice(0, 4);
-            if(this.engine.futuresMarket[3].cost == this.engine.STEP_THREE && this.haveNotShuffledAfterStep3) {
+            if(this.engine.futuresMarket[3].cost === this.engine.STEP_THREE && this.haveNotShuffledAfterStep3) {
 
                 // As soon as Step 3 is revealed, we must shuffle the draw deck.
                 util.shuffle(this.engine.plantCosts);
@@ -318,15 +318,17 @@ exports.Auction = function(engine, comms) {
         this.auctionRunning = false;
         this.currentBidders = [];
 
-        // If the current player lost the auction, they get to start the auction
-        // once more.
-        if(this.finishedAuctions.indexOf(this.engine.currentPlayer) == -1) {
-            this.comms.toAll(this.engine.getCurrentPlayer().displayName + " gets to start the auction again.");
-        }
-
-        else if(this.finishedAuctions.length == this.engine.getPlayerCount()) {
+        if(this.finishedAuctions.length === this.engine.getPlayerCount()) {
+            console.info("Auction done, move to next phase.");
+            this.engine.currentPlayerIndex = -2;
             this.finishedAuctions = [];
             this.engine.nextPlayer();
+        }
+
+        // If the current player lost the auction, they get to start the auction
+        // once more.
+        else if(this.finishedAuctions.indexOf(this.engine.currentPlayer) === -1) {
+            this.comms.toAll(this.engine.getCurrentPlayer().displayName + " gets to start the auction again.");
         }
         else {
 
@@ -334,7 +336,7 @@ exports.Auction = function(engine, comms) {
             // until we find one that has not finished their auction phase.
             do {
                 this.engine.nextPlayer();
-            } while(this.finishedAuctions.indexOf(this.engine.currentPlayer) != -1);
+            } while(this.finishedAuctions.indexOf(this.engine.currentPlayer) !== -1);
         }
     };
 };

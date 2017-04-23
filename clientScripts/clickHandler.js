@@ -273,6 +273,7 @@ canvas.addEventListener('mouseup', function(event) {
 var deselectOwnPowerPlants = function() {
     for(p in ppp) {
         ppp[p].selected = false;
+        ppp[p].resources = {'coal':0, 'oil':0, 'garbage':0, 'uranium':0};
     }
     selectedOwnedPlant = undefined;
     selectedPlants = [];

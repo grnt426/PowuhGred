@@ -50,6 +50,7 @@ exports.SocketInterceptor = function(comms, engine){
      */
     this.sendGameAction = function(action, data){
         let payload = {uid:this.uid, cmd:action, args:data};
+        console.info(JSON.stringify(payload));
         Promise.resolve(this.channelMapper[comms.SOCKET_GAMEACTION](payload))
             .catch((err) => console.error("Error in talking to server " + err));
     };

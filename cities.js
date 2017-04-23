@@ -259,7 +259,7 @@ exports.Cities = function() {
      */
     this.costToBuildOnCity = function(cityName) {
         return this.cities[cityName.toLowerCase()].costToBuild();
-    }
+    };
 
     /**
      * culls cities not included in this game

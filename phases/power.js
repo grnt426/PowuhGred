@@ -128,7 +128,7 @@ exports.Power = function(engine, comms, powerPlants) {
     this.ownsAllPlants = function(player, plants) {
         var ownsAll = true;
         for(var p in plants) {
-            ownsAll &= player.plants[plants[p].cost] != undefined;
+            ownsAll &= player.plants[plants[p].cost] !== undefined;
         }
         return ownsAll;
     };

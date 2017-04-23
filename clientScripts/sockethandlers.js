@@ -57,7 +57,7 @@ socket.on(SOCKET_UPDATES, function(data) {
         if(currentActionState === "build") {
             var playerOwnedPlantCosts = scorePanel.args.data.players[playerData.self.uid].plants;
             for(var i in playerOwnedPlantCosts) {
-                ppp[parseInt(i)].resources = {};
+                ppp[parseInt(i)].resources = {'coal':0, 'oil':0, 'garbage':0, 'uranium':0};
             }
         }
 

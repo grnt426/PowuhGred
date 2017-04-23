@@ -91,5 +91,9 @@ exports.Player = function(uid, name, comms, socket) {
 
     this.getMoney = function() {
         return this.money;
-    }
+    };
+
+    this.getPowerPlants = function() {
+        return this.plants;
+    };
 };
