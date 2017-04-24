@@ -14,7 +14,7 @@
     "pug": "2.0.0-beta11",
     "sinon": "1.17.6",
     "socket.io": "1.7.3",
-    "bcrypt":"1.0.2",
+    "bcrypt": "1.0.2",
     "sqlite": "2.5.0",
     "bluebird": "^3.5.0",
     "session-file-store": "1.0.0",

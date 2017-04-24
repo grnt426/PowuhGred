@@ -32,6 +32,12 @@ let sessionOptions = {
 let sessionObject;
 let bruteStore = {};
 
+// Don't let the server start unless an environment is specifically chosen
+if(process.argv[2].length !== 3 || (process.argv[2] !== "debug" && process.argv[2] !== "production")){
+    console.error("Usage: nodejs server.js (debug|production)");
+    process.exit();
+}
+
 // When running in a dev environment, it is just easier to only use HTTP rather than HTTPS
 if(process.argv[2] === "debug") {
     console.info("Running as debug");
