@@ -62,7 +62,7 @@ exports.DummyPlayer = function(socketInterceptor){
      * @param payload
      */
     this.processChatMessages = function(payload){
-        console.info("Got chat message: " + payload);
+        console.info("Got chat message: " + JSON.stringify(payload));
         // Do nothing for now...
     };
 
@@ -92,10 +92,13 @@ exports.DummyPlayer = function(socketInterceptor){
      * @param self
      */
     this.processAuction = function(self){
-        if(self.isOurTurn(self) && self.player.getPlantCount() <= 3) {
-            if(self.player.getPlantCount() === 0 || self.shouldDoIt(0.75)) {
+        if(self.isOurTurn(self)) {
+            if(self.player.getPlantCount() === 0 || (self.shouldDoIt(0.75) && self.player.getPlantCount() <= 3)) {
                 let plantCost = self.gameState["actualMarket"][0]["cost"];
                 self.socketInterceptor.sendGameAction("startAuction", {cost: plantCost, bid: plantCost});
+            }
+            else{
+                self.socketInterceptor.sendGameAction("startAuction", "pass");
             }
         }
     };
@@ -184,8 +187,9 @@ exports.DummyPlayer = function(socketInterceptor){
                     for(let cityName in neighbors){
                         let cityObject = self.engine.cities.convertToCityObjects(cityName);
 
-                        // we can't buy a city if there are no open slots for this Step.
-                        if(cityObject.players.length < self.engine.getCurrentStep(self.engine.currentAction)) {
+                        // we can't buy a city if there are no open slots for this Step, or we own it.
+                        if(cityObject.players.length === self.engine.getCurrentStep(self.engine.currentAction)
+                            || cityObject.players.indexOf(self.player.uid) !== -1) {
                             continue;
                         }
 
@@ -197,6 +201,7 @@ exports.DummyPlayer = function(socketInterceptor){
                                 cityOptions[cheapestPathToCity[cityName]].indexOf(cityName), 1);
                         }
 
+                        cheapestPathToCity[cityName] = buildCost;
                         if(cityOptions[buildCost]){
                             cityOptions[buildCost].push(cityName);
                         }

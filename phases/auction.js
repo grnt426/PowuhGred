@@ -283,7 +283,7 @@ exports.Auction = function(engine, comms) {
     this.addNewAndReorder = function() {
         var unsortedPlants = this.engine.currentMarket.concat(this.engine.futuresMarket);
         if(this.engine.plantCosts.length !== 0) {
-            var nextCost = this.engine.plantCosts.splice(0, 1);
+            var nextCost = this.engine.plantCosts.splice(0, 1)[0];
             var newPlant = this.engine.plants[nextCost];
             unsortedPlants = unsortedPlants.concat(newPlant);
         }
