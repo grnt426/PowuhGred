@@ -33,7 +33,7 @@ let sessionObject;
 let bruteStore = {};
 
 // Don't let the server start unless an environment is specifically chosen
-if(process.argv[2].length !== 3 || (process.argv[2] !== "debug" && process.argv[2] !== "production")){
+if(process.argv.length !== 3 || (process.argv[2] !== "debug" && process.argv[2] !== "production")){
     console.error("Usage: nodejs server.js (debug|production)");
     process.exit();
 }
