@@ -41,7 +41,7 @@ And start playing!
 
 
 Development
-------------
+============
 
 If in IntelliJ, define a run configuration (top bar, left of the Green Arrow).
 Choose to create a new NodeJS run profile, and just select server.js as the target.
@@ -50,4 +50,3 @@ To run tests, repeat, but instead create a new Mocha profile and then point at t
 pass --recursive to the "Extra mocha options" field.
 
 	mocha
-	

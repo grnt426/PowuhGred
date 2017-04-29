@@ -1,3 +1,5 @@
+const util = require('../util.js');
+
 /**
  * Handles the Build phase of the game, where players purchase slots on cities.
  * @param {Engine} engine
@@ -29,12 +31,12 @@ exports.Building = function(engine, comms, cities) {
     this.buildCities = function(data) {
 
         // Players can always choose to not purchase any cities
-        if(data == "pass") {
+        if(data === "pass") {
             this.comms.toAll(this.engine.getCurrentPlayer().displayName + " has passed on purchasing cities.");
             this.engine.nextPlayer();
         }
         else {
-            var cityErrors = [];
+            let cityErrors = [];
             var validPurchase = this.isValid(data, cityErrors);
 
             if(validPurchase !== true) {
@@ -86,12 +88,12 @@ exports.Building = function(engine, comms, cities) {
             city = this.cities.convertToCityObjects(name);
 
             if(city.isPlayerHere(playerId)) {
-                cityErrors.push("Can't build at " + name + ", you have already have a house there.")
+                cityErrors.push("Can't build at " + name + ", you have already have a house there.");
                 return false;
             }
 
             if(!city.isThereFreeSpace(playerId, currentStep)) {
-                cityErrors.push("Can't build at " + name + ", it already has the maximum number of players for the current Step.")
+                cityErrors.push("Can't build at " + name + ", it already has the maximum number of players for the current Step.");
                 return false;
             }
         }

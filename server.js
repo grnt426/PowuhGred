@@ -209,11 +209,7 @@ app.post("/creategame", globalBruteforce.prevent, function(req, res) {
                 console.info("Result: " + JSON.stringify(dbResult));
                 let id = dbResult.stmt.lastID;
                 console.info("Id: " + id);
-                const comms = new communicationsjs.Communications(io);
-                const engine = new enginejs.Engine(comms, citiesDef, powerPlants.powerPlants);
-                comms.setEngine(engine);
-                engine.engineId = id;
-                activeGames[id] = engine;
+                createGame(id);
                 if(activeGames.keys().length > 25){
 
                     // Putting a limiter on the number of total games that can be made to protect the server
@@ -322,10 +318,7 @@ app.use('/clientScripts', globalBruteforce.prevent, express.static(__dirname + '
 app.use('/data', globalBruteforce.prevent, express.static(__dirname + '/data'));
 
 let citiesDef = new citiesjs.Cities();
-citiesDef.parseCityList("data/germany_cities.txt");
-citiesDef.parseCities("data/germany_connections.txt");
 let powerPlants = new powerplantjs.PowerPlantReader();
-powerPlants.parsePowerPlants("data/power_plants.txt");
 
 var activeGames = [];
 
@@ -431,6 +424,14 @@ function addNewAi(comms, curGame, aiLevel){
     }
 }
 
+function createGame(id){
+    const comms = new communicationsjs.Communications(io);
+    const engine = new enginejs.Engine(comms, util.deepCopy(citiesDef), util.deepCopy(powerPlants.powerPlants));
+    comms.setEngine(engine);
+    engine.engineId = id;
+    activeGames[id] = engine;
+}
+
 /**
  * Given the current state of the game, which causes constant downtime/crashes, the previous games are still
  * stored in the DB and referenced when the server restarts. Since there is also no game restore feature, or any
@@ -440,11 +441,22 @@ function removeDeadGames(){
     db.run('DELETE FROM Games');
 }
 
+function readMaps(){
+    citiesDef.parseCityList("data/germany_cities.txt");
+    citiesDef.parseCities("data/germany_connections.txt");
+}
+
+function readPowerPlants(){
+    powerPlants.parsePowerPlants("data/power_plants.txt");
+}
+
 // All setup is finished, start listening for connections.
 Promise.resolve()
     .then(() => db.open('../database.sqlite', {Promise}))
-    .then(() => removeDeadGames())
-    // TODO comment out the below after first-run if you want data to persist with each run in dev.
+    // NOTE: comment out the below after first-run if you want data to persist with each run in dev.
     .then(() => db.migrate({force: (process.argv[2] === "debug" ? 'last' : false)}))
+    .then(() => removeDeadGames())
+    .then(() => readMaps())
+    .then(() => readPowerPlants())
     .then(() => server.listen(process.env.PORT || 3000))
     .catch((err) => console.error("WHAT " + err.stack));

@@ -1,4 +1,4 @@
-var res = require("./State/Resources.js");
+const res = require("./State/Resources.js");
 
 /**
  * Fisher-Yates shuffle algorithm, operates on the array in-place.
@@ -8,7 +8,7 @@ var res = require("./State/Resources.js");
  * @returns {*}
  */
 exports.shuffle = function(array) {
-    var currentIndex = array.length, temporaryValue, randomIndex;
+    let currentIndex = array.length, temporaryValue, randomIndex;
 
     // While there remain elements to shuffle...
     while(0 !== currentIndex) {
@@ -32,7 +32,7 @@ exports.shuffle = function(array) {
  * @returns {number} The number of keys (length) in the object
  */
 exports.olen = function(obj) {
-    if(typeof obj == "object") {
+    if(typeof obj === "object") {
         return Object.keys(obj).length;
     }
     return 0;
@@ -46,7 +46,7 @@ exports.olen = function(obj) {
 exports.deepCopy = function(obj) {
 
     // Seems to be an issue with the else-block on empty arrays, so we need to handle this special-case
-    if(obj.constructor === Array && obj.length == 0) {
+    if(obj.constructor === Array && obj.length === 0) {
         return [];
     }
     else {
@@ -55,7 +55,7 @@ exports.deepCopy = function(obj) {
 };
 
 exports.resourceList = function(coal, oil, garbage, uranium) {
-    var data = {};
+    let data = {};
     data[res.COAL] = coal;
     data[res.OIL] = oil;
     data[res.GARBAGE] = garbage;
