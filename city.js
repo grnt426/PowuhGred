@@ -5,7 +5,7 @@
  * @constructor
  * @this {City}
  */
-exports.City = function(name) {
+exports.City = function(name = "") {
 
     this.connections = {};
 
@@ -35,4 +35,13 @@ exports.City = function(name) {
     this.buildForPlayer = function(player) {
         this.players.push(player);
     };
+
+    this.readCopy = function(copy){
+        this.connections = copy.connections;
+        this.name = copy.name;
+        this.x = copy.x;
+        this.y = copy.y;
+        this.region = copy.region;
+        this.players = copy.players;
+    }
 };

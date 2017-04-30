@@ -1,19 +1,30 @@
-allcombinations = require('allcombinations');
-
-self.onmessage = function (request) {
+module.exports = function (request, done) {
+    console.info("Incoming Request: " + JSON.stringify(request));
 
     // TODO: we should leverage Memcached as a cache for our memoized search. For now, memoized results are thrown away.
     let data = request.data;
-    if(request.action === "findOptimalOrder") {
-        let result = findOptimalPurchaseCostOrderOfCities(data.ctx, data.start, data.end);
-        self.postMessage(result);
+    if(request.action === "findOptimalPurchaseCostOrderOfCities") {
+        let result = 0;
+        try {
+            result = findOptimalPurchaseCostOrderOfCities(data.ctx, data.cities, data.dests);
+        }
+        catch(err){
+            console.error("Error in finding optimal: " + err);
+        }
+        done(result);
     }
-    else if(request.action === "findArbitrary") {
-        let result = findArbitraryCheapestToDest(data.ctx, data.cities, data.dests);
-        self.postMessage(result);
+    else if(request.action === "findArbitraryCheapestToDest") {
+        let result = 0;
+        try{
+            result = findArbitraryCheapestToDest(data.ctx, data.cities, data.dest);
+        }
+        catch(err){
+            console.error("Error in finding arbitrary cheapest: " + err);
+        }
+        done(result);
     }
     else {
-        self.postMessage("Invalid request!");
+        done("Invalid request!");
     }
 };
 
@@ -39,7 +50,7 @@ function findCheapestRoute(ctx, start, end, debug = false) {
     let cheapestRoutes = [];
     let neighbors = start.connections;
     let visited = [];
-    let shortest = undefined;
+    let shortest = {};
     visited[start.name.toLowerCase()] = 0;
 
     // Add all our neighbors
@@ -104,6 +115,9 @@ function findArbitraryCheapestToDest(ctx, cities, dest) {
     let lowestCost = 999;
     for(let i in cities) {
         let cost = findCheapestRoute(ctx, cities[i], dest).cost;
+        if(isNaN(cost)){
+            console.info("Bad cost? " + cost);
+        }
         if(cost < lowestCost)
             lowestCost = cost;
     }
@@ -174,7 +188,7 @@ function convertToCityObjects(cityNames, cities) {
  * Since we can't require inside worker threads, just copy-pasting this here is enough.
  * @param input
  */
-function allcombinations(input) {
+function* allcombinations(input) {
     if (input.length === 1) {
         yield input;
         return

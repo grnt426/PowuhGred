@@ -82,7 +82,8 @@ app.set('view engine', 'pug');
 var io = require('socket.io').listen(server),
     communicationsjs = require('./communications.js'),
     citiesjs = require('./cities.js'),
-    powerplantjs = require('./powerplantreader.js'),
+    powerPlantReaderjs = require('./powerplantreader.js'),
+    powerPlantjs = require("./includes/PowerPlant.js")
     enginejs = require('./engine.js'),
     util = require('./util.js'),
     socketInterceptor = require('./ai/socketinterceptor.js'),
@@ -318,7 +319,7 @@ app.use('/clientScripts', globalBruteforce.prevent, express.static(__dirname + '
 app.use('/data', globalBruteforce.prevent, express.static(__dirname + '/data'));
 
 let citiesDef = new citiesjs.Cities();
-let powerPlants = new powerplantjs.PowerPlantReader();
+let powerPlants = new powerPlantReaderjs.PowerPlantReader();
 
 var activeGames = [];
 
@@ -426,7 +427,15 @@ function addNewAi(comms, curGame, aiLevel){
 
 function createGame(id){
     const comms = new communicationsjs.Communications(io);
-    const engine = new enginejs.Engine(comms, util.deepCopy(citiesDef), util.deepCopy(powerPlants.powerPlants));
+    let cities = new citiesjs.Cities(util.deepCopy(citiesDef.cities));
+    let powerPlantCopy = {};
+    for(let cost in powerPlants.powerPlants){
+        let plant = powerPlants.powerPlants[cost];
+        let copy = new powerPlantjs.PowerPlant();
+        powerPlantCopy[cost] = copy;
+        copy.createCopy(plant);
+    }
+    const engine = new enginejs.Engine(comms, cities, powerPlantCopy);
     comms.setEngine(engine);
     engine.engineId = id;
     activeGames[id] = engine;

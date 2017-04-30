@@ -9,7 +9,7 @@ var res = require("./../State/Resources.js");
  * @constructor
  * @this {PowerPlant}
  */
-exports.PowerPlant = function(cost, type, requires, powers) {
+exports.PowerPlant = function(cost = 0, type = '', requires = 0, powers = 0) {
 
     /**
      * Minimum cost to buy this power plant.
@@ -134,5 +134,12 @@ exports.PowerPlant = function(cost, type, requires, powers) {
             }
         }
         return this.powers;
+    };
+
+    this.createCopy = function(plant){
+        this.cost = plant.cost;
+        this.powers = plant.powers;
+        this.requires = plant.requires;
+        this.type = plant.type;
     };
 };

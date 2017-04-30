@@ -37,36 +37,41 @@ exports.Building = function(engine, comms, cities) {
         }
         else {
             let cityErrors = [];
-            var validPurchase = this.isValid(data, cityErrors);
+            let validPurchase = this.isValid(data, cityErrors);
 
             if(validPurchase !== true) {
                 this.comms.toCurrent(cityErrors[0]);
                 return;
             }
 
-            var totalCost = this.checkCost(data, this.engine.getCurrentPlayer());
-            var currentPlayer = this.engine.getCurrentPlayer();
-            if(totalCost > currentPlayer.money) {
-                this.comms.toCurrent("The selected set of cities cost $" + totalCost + ", and you only have $" + currentPlayer.money);
-            }
+            let playerCities = this.engine.getCurrentPlayer().cities;
+            let self = this;
+            Promise
+                .resolve(this.cities.findOptimalPurchaseCostOrderOfCities(playerCities, data))
+                .then(function(result){
+                    let totalCost = result + self.cities.getTotalCostToBuild(data);
+                    let currentPlayer = self.engine.getCurrentPlayer();
+                    if(totalCost > currentPlayer.money) {
+                        self.comms.toCurrent("The selected set of cities cost $" + totalCost + ", and you only have $" + currentPlayer.money);
+                    }
 
-            // Otherwise, all good! Reserve the city slots and subtract the cost
-            else {
-                for(var i in data) {
-                    this.cities.purchaseCity(data[i], currentPlayer.uid);
-                    currentPlayer.buildOnCity(this.cities.convertToCityObjects(data[i]));
-                }
-                this.comms.toAll(currentPlayer.displayName + " bought " + data);
-                currentPlayer.money -= totalCost;
-                this.engine.checkCityCounts(currentPlayer.cities.length);
-                engine.nextPlayer();
-            }
+                    // Otherwise, all good! Reserve the city slots and subtract the cost
+                    else {
+                        let citiesRequested = data;
+                        for(let i in citiesRequested) {
+                            self.cities.purchaseCity(citiesRequested[i], currentPlayer.uid);
+                            currentPlayer.buildOnCity(self.cities.convertToCityObjects(citiesRequested[i]));
+                        }
+                        self.comms.toAll(currentPlayer.displayName + " bought " + citiesRequested + " for " + totalCost);
+                        currentPlayer.money -= totalCost;
+                        self.engine.checkCityCounts(currentPlayer.cities.length);
+                        engine.nextPlayer();
+                    }
+                })
+                .catch(function(err){
+                    console.error("Error in processing building request: " + err);
+                });
         }
-    };
-
-    this.checkCost = function(requestedCities, player) {
-        return this.cities.findOptimalPurchaseCostOrderOfCities(player.cities, requestedCities) +
-            this.cities.getTotalCostToBuild(requestedCities);
     };
 
     /**

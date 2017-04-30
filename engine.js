@@ -175,7 +175,7 @@ exports.Engine = function(comms, cities, plants) {
      * any one player must own for the game to end.
      * @type {number[]}
      */
-    this.gameEndCityCounts = [3, 21, 17, 17, 15, 14];
+    this.gameEndCityCounts = [21, 21, 17, 17, 15, 14];
 
     /**
      * Zero-indexed by player count (index 0 for 1 player, 1 for 2 players, etc). The value is the minimum number of
@@ -355,7 +355,7 @@ exports.Engine = function(comms, cities, plants) {
         sortablePlayers.sort(function(playerA, playerB) {
             var aCityCount = playerA.cities !== undefined ? playerA.cities.length : 0;
             var bCityCount = playerB.cities !== undefined ? playerB.cities.length : 0;
-            return aCityCount != bCityCount
+            return aCityCount !== bCityCount
                 ? playerB.cities.length - playerA.cities.length
                 : playerB.getHighestCostPowerPlant() - playerA.getHighestCostPowerPlant();
         });

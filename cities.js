@@ -6,20 +6,30 @@ const threads = require('threads'),
     fs = require("fs"),
     cityjs = require("./city.js");
 
-const GRAPH_SEARCH_JS = "external/graphsearch.js";
+const GRAPH_SEARCH_JS = "graphsearch.js";
 
 /**
  * Manages the cities of the game, including searching to determine optimal costs of building new cities.
  * @constructor
  * @this {Cities}
  */
-exports.Cities = function() {
+exports.Cities = function(cities = {}) {
 
     /**
      * String (name of city) -> City
      * @type {Object<string, City>}
      */
     this.cities = {};
+
+    // TODO: we can move/make this better.
+    if(cities !== {}){
+        for(let name in cities){
+            let city = cities[name];
+            let copy = new cityjs.City();
+            copy.readCopy(city);
+            this.cities[name] = copy;
+        }
+    }
 
     /**
      * String (name of city) -> City, which has been deactivated due to being part of a region that's not used by the current game
@@ -42,8 +52,7 @@ exports.Cities = function() {
     // Set base paths to thread scripts
     threadsConfig.set({
         basepath : {
-            browser : 'http://myserver.local/thread-scripts',
-            node    : __dirname + '/../thread-scripts'
+            node    : __dirname + '/external'
         }
     });
 
@@ -54,24 +63,24 @@ exports.Cities = function() {
     };
 
     this.findCheapestRoute = function(start, end){
-        threadPool
+        return threadPool
             .send({action:'findCheapestRoute',
-                data:{ctx:{cities:this.cities, cityDistDict:cityDistDict}, start:start, end:end}})
+                data:{ctx:{cities:this.cities, cityDistDict:{}}, start:start, end:end}})
             .promise()
     };
 
 
     this.findArbitraryCheapestToDest = function(cities, dest){
-        threadPool
+        return threadPool
             .send({action:'findArbitraryCheapestToDest',
-                data:{ctx:{cities:this.cities, cityDistDict:cityDistDict}, cities:cities, dest:dest}})
+                data:{ctx:{cities:this.cities, cityDistDict:{}}, cities:cities, dest:dest}})
             .promise()
     };
 
     this.findOptimalPurchaseCostOrderOfCities = function(cities, dests){
-        threadPool
+        return threadPool
             .send({action:'findOptimalPurchaseCostOrderOfCities',
-                data:{ctx:{cities:this.cities, cityDistDict:cityDistDict}, cities:cities, dests:dests}})
+                data:{ctx:{cities:this.cities, cityDistDict:{}}, cities:cities, dests:dests}})
             .promise()
     };
 
@@ -129,7 +138,7 @@ exports.Cities = function() {
         for(i in array) {
             if(array[i]) {
                 var oneLine = array[i].split(" ");
-                if(oneLine.length == 4) {
+                if(oneLine.length === 4) {
                     var newCity = new cityjs.City(oneLine[2]);
                     newCity.x = oneLine[0];
                     newCity.y = oneLine[1];
