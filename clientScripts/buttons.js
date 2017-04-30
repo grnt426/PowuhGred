@@ -115,6 +115,9 @@ var confirmResourcePurchase = function() {
     deselectOwnPowerPlants();
 };
 
+/**
+ * TODO: Should alert clients when purchasing more than 6 cities that it can take a while to compute.
+ */
 var buildCities = function() {
     socket.emit(SOCKET_GAMEACTION, {uid: playerData.self.uid, cmd: "build", args: selectedCities});
     selectedCities = [];
