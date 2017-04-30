@@ -62,10 +62,11 @@ exports.Building = function(engine, comms, cities) {
                             self.cities.purchaseCity(citiesRequested[i], currentPlayer.uid);
                             currentPlayer.buildOnCity(self.cities.convertToCityObjects(citiesRequested[i]));
                         }
-                        self.comms.toAll(currentPlayer.displayName + " bought " + citiesRequested + " for " + totalCost);
+                        self.comms.toAll(currentPlayer.displayName + " bought " + citiesRequested + " for $" + totalCost);
                         currentPlayer.money -= totalCost;
                         self.engine.checkCityCounts(currentPlayer.cities.length);
                         engine.nextPlayer();
+                        engine.broadcastGameState();
                     }
                 })
                 .catch(function(err){
