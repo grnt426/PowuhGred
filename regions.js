@@ -60,19 +60,19 @@ exports.addConnection = function(startName, endName, regions) {
  * @returns {number} number of regions
  */
 exports.howManyRegions = function(numPlayers) {
-    if(numPlayers == 2) {
+    if(numPlayers === 2) {
         return 3;
     }
-    if(numPlayers == 3) {
+    if(numPlayers === 3) {
         return 3;
     }
-    if(numPlayers == 4) {
+    if(numPlayers === 4) {
         return 4;
     }
-    if(numPlayers == 5) {
+    if(numPlayers === 5) {
         return 5;
     }
-    if(numPlayers == 6) {
+    if(numPlayers === 6) {
         return 5;
     }
     return 3; //just for solo debugging
