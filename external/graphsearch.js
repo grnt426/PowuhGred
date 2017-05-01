@@ -1,3 +1,5 @@
+let fs = require('fs');
+
 module.exports = function (request, done) {
     console.info("Incoming Request: " + JSON.stringify(request));
 
@@ -6,6 +8,7 @@ module.exports = function (request, done) {
     if(request.action === "findOptimalPurchaseCostOrderOfCities") {
         let result = 0;
         try {
+            computeEverything(data.ctx);
             result = findOptimalPurchaseCostOrderOfCities(data.ctx, data.cities, data.dests);
         }
         catch(err){
@@ -28,6 +31,112 @@ module.exports = function (request, done) {
     }
 };
 
+function computeEverything(ctx){
+    let result = "";
+    let allRegionSelections =
+        [
+            "cyan brown red yellow blue purple",
+            "cyan red yellow blue purple",
+            "brown red yellow blue purple",
+            "cyan brown yellow blue purple",
+            "cyan brown red blue purple",
+            "cyan brown red yellow purple",
+            "cyan brown red yellow blue",
+            "red yellow blue purple",
+            "cyan yellow blue purple",
+            "brown red yellow blue",
+            "cyan red blue purple",
+            "cyan red yellow purple",
+            "cyan red yellow blue",
+            "cyan brown yellow purple",
+            "cyan brown yellow blue",
+            "cyan brown red blue",
+            "cyan brown red yellow",
+            "brown yellow blue purple",
+            "brown red yellow purple",
+            "cyan brown red",
+            "cyan brown yellow",
+            "cyan red yellow",
+            "cyan red blue",
+            "cyan yellow blue",
+            "cyan yellow purple",
+            "brown red yellow",
+            "brown yellow blue",
+            "brown yellow purple",
+            "red yellow blue",
+            "red yellow purple",
+            "red blue purple",
+            "yellow blue purple"
+        ];
+
+    let originalCopy = ctx.cities;
+    for(let regionSelection in allRegionSelections){
+        let workingCities = copyCities(originalCopy);
+        console.info("Working set: " + JSON.stringify(workingCities));
+        let regionSelectionArr = allRegionSelections[regionSelection].split(" ");
+        console.info("Region selection: " + JSON.stringify(allRegionSelections[regionSelection]));
+        onlyUseTheseRegions(regionSelectionArr, workingCities);
+        console.info("Working set before breaking into keys: " + JSON.stringify(workingCities));
+        let cityNames = Object.keys(workingCities);
+        console.info("City Names: " + JSON.stringify(cityNames));
+        for(let start = 0; start < cityNames.length; start++){
+            for(let end = start + 1; end < cityNames.length; end++){
+                console.info(start + " -> " + end);
+                let startCity = workingCities[cityNames[start]];
+                let endCity = workingCities[cityNames[end]];
+                console.info("S: " + JSON.stringify(startCity) + " E: " + JSON.stringify(endCity));
+                result = result + allRegionSelections[regionSelection] + "|" + startCity.name + ">" + endCity.name +
+                    "=" + findCheapestRoute({cities:workingCities, cityDistDict:{}}, startCity, endCity).cost + "\n";
+            }
+        }
+    }
+
+    fs.writeFile("pathcosts.txt", result, function(err) {
+        if(err) {
+            return console.log(err);
+        }
+
+        console.log("The file was saved!");
+    });
+}
+
+function copyCities(cities){
+    console.info("Making copy of " + JSON.stringify(cities));
+    let citiesCopy = {};
+    for(let name in cities){
+        let city = cities[name];
+        let copy = makeCopy(city);
+        citiesCopy[name] = copy;
+    }
+    return citiesCopy;
+}
+
+function makeCopy(city){
+
+    let connectionsCopy = {};
+    for(let c in city.connections){
+        connectionsCopy[c] = city.connections[c];
+    }
+    console.info("Connections copy: " + JSON.stringify(connectionsCopy));
+    return { connections:connectionsCopy, name:city.name, region:city.region };
+}
+
+function onlyUseTheseRegions(activeRegions, cities) {
+    for(let name in cities) {
+        if(!activeRegions.includes(cities[name].region)) {
+            deactivateCity(name, cities);
+        }
+    }
+}
+
+function deactivateCity(cityName, cities) {
+    console.info("Delete: " + cityName);
+    for(let connCityName in cities[cityName].connections) {
+        delete cities[connCityName].connections[cityName];
+    }
+    delete cities[cityName];
+}
+
 /**
  * Computes the lowest cost route from start to end. Note: does NOT account for the cost of buying the city.
  *
@@ -36,16 +145,8 @@ module.exports = function (request, done) {
  * @param {boolean} [debug=false]
  * @returns {Object}    The shortest route and its cost
  */
-function findCheapestRoute(ctx, start, end, debug = false) {
+function findCheapestRoute(ctx, start, end, debug = true) {
     if(debug) console.info("PATH " + JSON.stringify(start) + " => " + JSON.stringify(end));
-
-    let startDict = ctx.cityDistDict[start.name.toLowerCase()];
-    if(startDict === undefined) {
-        startDict = ctx.cityDistDict[start.name.toLowerCase()] = {};
-    }
-    if(startDict[end.name.toLowerCase()] !== undefined) {
-        return startDict[end.name.toLowerCase()];
-    }
 
     let cheapestRoutes = [];
     let neighbors = start.connections;
@@ -100,7 +201,6 @@ function findCheapestRoute(ctx, start, end, debug = false) {
             visited[city] = cost;
         }
     }
-    startDict[end.name.toLowerCase()] = shortest;
     return shortest;
 }
 

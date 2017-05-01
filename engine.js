@@ -328,11 +328,11 @@ exports.Engine = function(comms, cities, plants) {
      * At the start of the game, randomly pick a valid set regions to use
      */
     this.initRegions = function() {
-        var givenRegions = regionsjs.selectRegions(this.getPlayerCount());
-        this.activeRegions = givenRegions[0];
-        this.inactiveRegions = givenRegions[1];
-        this.comms.toAll("Using regions " + this.activeRegions.join(", ") + " for this game.");
-        this.cities.onlyUseTheseRegions(this.activeRegions);
+        // var givenRegions = regionsjs.selectRegions(this.getPlayerCount());
+        // this.activeRegions = givenRegions[0];
+        // this.inactiveRegions = givenRegions[1];
+        // this.comms.toAll("Using regions " + this.activeRegions.join(", ") + " for this game.");
+        // this.cities.onlyUseTheseRegions(this.activeRegions);
     };
 
     /**
