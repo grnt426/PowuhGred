@@ -49,7 +49,7 @@ exports.DummyPlayer = function(socketInterceptor){
         let action = self.gameState['currentAction'];
         console.info("Got a new game state. " + action);
 
-        // If we don't sleep, the game progresses really fast, which isn't very enjoyable for a human.
+        // If we don't sleep, the AI progresses really fast, which isn't very enjoyable for a human.
         sleep(1750 + (Math.random() * 750)).then(function(){
             if(action) {
                 self.actionMap[action](self);
@@ -62,7 +62,7 @@ exports.DummyPlayer = function(socketInterceptor){
      * @param payload
      */
     this.processChatMessages = function(payload){
-        console.info("Got chat message: " + JSON.stringify(payload));
+        console.info("Got chat message");
         // Do nothing for now...
     };
 

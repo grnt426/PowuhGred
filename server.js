@@ -339,17 +339,56 @@ io.sockets.on('connection', function(socket) {
     let curGame = activeGames[gameId];
 
     if(curGame && curGame.gameStarted) {
-        console.info("A player tried to join after the game started!?");
-        return;
-    }
 
+        let player = curGame.getPlayerByUsername(username);
+        if(player !== undefined){
+            player.socket = socket;
+            reconnectPlayer(curGame, player, socket);
+            cleanJoiningSessionData(session);
+        }
+        else {
+            console.info("A player tried to join after the game started!?");
+            return;
+        }
+    }
+    else {
+        cleanJoiningSessionData(session);
+        processNewPlayer(socket, curGame, username);
+    }
+});
+
+function cleanJoiningSessionData(session) {
     // No longer trying to join. Free up so the player can join another.
     delete session.joining;
     console.info(JSON.stringify(session));
-    session.save(function(err){if(err){console.info("error saving session: : " + err);}});
+    session.save(function(err) {
+        if(err) {
+            console.info("error saving session: : " + err);
+        }
+    });
+}
 
-    processNewPlayer(socket, curGame, username);
-});
+function reconnectPlayer(curGame, player, socket) {
+    socket.engine = curGame;
+    let comms = curGame.comms;
+    socket.uid = player.uid;
+    socket.emit(comms.SOCKET_USERID, player.uid);
+
+    socket.emit(comms.SOCKET_DEFINECITIES, citiesDef.cities);
+    comms.toAll(player.displayName + " has rejoined the game!");
+    console.info(player.uid + " [" + player.displayName + "] has rejoined the game.");
+    curGame.reconnectPlayer(player);
+
+    setupSocketBindings(socket, comms, curGame);
+    curGame.playersDisconnected.splice(curGame.playersDisconnected.indexOf(player.uid), 1);
+
+    if(curGame.playersDisconnected.length === 0) {
+        comms.toAll("All players reconnected, the game may now resume!");
+    }
+    else {
+        comms.toAll("Still waiting for " + curGame.playersDisconnected.length + " players to reconnect.");
+    }
+}
 
 function processNewPlayer(socket, curGame, username){
     // For simplicity, bind the Engine object to the Socket
@@ -365,6 +404,11 @@ function processNewPlayer(socket, curGame, username){
     console.info(username + " [" + socket.uid + "] has joined the game");
     curGame.broadcastGameState();
 
+    setupSocketBindings(socket, comms, curGame);
+    return player;
+}
+
+function setupSocketBindings(socket, comms, curGame) {
     // When the client emits sendchat, this listens and executes
     // sendchat -> String
     socket.on(comms.SOCKET_SENDCHAT, function(data) {
@@ -387,17 +431,16 @@ function processNewPlayer(socket, curGame, username){
     // when the user disconnects
     socket.on(comms.SOCKET_DISCONNECT, function() {
         // TODO handle players leaving.
-        comms.toAll(curGame.reverseLookUp[socket.uid].displayName + " has left the game.");
+        comms.toAll(curGame.reverseLookUp[socket.uid].displayName + " has left the game! We must wait for them to reconnect...");
+        socket.engine.addDisconnectedPlayer(socket.uid);
     });
-
-    return player;
 }
 
 // handles user chat commands
 function resolveCommand(socket, comms, curGame, data) {
     console.info(data);
     let command = data.substring(0, data.indexOf(' '));
-    let args = data.substring(data.indexOf(' ') + 1);
+    let args = data.indexOf(' ') === -1 ? "" : data.substring(data.indexOf(' ') + 1);
     if(command === "/name") {
         let name = args;
         console.info("Name received: " + name);

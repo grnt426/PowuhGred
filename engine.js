@@ -235,6 +235,17 @@ exports.Engine = function(comms, cities, plants) {
     this.inactiveRegions = [];
 
     /**
+     * Players that have disconnected.
+     * @type {Array<String>}
+     */
+    this.playersDisconnected = [];
+
+    /**
+     * Stores the previous update that was broadcast to all players.
+     */
+    this.previousGameUpdate = {};
+
+    /**
      * @returns {Player}
      */
     this.getCurrentPlayer = function() {
@@ -284,11 +295,20 @@ exports.Engine = function(comms, cities, plants) {
      * @returns {Player}    The Player object represented by that UID.
      */
     this.getPlayerByUID = function(uid) {
-        for(var p in this.players) {
-            if(this.players[p].uid == uid) {
+        for(let p in this.players) {
+            if(this.players[p].uid === uid) {
                 return this.players[p];
             }
         }
+    };
+
+    this.getPlayerByUsername = function(username) {
+        for(let p in this.players) {
+            if(this.players[p].displayName === username) {
+                return this.players[p];
+            }
+        }
+        return undefined;
     };
 
     this.startGame = function() {
@@ -430,6 +450,11 @@ exports.Engine = function(comms, cities, plants) {
 
         if(this.gameOver) {
             this.comms.toPlayer(player, "The game has ended! Why not play another game? :)");
+            return;
+        }
+
+        if(this.playersDisconnected.length !== 0) {
+            this.comms.toPlayer(player, "Must wait for " + this.playersDisconnected.length + " players to rejoin.");
             return;
         }
 
@@ -762,8 +787,8 @@ exports.Engine = function(comms, cities, plants) {
     };
 
     this.getLowestCostPlant = function() {
-        var lowest = 999;
-        for(var p in this.currentMarket) {
+        let lowest = 999;
+        for(let p in this.currentMarket) {
             if(this.currentMarket[p].cost < lowest) {
                 lowest = this.currentMarket[p].cost;
             }
@@ -772,14 +797,25 @@ exports.Engine = function(comms, cities, plants) {
     };
 
     this.removePowerPlantFromRoundEnd = function() {
-        if(this.currentStep != 3 && !this.step3Triggered) {
-            var plant = this.futuresMarket.splice(3, 1)[0];
+        if(this.currentStep !== 3 && !this.step3Triggered) {
+            let plant = this.futuresMarket.splice(3, 1)[0];
             this.plantCosts.push(plant.cost);
             this.auction.addNewAndReorder();
         }
         else {
             this.auction.removeLowestPlant(true);
         }
+    };
+
+    this.addDisconnectedPlayer = function(playerId) {
+        this.playersDisconnected.push(playerId);
+    };
+
+    this.reconnectPlayer = function(player) {
+        this.comms.broadcaseUpdateToPlayer(player, {
+            group: 'updateGameState',
+            args: {data: this.previousGameUpdate, changes: this.changes, changeSet: changeSet}
+        });
     };
 
     /**
@@ -847,6 +883,7 @@ exports.Engine = function(comms, cities, plants) {
             args: {data: score, changes: this.changes, changeSet: changeSet}
         });
         console.info(JSON.stringify(score));
+        this.previousGameUpdate = score;
         this.changes = [];
     };
 

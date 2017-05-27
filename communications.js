@@ -163,9 +163,12 @@ exports.Communications = function(io) {
      */
     this.broadcastUpdate = function(dataObj) {
         for(const p in this.engine.players) {
-            const player = this.engine.players[p];
-            player.socket.emit(this.SOCKET_UPDATES, dataObj);
+            this.broadcaseUpdateToPlayer(this.engine.players[p], dataObj);
         }
     };
+
+    this.broadcaseUpdateToPlayer = function(player, dataObj) {
+        player.socket.emit(this.SOCKET_UPDATES, dataObj);
+    }
 };
 

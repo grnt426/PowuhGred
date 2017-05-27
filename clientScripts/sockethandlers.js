@@ -23,7 +23,16 @@ socket.on(SOCKET_DEFINECITIES, function(data) {
 
 
 socket.on(SOCKET_UPDATES, function(data) {
+    console.info("Payload received: " + JSON.stringify(data));
     if(data.group === "updateGameState") {
+
+        if(data.args.data.currentAction !== "startGame" && animationFlags["start_game"] === undefined) {
+            console.info("Reconnect detected! Skipping game start animations....");
+            animationFlags["start_game_p"] = 1;
+            animationFlags["start_game"] = false;
+            anim.progress = 1;
+        }
+
         scorePanel = data;
 
         // extract globals
