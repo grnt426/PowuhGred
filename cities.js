@@ -21,6 +21,8 @@ exports.Cities = function(cities = {}) {
      */
     this.cities = {};
 
+    this.RUN_MODE = "";
+
     // TODO: we can move/make this better.
     if(cities !== {}){
         for(let name in cities){
@@ -65,7 +67,8 @@ exports.Cities = function(cities = {}) {
     this.findCheapestRoute = function(start, end){
         return threadPool
             .send({action:'findCheapestRoute',
-                data:{ctx:{cities:this.cities, cityDistDict:{}}, start:start, end:end}})
+                data:{ctx:{run_mode:this.RUN_MODE, regions:this.activeRegions, cities:this.cities,
+                    cityDistDict:{}}, start:start, end:end}})
             .promise()
     };
 
@@ -73,14 +76,16 @@ exports.Cities = function(cities = {}) {
     this.findArbitraryCheapestToDest = function(cities, dest){
         return threadPool
             .send({action:'findArbitraryCheapestToDest',
-                data:{ctx:{cities:this.cities, cityDistDict:{}}, cities:cities, dest:dest}})
+                data:{ctx:{run_mode:this.RUN_MODE, regions:this.activeRegions, cities:this.cities,
+                    cityDistDict:{}}, cities:cities, dest:dest}})
             .promise()
     };
 
     this.findOptimalPurchaseCostOrderOfCities = function(cities, dests){
         return threadPool
             .send({action:'findOptimalPurchaseCostOrderOfCities',
-                data:{ctx:{cities:this.cities, cityDistDict:{}}, cities:cities, dests:dests}})
+                data:{ctx:{run_mode:this.RUN_MODE, regions:this.activeRegions, cities:this.cities,
+                    cityDistDict:{}}, cities:cities, dests:dests}})
             .promise()
     };
 

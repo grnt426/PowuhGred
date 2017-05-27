@@ -18,7 +18,8 @@ let httpServer,
     validator = require('validator'),
     ExpressBrute = require('express-brute'),
     BruteMemcachedStore = require('express-brute-memcached'),
-    SessionMemcachedStore = require('connect-memcached')(session);
+    SessionMemcachedStore = require('connect-memcached')(session),
+    NodeCache = require('node-cache');
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
@@ -38,8 +39,10 @@ if(process.argv.length !== 3 || (process.argv[2] !== "debug" && process.argv[2] 
     process.exit();
 }
 
+const RUN_MODE = process.argv[2];
+
 // When running in a dev environment, it is just easier to only use HTTP rather than HTTPS
-if(process.argv[2] === "debug") {
+if(RUN_MODE === "debug") {
     console.info("Running as debug");
     sessionOptions.cookie.secure = false;
     sessionOptions.store = new sessionFileStore();
@@ -436,6 +439,7 @@ function createGame(id){
         copy.createCopy(plant);
     }
     const engine = new enginejs.Engine(comms, cities, powerPlantCopy);
+    cities.RUN_MODE = RUN_MODE;
     comms.setEngine(engine);
     engine.engineId = id;
     activeGames[id] = engine;
@@ -459,13 +463,40 @@ function readPowerPlants(){
     powerPlants.parsePowerPlants("data/power_plants.txt");
 }
 
+function loadPreComputedPaths(){
+    // const myCache = new NodeCache();
+    // fs.readFile('data/pathcosts.txt', 'utf-8', function(err, contents) {
+    //     if(err) {
+    //         console.error("Error reading file: " + JSON.stringify(err));
+    //     }
+    //     else {
+    //         let lines = contents.split("\n");
+    //         for(let i = 0; i < lines.length; i++) {
+    //             let line = lines[i];
+    //             if(line.length !== 0) {
+    //                 line = line.toLowerCase();
+    //                 let data = line.split("|");
+    //                 let regions = data[0];
+    //                 let path = data[1].split("=");
+    //                 let names = path[0].split(">");
+    //                 let cost = Number(path[1]);
+    //                 myCache.set(regions + "|" + names[0] + ">" + names[1], cost);
+    //                 myCache.set(regions + "|" + names[1] + ">" + names[0], cost);
+    //             }
+    //         }
+    //         console.info("Keys: " + JSON.stringify(myCache.keys()));
+    //     }
+    // });
+}
+
 // All setup is finished, start listening for connections.
 Promise.resolve()
     .then(() => db.open('../database.sqlite', {Promise}))
     // NOTE: comment out the below after first-run if you want data to persist with each run in dev.
-    .then(() => db.migrate({force: (process.argv[2] === "debug" ? 'last' : false)}))
+    .then(() => db.migrate({force: (RUN_MODE === "debug" ? 'last' : false)}))
     .then(() => removeDeadGames())
     .then(() => readMaps())
     .then(() => readPowerPlants())
+    .then(() => loadPreComputedPaths())
     .then(() => server.listen(process.env.PORT || 3000))
     .catch((err) => console.error("WHAT " + err.stack));
