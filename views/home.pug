@@ -1,45 +1,55 @@
 html
     head
-        title PowerGrid Home
+        title "PowerGrid"
+        style
+            include ./css/main.css
     body
-        h1 PowerGrid
-        if session.error
-            p #{session.error}
-            - delete session.error
-        if session.authenticated
-            p you are logged in as #{session.username}
-            a(href='/logout') Logout
-        else
-            p you are not logged in.
-            form(method='POST' action='/login')
-                label(for='username') Username:
-                input(type='text', placeholder='Username', name='username')
-                label(for='password') Password:
-                input(type='password', name='password')
-                input(type='submit', value='Login')
-            a(href='/register') or Register!
-        h2 Create Game
-        div
-            form(method='POST' action='/creategame')
-                label(for='maxplayers') Max Players:
-                input(type='text', value='4', name='maxplayers')
-                input(type='submit', value='Create')
-        h2 Lobby
-        div
-            if games && games.length > 0
-                table
-                    thead
-                        tr
-                            th Host
-                            th Players
-                            th
-                    tbody
-                        each game, i in games
-                            tr
-                                td #{game.hostUser}
-                                td #{game.maxPlayers}
-                                td
-                                    if game.started == 0
-                                        a(href='/game/' + game.gameId) Join!
+        div(class='header')
+            p(id='pagetitle')
+                | Granite Games - PowerGrid
+            p(id='loggedinDisplay')
+                if session.authenticated
+                    | #{session.username}&nbsp;
+                    a(href='/logout') Logout
+
+        div(class='content')
+            if session.error
+                p #{session.error}
+                - delete session.error
+            if session.authenticated
+                p you are logged in as #{session.username}
+                a(href='/logout') Logout
             else
-                p No games found!
+                p you are not logged in.
+                form(method='POST' action='/login')
+                    label(for='username') Username:
+                    input(type='text', placeholder='Username', name='username')
+                    label(for='password') Password:
+                    input(type='password', name='password')
+                    input(type='submit', value='Login')
+                a(href='/register') or Register!
+            h2 Create Game
+            div
+                form(method='POST' action='/creategame')
+                    label(for='maxplayers') Max Players:
+                    input(type='text', value='4', name='maxplayers')
+                    input(type='submit', value='Create')
+            h2 Lobby
+            div
+                if games && games.length > 0
+                    table
+                        thead
+                            tr
+                                th Host
+                                th Players
+                                th
+                        tbody
+                            each game, i in games
+                                tr
+                                    td #{game.hostUser}
+                                    td #{game.maxPlayers}
+                                    td
+                                        if game.started == 0
+                                            a(href='/game/' + game.gameId) Join!
+                else
+                    p No games found!
