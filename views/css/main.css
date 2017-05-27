@@ -1,15 +1,12 @@
 body{
     margin: 0;
-    background: #fffbe4;
+    background: #F0F0F0;
+    font-family: "Century Gothic", serif;
 }
 
-.header {
-    height: 50px;
-    background: #F0F0F0;
-    border: 1px solid #CCC;
-    width: 960px;
-    margin: 5px auto;
-    font-family: "Century Gothic", serif;
+.content {
+    width:960px;
+    margin: 20px auto;
 }
 
 #pagetitle {
@@ -24,11 +21,20 @@ body{
     float: right;
 }
 
-.content {
-    width:960px;
-    background: #F0F0F0;
-    border: 1px solid #CCC;
-    height: 2000px;
-    margin: 20px auto;
-    font-family: "Century Gothic", serif;
+.card {
+    position: relative;
+    margin: .5rem .5rem 1rem .5rem;
+    background-color: #fff;
+    transition: box-shadow .25s;
+    border-radius: 2px;
+    padding: 24px;
+    box-shadow: 0 2px 2px 0 rgba(0,0,0,0.14), 0 1px 5px 0 rgba(0,0,0,0.12), 0 3px 1px -2px rgba(0,0,0,0.2);
+}
+
+.card .card-title {
+    display: block;
+    line-height: 32px;
+    margin-bottom: 8px;
+    font-size: 24px;
+    font-weight: bold;
 }
