@@ -13,12 +13,15 @@ body{
     vertical-align: middle;
     font-size: 34px;
     margin: 0 auto;
+    float: left;
 }
 
 #loggedinDisplay {
     font-size: 14px;
     margin: 0 auto;
     float: right;
+    vertical-align: bottom;
+    padding-right: 5px;
 }
 
 .card {
