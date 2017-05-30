@@ -4,7 +4,8 @@ var playerjs = require("./includes/Player.js"),
     marketjs = require("./phases/market.js"),
     buildingjs = require("./phases/building.js"),
     powerjs = require("./phases/power.js"),
-    regionsjs = require("./regions.js");
+    regionsjs = require("./regions.js"),
+    validator = require('validator');
 
 /**
  * Primary entry point for the game, which manages game creation, phase transition, and action verification.
@@ -549,9 +550,13 @@ exports.Engine = function(comms, cities, plants) {
     };
 
     this.getPowerPlantFromActualAuction = function(plantCost) {
-        var index = 0;
-        for(var plant in this.currentMarket) {
-            if(this.currentMarket[plant].cost == plantCost) {
+        if(!validator.isInt(plantCost, {min:3, max:50, allow_leading_zeroes:false})){
+            return undefined;
+        }
+
+        let index = 0;
+        for(let plant in this.currentMarket) {
+            if(this.currentMarket[plant].cost === plantCost) {
                 return this.currentMarket[plant];
             }
             index += 1;

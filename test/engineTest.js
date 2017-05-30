@@ -54,7 +54,7 @@ describe('Engine', function () {
     describe('#addPlayer()', function () {
 
         it('Should add one player', function () {
-            engine.addPlayer(1, mockSocket(1));
+            engine.addPlayer(1, "name1", mockSocket(1));
 
             assert.equal(util.olen(engine.players), 1);
             assert.notEqual(engine.players[1], undefined);
@@ -63,9 +63,9 @@ describe('Engine', function () {
         });
 
         it('Should add three players', function () {
-            engine.addPlayer(1, mockSocket(1));
-            engine.addPlayer(2, mockSocket(2));
-            engine.addPlayer(3, mockSocket(3));
+            engine.addPlayer(1, "name1", mockSocket(1));
+            engine.addPlayer(2, "name1", mockSocket(2));
+            engine.addPlayer(3, "name1", mockSocket(3));
 
             assert.equal(3, util.olen(engine.players));
             for (i = 1; i < 4; i++) {

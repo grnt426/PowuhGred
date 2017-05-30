@@ -166,18 +166,18 @@ exports.Auction = function(engine, comms) {
             this.engine.nextPlayer();
         }
         else {
-            this.powerPlantBoughtInRound = true;
             console.info(data);
-            var player = this.engine.players[this.engine.currentPlayer];
+            var player = this.engine.getCurrentPlayer();
             var plant = data.cost;
 
             var plantObject = this.engine.getPowerPlantFromActualAuction(plant);
             if(plantObject === undefined) {
                 this.comms.toPlayer(player, "Invalid plant selected");
+                return;
             }
 
             var bid = data.bid;
-            if(bid < plant) {
+            if(bid < plant || bid < 3) {
                 // Reject bid
                 console.info("Bid too low.");
                 this.comms.toPlayer(player, "bid too low.");
@@ -191,6 +191,7 @@ exports.Auction = function(engine, comms) {
                 return;
             }
 
+            this.powerPlantBoughtInRound = true;
             this.currentBid = bid;
             this.currentBidChoice = plant;
             this.currentBidLeader = player.uid;
@@ -198,10 +199,10 @@ exports.Auction = function(engine, comms) {
 
             this.comms.toAll(player.displayName + " started the auction for plant " + plant + " at $" + bid);
 
-            for(var key in this.engine.players) {
+            for(let key in this.engine.players) {
                 console.info(this.engine.players[key].uid + " Eligible? "
-                    + (this.finishedAuctions.indexOf(this.engine.players[key].uid) == -1 ? "yes" : "no"));
-                if(this.finishedAuctions.indexOf(this.engine.players[key].uid) == -1)
+                    + (this.finishedAuctions.indexOf(this.engine.players[key].uid) === -1 ? "yes" : "no"));
+                if(this.finishedAuctions.indexOf(this.engine.players[key].uid) === -1)
                     this.currentBidders.push(this.engine.players[key].uid);
             }
             this.currentPlayerBidIndex = this.currentBidders.indexOf(player.uid);

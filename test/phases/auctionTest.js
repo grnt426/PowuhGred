@@ -41,11 +41,14 @@ describe('Phase/auction', function() {
             assert(auction.engine.nextPlayer.calledOnce);
         });
 
-        it('Current bidder tries to start bid too low', function () {
+        it('Current bidder tries to start Auction too low', function () {
             auction.engine.currentPlayer = CURRENT_BIDDER;
             auction.engine.nextPlayer = sinon.spy();
-            auction.startAuction(createStartAuctionData(4, 1));
-            auction.nextBidder = sinon.spy();
+            auction.nextBidder = sinon.stub().returns({});
+            auction.engine.getPowerPlantFromActualAuction = sinon.stub().returns({});
+            auction.engine.getCurrentPlayer = sinon.stub().returns(createPlayer(5));
+
+            auction.startAuction(createStartAuctionData(4, 3));
 
             assert.equal(auction.currentBidders.length, 0);
             assert.equal(auction.finishedAuctions.length, 0);
@@ -53,11 +56,27 @@ describe('Phase/auction', function() {
             assert(auction.comms.toPlayer.calledOnce, "Expected an error message to the player.");
         });
 
-        it('Current bidder tries to bid more than they have', function () {
+        it('Current bidder tries to start Auction at less than the valid amount (less than 3, or negative)', function () {
             auction.engine.currentPlayer = CURRENT_BIDDER;
             auction.engine.nextPlayer = sinon.spy();
-            auction.engine.players[CURRENT_BIDDER].money = 5;
+            auction.nextBidder = sinon.stub().returns({});
+            auction.engine.getPowerPlantFromActualAuction = sinon.stub().returns({});
+            auction.engine.getCurrentPlayer = sinon.stub().returns(createPlayer(5));
+
+            auction.startAuction(createStartAuctionData(4, 1));
+
+            assert.equal(auction.currentBidders.length, 0);
+            assert.equal(auction.finishedAuctions.length, 0);
+            assert(auction.nextBidder.notCalled, "Bidding too low shouldn't advance to the next player.");
+            assert(auction.comms.toPlayer.calledOnce, "Expected an error message to the player.");
+        });
+
+        it('Current bidder tries to start Auction at more than they have', function () {
+            auction.engine.currentPlayer = CURRENT_BIDDER;
+            auction.engine.nextPlayer = sinon.spy();
+            auction.engine.getCurrentPlayer = sinon.stub().returns(createPlayer(5));
             auction.nextBidder = sinon.spy();
+            auction.engine.getPowerPlantFromActualAuction = sinon.stub().returns({});
 
             auction.startAuction(createStartAuctionData(4, 6));
 
@@ -67,11 +86,12 @@ describe('Phase/auction', function() {
             assert(auction.comms.toPlayer.calledOnce, "Expected an error message to the player.");
         });
 
-        it('Bidding correctly', function () {
+        it('Starting Auction correctly', function () {
             auction.engine.currentPlayer = CURRENT_BIDDER;
             auction.engine.nextPlayer = sinon.spy();
-            auction.engine.players[CURRENT_BIDDER].money = 5;
             auction.nextBidder = sinon.spy();
+            auction.engine.getPowerPlantFromActualAuction = sinon.stub().returns({});
+            auction.engine.getCurrentPlayer = sinon.stub().returns(createPlayer(5, "2"));
 
             auction.startAuction(createStartAuctionData(4, 5));
 
@@ -164,6 +184,10 @@ describe('Phase/auction', function() {
         });
     });
 });
+
+function createPlayer(money, uid = "1") {
+    return {money:money,uid:uid};
+}
 
 function createBidData(bidAmount){
     return {bid:bidAmount};
