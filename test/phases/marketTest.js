@@ -26,6 +26,9 @@ beforeEach(function () {
     powerPlants[2].addResources = sinon.spy();
     powerPlants[3].addResources = sinon.spy();
 
+    comms.toAll = sinon.spy();
+    comms.toCurrent = sinon.spy();
+
     market = new marketjs.Market(engine, comms, powerPlants);
     market.setupStartingResources();
 });

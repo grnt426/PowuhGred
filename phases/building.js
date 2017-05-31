@@ -66,11 +66,17 @@ exports.Building = function(engine, comms, cities) {
                         currentPlayer.money -= totalCost;
                         self.engine.checkCityCounts(currentPlayer.cities.length);
                         engine.nextPlayer();
+
+                        // We must manually call this here because the engine *may* have already called it earlier
+                        // after processing the request and then firing off this asynchronous Promise.
                         engine.broadcastGameState();
+
+                        let val = 4 / something.hello;
                     }
                 })
                 .catch(function(err){
                     console.error("Error in processing building request: " + err);
+                    self.comms.toAll("Something went wrong in processing your build request!");
                 });
         }
     };
