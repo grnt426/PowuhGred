@@ -28,6 +28,9 @@ beforeEach(function () {
     engine.returnUsedResources = sinon.spy();
     engine.getPlayerCount = sinon.stub().returns(1);
     engine.nextAction = sinon.spy();
+    engine.removePowerPlantFromRoundEnd = sinon.spy();
+
+    comms.toCurrent = sinon.spy();
 
     power = new powerjs.Power(engine, comms, powerPlants);
 
