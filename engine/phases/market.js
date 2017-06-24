@@ -1,4 +1,4 @@
-var res = require("../State/Resources.js"),
+var res = require("../Resources.js"),
     util = require("../util.js");
 
 /**

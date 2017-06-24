@@ -1,7 +1,7 @@
 var assert = require('assert'),
     sinon = require('sinon'),
-    util = require('../../util.js'),
-    buildingjs = require('../../phases/building.js'),
+    util = require('../../engine/util.js'),
+    buildingjs = require('../../engine/phases/building.js'),
     PromiseMock = require('promise-mock');
 
 var building,

@@ -1,4 +1,4 @@
-const res = require("./State/Resources.js");
+const res = require("./Resources.js");
 
 /**
  * Fisher-Yates shuffle algorithm, operates on the array in-place.

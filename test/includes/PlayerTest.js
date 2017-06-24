@@ -1,8 +1,8 @@
 var assert = require('assert'),
     sinon = require('sinon'),
-    util = require('../../util.js'),
-    res = require("../../State/Resources.js"),
-    playerjs = require('../../includes/Player.js');
+    util = require('../../engine/util.js'),
+    res = require("../../engine/Resources.js"),
+    playerjs = require('../../engine/Player.js');
 
 var UID = "uid";
 var player;

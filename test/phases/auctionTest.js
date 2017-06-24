@@ -1,7 +1,7 @@
 var assert = require('assert'),
     sinon = require('sinon'),
-    util = require('../../util.js'),
-    auctionjs = require('../../phases/auction.js');
+    util = require('../../engine/util.js'),
+    auctionjs = require('../../engine/phases/auction.js');
 
 var auction;
 var PASS_DATA = "pass";

@@ -1,5 +1,5 @@
 const fs = require("fs"),
-    powerPlant = require("./includes/PowerPlant.js");
+    powerPlant = require("./PowerPlant.js");
 
 /**
  *

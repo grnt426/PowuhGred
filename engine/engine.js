@@ -1,4 +1,4 @@
-var playerjs = require("./includes/Player.js"),
+var playerjs = require("./Player.js"),
     auctionjs = require("./phases/auction.js"),
     util = require("./util.js"),
     marketjs = require("./phases/market.js"),
@@ -530,14 +530,14 @@ exports.Engine = function(comms, cities, plants) {
         var destinationPlantCost = data['dst'];
         var resources = data['resources'];
 
-        if(player.plants[sourcePlantCost] == undefined || player.plants[destinationPlantCost] == undefined) {
+        if(player.plants[sourcePlantCost] === undefined || player.plants[destinationPlantCost] === undefined) {
             comms.toPlayer(player, "Source or Destination plant not owned.");
         }
         else {
             var sourcePlant = player.plants[sourcePlantCost];
 
             // If the player has chosen the new plant as the destination, we need to select it, instead.
-            var destinationPlant = player.plants[destinationPlantCost] != undefined ? player.plants[destinationPlantCost]
+            var destinationPlant = player.plants[destinationPlantCost] !== undefined ? player.plants[destinationPlantCost]
                 : this.plants[destinationPlantCost];
             if(sourcePlant.canRemoveResources(resources) && destinationPlant.canAddResources(resources)) {
                 sourcePlant.removeResources(resources);
@@ -550,7 +550,8 @@ exports.Engine = function(comms, cities, plants) {
     };
 
     this.getPowerPlantFromActualAuction = function(plantCost) {
-        if(!validator.isInt(plantCost, {min:3, max:50, allow_leading_zeroes:false})){
+        console.log("Cost: `" + plantCost + "`");
+        if(!Number.isInteger(plantCost) || plantCost < 3 || plantCost > 50){
             return undefined;
         }
 

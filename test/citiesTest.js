@@ -1,7 +1,7 @@
 var assert = require('assert'),
     sinon = require('sinon'),
-    util = require('../util.js'),
-    citiesjs = require('../cities.js');
+    util = require('../engine/util.js'),
+    citiesjs = require('../engine/cities.js');
 
 var cities = new citiesjs.Cities();
 cities.parseCityList("data/germany_cities.txt");

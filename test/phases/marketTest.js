@@ -1,8 +1,8 @@
 var assert = require('assert'),
     sinon = require('sinon'),
-    util = require('../../util.js'),
-    res = require('../../State/Resources.js'),
-    marketjs = require('../../phases/market.js');
+    util = require('../../engine/util.js'),
+    res = require('../../engine/Resources.js'),
+    marketjs = require('../../engine/phases/market.js');
 
 var market,
     marketData = constructRequestData(1, 1, 1, 1, 1),

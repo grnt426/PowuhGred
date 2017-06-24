@@ -1,7 +1,7 @@
 var assert = require('assert'),
     sinon = require('sinon'),
-    enginejs = require('../engine.js'),
-    util = require('../util.js');
+    enginejs = require('../engine/engine.js'),
+    util = require('../engine/util.js');
 
 var engine;
 var comms = sinon.spy(),

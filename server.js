@@ -80,14 +80,14 @@ var bruteforce = new ExpressBrute(bruteStore);
 app.set('view engine', 'pug');
 
 var io = require('socket.io').listen(server),
-    communicationsjs = require('./communications.js'),
-    citiesjs = require('./cities.js'),
-    powerPlantReaderjs = require('./powerplantreader.js'),
-    powerPlantjs = require("./includes/PowerPlant.js")
-    enginejs = require('./engine.js'),
-    util = require('./util.js'),
-    socketInterceptor = require('./ai/socketinterceptor.js'),
-    dummyPlayer = require('./ai/dummyplayer');
+    communicationsjs = require('./engine/communications.js'),
+    citiesjs = require('./engine/cities.js'),
+    powerPlantReaderjs = require('./engine/powerplantreader.js'),
+    powerPlantjs = require("./engine/PowerPlant.js")
+    enginejs = require('./engine/engine.js'),
+    util = require('./engine/util.js'),
+    socketInterceptor = require('./engine/ai/socketinterceptor.js'),
+    dummyPlayer = require('./engine/ai/dummyplayer');
 
 var failCallback = function (req, res, next, nextValidRequestDate) {
     res.redirect('/'); // brute force protection triggered, send them back to the login page
