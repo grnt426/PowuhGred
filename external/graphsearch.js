@@ -23,8 +23,18 @@ module.exports = function (request, done) {
         }
         done(result);
     }
+    else if(request.action === "findCheapestRoute") {
+        let result = 0;
+        try{
+            result = findCheapestRoute(data.ctx, data.start, data.end);
+        }
+        catch(err){
+            console.error("Error in finding route: " + err);
+        }
+        done(result);
+    }
     else {
-        done("Invalid request!");
+        done("Invalid request! " + request.action);
     }
 };
 

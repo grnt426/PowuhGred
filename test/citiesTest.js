@@ -34,71 +34,76 @@ beforeEach(function () {
 });
 
 describe('Cities', function () {
-    describe('#findCheapestRoute()', function () {
+    describe('#findCheapestRoute()', function (done) {
 
         it('Find cheapest between ESSEN to DORTMUND, which is 4', function () {
-            var path = cities.findCheapestRoute(ESSEN, DORTMUND);
-            assert.notEqual(path, undefined);
-            assert.equal(path.cost, 4);
-            assert.equal(path.path.length, 1);
-            assert.equal(path.path[0], "dortmund");
+            return cities.findCheapestRoute(ESSEN, DORTMUND)
+                .then(function(res) {
+                    assert.notEqual(res, undefined);
+                    assert.equal(res.cost, 4);
+                    assert.equal(res.path.length, 1);
+                    assert.equal(res.path[0], "dortmund");
+                });
         });
 
         it('Find cheapest between DORTMUND to AACHEN, which is 15', function () {
-            var path = cities.findCheapestRoute(DORTMUND, AACHEN);
-            assert.notEqual(path, undefined);
-            assert.equal(path.cost, 15);
-            assert.equal(path.path.length, 3);
-            assert.equal(path.path[0], "essen");
-            assert.equal(path.path[1], "dusseldorf");
-            assert.equal(path.path[2], "aachen");
+            return cities.findCheapestRoute(DORTMUND, AACHEN)
+                .then(function(res) {
+                    assert.notEqual(res, undefined);
+                    assert.equal(res.cost, 15);
+                    assert.equal(res.path.length, 3);
+                    assert.equal(res.path[0], "essen");
+                    assert.equal(res.path[1], "dusseldorf");
+                    assert.equal(res.path[2], "aachen");
+                });
         });
 
         it('Find cheapest between KONSTANZ to FLENSBURG, which is 90', function () {
-            var path = cities.findCheapestRoute(KONSTANZ, FLENSBURG);
-            assert.notEqual(path, undefined);
-            assert.equal(path.cost, 90);
-            assert.equal(path.path.length, 9);
-            assert.equal(path.path[0], "stuttgart");
-            assert.equal(path.path[1], "mannheim");
-            assert.equal(path.path[2], "wiesbaden");
-            assert.equal(path.path[3], "frankfurt-m");
-            assert.equal(path.path[4], "kassel");
-            assert.equal(path.path[5], "hannover");
-            assert.equal(path.path[6], "hamburg");
-            assert.equal(path.path[7], "kiel");
-            assert.equal(path.path[8], "flensburg");
+            return cities.findCheapestRoute(KONSTANZ, FLENSBURG)
+                .then(function(res) {
+                    assert.notEqual(res, undefined);
+                    assert.equal(res.cost, 90);
+                    assert.equal(res.path.length, 9);
+                    assert.equal(res.path[0], "stuttgart");
+                    assert.equal(res.path[1], "mannheim");
+                    assert.equal(res.path[2], "wiesbaden");
+                    assert.equal(res.path[3], "frankfurt-m");
+                    assert.equal(res.path[4], "kassel");
+                    assert.equal(res.path[5], "hannover");
+                    assert.equal(res.path[6], "hamburg");
+                    assert.equal(res.path[7], "kiel");
+                    assert.equal(res.path[8], "flensburg");
+                });
         });
     });
 
     describe('#findArbitraryCheapestToDest()', function () {
 
         it('Find cheapest between [KOLN,ESSEN,MUNSTER] to DORTMUND, which is 2', function () {
-            assert.equal(cities.findArbitraryCheapestToDest([KOLN, ESSEN, MUNSTER], DORTMUND), 2);
+            return assertCost(cities.findArbitraryCheapestToDest([KOLN, ESSEN, MUNSTER], DORTMUND), 2);
         });
 
         it('Find cheapest between [KOLN,KONSTANZ,FLENSBURG] to DRESDEN, which is 54', function () {
 
             // There are actually two valid ways to get there at 54, and both start from Flensburg,
             // and either go through Berlin or Magdeburg
-            assert.equal(cities.findArbitraryCheapestToDest([KOLN, FLENSBURG, KONSTANZ], DRESDEN), 54);
+            return assertCost(cities.findArbitraryCheapestToDest([KOLN, FLENSBURG, KONSTANZ], DRESDEN), 54);
         });
     });
 
     describe('#findOptimalPurchaseCostOrderOfCities()', function () {
 
         it('Find cheapest between [KOLN,ESSEN,MUNSTER] to [DORTMUND,AACHEN], which is 9', function () {
-            assert.equal(cities.findOptimalPurchaseCostOrderOfCities([KOLN, ESSEN, MUNSTER], [DORTMUND.name, AACHEN.name]), 9);
+            return assertCost(cities.findOptimalPurchaseCostOrderOfCities(
+                [KOLN, ESSEN, MUNSTER], [DORTMUND.name, AACHEN.name]), 9);
         });
 
         /**
          * This one should find separate paths: one to ESSEN from KOLN, and one to DRESDEN from FLENSBURG
          */
         it('Find cheapest between [KOLN,KONSTANZ,FLENSBURG] to [DRESDEN,ESSEN], which is 60', function () {
-
-            // There are actually two valid ways to get there at 54, and both start from Flensburg,
-            // and either go through Berlin or Magdeburg
-            assert.equal(cities.findOptimalPurchaseCostOrderOfCities([KOLN, FLENSBURG, KONSTANZ], [DRESDEN.name, ESSEN.name]), 60);
+            return assertCost(cities.findOptimalPurchaseCostOrderOfCities(
+                [KOLN, FLENSBURG, KONSTANZ], [DRESDEN.name, ESSEN.name]), 60);
         });
 
         /**
@@ -106,45 +111,42 @@ describe('Cities', function () {
          * The total savings over this method instead of separate paths from KOLN and FLENSBURG is 2.
          */
         it('Find cheapest between [KOLN,KONSTANZ,FLENSBURG] to [DRESDEN,DORTMUND], which is 62', function () {
-            assert.equal(cities.findOptimalPurchaseCostOrderOfCities([KOLN, FLENSBURG, KONSTANZ], [DRESDEN.name, DORTMUND.name]), 62);
+            return assertCost(cities.findOptimalPurchaseCostOrderOfCities(
+                [KOLN, FLENSBURG, KONSTANZ], [DRESDEN.name, DORTMUND.name]), 62);
         });
 
         /**
          * Slight performance test to ensure this runs quickly.
          */
         it('Find cheapest between [KOLN,KONSTANZ,FLENSBURG,ESSEN,MUNSTER,AACHEN] to [DRESDEN,DORTMUND], which is 54', function () {
-
-            // There are actually two valid ways to get there at 54, and both start from Flensburg,
-            // and either go through Berlin or Magdeburg
-            assert.equal(cities.findOptimalPurchaseCostOrderOfCities(
-                [KOLN, FLENSBURG, KONSTANZ, ESSEN, MUNSTER, AACHEN],
-                [DRESDEN.name,DORTMUND.name]), 54);
+            return assertCost(cities.findOptimalPurchaseCostOrderOfCities(
+                    [KOLN, FLENSBURG, KONSTANZ, ESSEN, MUNSTER, AACHEN],
+                    [DRESDEN.name,DORTMUND.name]), 54);
         });
 
         /**
          * Larger test.
          */
         it('Find cheapest between 16 cities to [DRESDEN,DORTMUND,AACHEN,FLENSBURG], which is 56', function () {
-
-            // There are actually two valid ways to get there at 54, and both start from Flensburg,
-            // and either go through Berlin or Magdeburg
-            assert.equal(cities.findOptimalPurchaseCostOrderOfCities(
-                [KOLN, FLENSBURG, KONSTANZ, ESSEN, MUNSTER, SAARBRUCKEN, MUNCHEN, PASSAU,
-                    FRANKFURTM, OSNABRUCK, KASSEL, FULDA, WURZBURG, HANNOVER, MAGDEBURG, BREMEN],
-                [DRESDEN.name,DORTMUND.name,AACHEN.name,FLENSBURG.name]), 56);
+            return assertCost(cities.findOptimalPurchaseCostOrderOfCities(
+                    [KOLN, FLENSBURG, KONSTANZ, ESSEN, MUNSTER, SAARBRUCKEN, MUNCHEN, PASSAU,
+                        FRANKFURTM, OSNABRUCK, KASSEL, FULDA, WURZBURG, HANNOVER, MAGDEBURG, BREMEN],
+                    [DRESDEN.name,DORTMUND.name,AACHEN.name,FLENSBURG.name]), 56);
         });
 
         /**
-         * Intense test, to see where the limits are.
+         * Intense test, to see where the limits are. On my machine, this test took 270ms
+         * (most tests take 160ms to run, so about 110ms to actually compute).
          */
-        it('Find cheapest between 16 cities to 6 cities, which is 62', function () {
-
-            // There are actually two valid ways to get there at 54, and both start from Flensburg,
-            // and either go through Berlin or Magdeburg
-            assert.equal(cities.findOptimalPurchaseCostOrderOfCities(
+        it('Find cheapest between 16 cities to 6 cities, which is 98', function () {
+            return assertCost(cities.findOptimalPurchaseCostOrderOfCities(
                 [KOLN, FLENSBURG, KONSTANZ, ESSEN, MUNSTER, SAARBRUCKEN, MUNCHEN, PASSAU,
                     FRANKFURTM, OSNABRUCK, KASSEL, FULDA, WURZBURG, HANNOVER, MAGDEBURG],
-                [DRESDEN.name,DORTMUND.name,AACHEN.name,FLENSBURG.name,TRIER.name,TORGELOW.name]), 98);
+                [DRESDEN.name,DORTMUND.name,AACHEN.name,TRIER.name,FLENSBURG.name,TORGELOW.name]), 98);
         });
     });
 });
+
+function assertCost(func, cost){
+    return func.then(function(res){assert.equal(res, cost);console.log(cost)});
+}
