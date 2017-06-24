@@ -46,7 +46,7 @@ ppp[46] = {x: 4, y: 2};
 ppp[50] = {x: 7, y: 5};
 ppp["step3"] = {x: 8, y: 2};
 
-for(var i = 3; i < 51; i++) {
+for(let i = 3; i < 51; i++) {
     if(ppp[i] !== undefined) {
         ppp[i].resources = {'coal': 0, 'oil': 0, 'garbage': 0, 'uranium': 0};
         ppp[i].cost = i;

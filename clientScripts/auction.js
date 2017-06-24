@@ -21,7 +21,7 @@ var updateActualMarket = function(data) {
 var updateFutureMarket = function(data) {
     log("Future Market =>", CONSOLE_O);
     futureMarket = [];
-    for(var m in data) {
+    for(let m in data) {
         log("Cost: " + data[m].cost + " Type: " + data[m].type
             + " Requires: " + data[m].requires + " Powers: " + data[m].powers, CONSOLE_O);
         futureMarket.push(data[m].cost);

@@ -49,8 +49,8 @@ var redraw = function(scorePanel) {
         ctx.strokeStyle = GRAY;
         ctx.fillStyle = WHITE;
         ctx.lineWidth = 2;
-        var x = externalX(city.x);
-        var y = externalY(city.y);
+        let x = externalX(city.x);
+        let y = externalY(city.y);
         if(DEBUG) {
             ctx.beginPath();
             ctx.arc(x, y, 20, 0, 360, false);
@@ -61,7 +61,7 @@ var redraw = function(scorePanel) {
         }
 
         // Gray out a city if it is in an inactive region
-        if(scorePanel.inactiveRegions.indexOf(city.region) != -1) {
+        if(scorePanel.inactiveRegions.indexOf(city.region) !== -1) {
             ctx.fillStyle = GRAY;
             ctx.globalAlpha = 0.6;
             ctx.beginPath();
@@ -72,8 +72,8 @@ var redraw = function(scorePanel) {
     });
 
     // draw internal resource grid
-    var regular = 24;
-    var uranium = 12;
+    let regular = 24;
+    let uranium = 12;
     $.each(resourceGrid, function(key, box) {
         ctx.strokeStyle = BLUE;
         if(box.type === "coal") {
@@ -90,8 +90,8 @@ var redraw = function(scorePanel) {
         }
         ctx.lineWidth = 1;
 
-        var x = externalX(box.x);
-        var y = externalY(box.y);
+        let x = externalX(box.x);
+        let y = externalY(box.y);
 
         if(DEBUG) {
             ctx.beginPath();
@@ -100,49 +100,49 @@ var redraw = function(scorePanel) {
         }
 
         // Draw resource unit
-        if(box.type == "coal" && key % regular >= 24 - resources.coal) {
+        if(box.type === "coal" && key % regular >= 24 - resources.coal) {
             ctx.fillRect(x + box.size / 4, y + box.size / 4,
                 box.size * (0.5), box.size * (0.5));
         }
-        if(box.type == "oil" && key % regular >= 24 - resources.oil) {
+        if(box.type === "oil" && key % regular >= 24 - resources.oil) {
             ctx.fillRect(x + box.size / 4, y + box.size / 4,
                 box.size * (0.5), box.size * (0.5));
         }
-        if(box.type == "garbage" && key % regular >= 24 - resources.garbage) {
+        if(box.type === "garbage" && key % regular >= 24 - resources.garbage) {
             ctx.fillRect(x + box.size / 4, y + box.size / 4,
                 box.size * (0.5), box.size * (0.5));
         }
-        if(box.type == "uranium" && key % uranium >= 12 - resources.uranium) {
+        if(box.type === "uranium" && key % uranium >= 12 - resources.uranium) {
             ctx.fillRect(x + box.size / 4, y + box.size / 4,
                 box.size * (0.5), box.size * (0.5));
         }
     });
 
     // Draw resource replenishment rate box
-    var replenishRate = scorePanel.replenishRate;
+    let replenishRate = scorePanel.replenishRate;
     ctx.fillStyle = WHITE;
     ctx.globalAlpha = 0.8;
     ctx.fillRect(32, 860, 125, 80);
     ctx.globalAlpha = 1.0;
     ctx.fillStyle = BLACK;
     ctx.font = "14px monospace";
-    var replenishY = 935;
+    let replenishY = 935;
     ctx.fillText("   Coal", 35, replenishY);
     ctx.fillText("    Oil", 35, replenishY - 15);
     ctx.fillText("Garbage", 35, replenishY - 30);
     ctx.fillText("Uranium", 35, replenishY - 45);
     ctx.fillText("   Step", 35, replenishY - 60);
-    var repOffSet = ["coal", "oil", "garbage", "uranium"];
+    let repOffSet = ["coal", "oil", "garbage", "uranium"];
 
-    var replenishX = 100;
+    let replenishX = 100;
     ctx.fillText("1", replenishX, 875);
     ctx.fillText("2", replenishX + 20, 875);
     ctx.fillText("3", replenishX + 40, 875);
     replenishX += 20;
-    for(var step in replenishRate) {
-        var perStep = replenishRate[step];
-        for(var type in perStep) {
-            if(step == currentStep - 1) {
+    for(let step in replenishRate) {
+        let perStep = replenishRate[step];
+        for(let type in perStep) {
+            if(step === currentStep - 1) {
                 ctx.fillStyle = ORANGE;
             }
             else {
@@ -153,12 +153,12 @@ var redraw = function(scorePanel) {
     }
 
     // Draw excess supply
-    var typeStartX = {'coal': 725, 'oil': 705, 'garbage': 685, 'uranium': 665};
-    for(type in scorePanel.excessResources) {
-        var amt = scorePanel.excessResources[type];
-        var startX = typeStartX[type];
+    let typeStartX = {'coal': 725, 'oil': 705, 'garbage': 685, 'uranium': 665};
+    for(let type in scorePanel.excessResources) {
+        let amt = scorePanel.excessResources[type];
+        let startX = typeStartX[type];
         ctx.fillStyle = colorNameToColorCode(type);
-        var amtDrawn = 0;
+        let amtDrawn = 0;
         while(amt > 0) {
             ctx.fillRect(startX, 930 - (15 * amtDrawn), 10, 10);
             amtDrawn += 1;
@@ -167,18 +167,18 @@ var redraw = function(scorePanel) {
     }
 
     // draw owned cities
-    for(var p in scorePanel.players) {
-        var player = scorePanel.players[p];
-        for(var city in player.cities) {
-            var city = player.cities[city];
-            var pos = city.players.indexOf(player.uid);
+    for(let p in scorePanel.players) {
+        let player = scorePanel.players[p];
+        for(let city in player.cities) {
+            city = player.cities[city];
+            let pos = city.players.indexOf(player.uid);
             ctx.fillStyle = colorNameToColorCode(player.color);
-            var posX = city.x;
-            var posY = city.y;
-            if(pos == 0) {
+            let posX = city.x;
+            let posY = city.y;
+            if(pos === 0) {
                 ctx.fillRect(externalX(posX) - 17, externalY(posY) - 5, 10, 10);
             }
-            else if(pos == 1) {
+            else if(pos === 1) {
                 ctx.fillRect(externalX(posX) + 5, externalY(posY), 10, 10);
             }
             else {
@@ -190,29 +190,29 @@ var redraw = function(scorePanel) {
     // highlight selected city
     ctx.strokeStyle = ORANGE;
     ctx.lineWidth = 3;
-    if(selectedCity && currentActionState != "build") {
+    if(selectedCity && currentActionState !== "build") {
         ctx.beginPath();
-        var x = externalX(selectedCity.x);
-        var y = externalY(selectedCity.y);
+        let x = externalX(selectedCity.x);
+        let y = externalY(selectedCity.y);
         ctx.arc(x, y, 20, 0, 360, false);
         ctx.stroke();
     }
     else {
-        for(var key in selectedCities) {
+        for(let key in selectedCities) {
             ctx.beginPath();
-            var city = citiesDef[selectedCities[key]];
-            var x = externalX(city.x);
-            var y = externalY(city.y);
+            let city = citiesDef[selectedCities[key]];
+            let x = externalX(city.x);
+            let y = externalY(city.y);
             ctx.arc(x, y, 20, 0, 360, false);
             ctx.stroke();
         }
     }
 
     // Draw the player's power plants
-    var count = 0;
-    for(var p in playerData.self.ownedPlants) {
-        var plant = playerData.self.ownedPlants[p];
-        var cost = plant.cost;
+    let count = 0;
+    for(let p in playerData.self.ownedPlants) {
+        let plant = playerData.self.ownedPlants[p];
+        let cost = plant.cost;
         ctx.drawImage(plantImg, ppp[cost].x * pppWidth, ppp[cost].y * pppHeight,
             pppWidth, pppHeight,
             800 + count * 125, 150, pppWidth, pppHeight);
@@ -226,28 +226,28 @@ var redraw = function(scorePanel) {
     ctx.lineWidth = 1;
     ctx.font = "12px Arial";
     ctx.fillText("Actual Market", 794, 284);
-    ctx.strokeRect(794, 294, (currentStep == 3 ? 3 : 4) * 120 + 7, (currentStep == 3 ? 250 : 125));
-    var wrap = currentStep == 3 ? 3 : 4;
-    for(p in actualMarket) {
-        plant = actualMarket[p];
+    ctx.strokeRect(794, 294, (currentStep === 3 ? 3 : 4) * 120 + 7, (currentStep === 3 ? 250 : 125));
+    let wrap = currentStep === 3 ? 3 : 4;
+    for(let p in actualMarket) {
+        let plant = actualMarket[p];
         plant.drawnPosition = count;
-        cost = plant.cost;
+        let cost = plant.cost;
         ctx.drawImage(plantImg, ppp[cost].x * pppWidth, ppp[cost].y * pppHeight, pppWidth, pppHeight,
-            800 + ((count % wrap) * 120), 300 + (125 * (currentStep == 3 && count > 2 ? 1 : 0)), pppWidth, pppHeight);
+            800 + ((count % wrap) * 120), 300 + (125 * (currentStep === 3 && count > 2 ? 1 : 0)), pppWidth, pppHeight);
         count += 1;
     }
 
     // Draw the future market
-    if(currentStep != 3) {
+    if(currentStep !== 3) {
         count = 0;
         ctx.strokeStyle = PINK;
         ctx.fillStyle = PINK;
         ctx.font = "12px Arial";
         ctx.fillText("Future Market", 794, 434);
         ctx.strokeRect(794, 444, 4 * 120 + 7, 125);
-        for(p in futureMarket) {
-            plant = futureMarket[p];
-            cost = plant.cost;
+        for(let p in futureMarket) {
+            let plant = futureMarket[p];
+            let cost = plant.cost;
             ctx.drawImage(plantImg, ppp[cost].x * pppWidth, ppp[cost].y * pppHeight,
                 pppWidth, pppHeight,
                 800 + count * 120, 450, pppWidth, pppHeight);
@@ -260,10 +260,10 @@ var redraw = function(scorePanel) {
         ctx.strokeStyle = ORANGE;
         ctx.lineWidth = 5;
         ctx.beginPath();
-        var highlightPlant;
+        let highlightPlant;
         if(scorePanel.auction.auctionRunning) {
-            for(var actualP in actualMarket) {
-                if(actualMarket[actualP].cost == scorePanel.auction.currentBidChoice) {
+            for(let actualP in actualMarket) {
+                if(actualMarket[actualP].cost === scorePanel.auction.currentBidChoice) {
                     highlightPlant = actualMarket[actualP].drawnPosition;
                 }
             }
@@ -271,8 +271,8 @@ var redraw = function(scorePanel) {
         else {
             highlightPlant = selectedPlant;
         }
-        x = (800 + (highlightPlant * 120)); //Changed 114 => 120 to account for spaces
-        y = 300;
+        let x = (800 + (highlightPlant * 120)); //Changed 114 => 120 to account for spaces
+        let y = 300;
         ctx.strokeRect(x, y, 114, 114);
         ctx.stroke();
         ctx.stroke();
@@ -281,23 +281,23 @@ var redraw = function(scorePanel) {
     drawScorePanel(scorePanel, ctx, ppp);
 
     // Draw Phase header
-    var yOffsetForButtons = 20;
+    let yOffsetForButtons = 20;
     ctx.fillStyle = BLACK;
     ctx.font = "20px monospace";
     ctx.fillText(getPhaseName(currentActionState), 800, yOffsetForButtons);
 
     // draw buttons
     ctx.fillStyle = WHITE;
-    var currentWidth = 800;
-    var bufferSpace = 10;
-    var buttonsDrawn = 0;
+    let currentWidth = 800;
+    let bufferSpace = 10;
+    let buttonsDrawn = 0;
     yOffsetForButtons += 15;
     ctx.font = "16px monospace";
-    for(var key in buttonArray) {
-        var btn = buttonArray[key];
+    for(let key in buttonArray) {
+        let btn = buttonArray[key];
 
-        var cur = ACTIONS_FLAGS[currentActionState];
-        var flag = btn.flags;
+        let cur = ACTIONS_FLAGS[currentActionState];
+        let flag = btn.flags;
         btn.width = btn.disp.length * 10 + 8;
         btn.height = 24;
 
@@ -313,9 +313,9 @@ var redraw = function(scorePanel) {
 
             btn.y = yOffsetForButtons;
 
-            var pos = currentWidth;
+            let pos = currentWidth;
             btn.x = pos;
-            if(key == "Pass") {
+            if(key === "Pass") {
                 btn.x = 1200;
                 btn.y = 245;
                 ctx.strokeRect(btn.x, btn.y, btn.width, btn.height);
@@ -339,7 +339,7 @@ var redraw = function(scorePanel) {
         ctx.strokeStyle = GREEN;
         ctx.font = "14px monospace";
         ctx.fillText("Current Bid: " + selectedBid, 800, yOffsetForButtons);
-        if(scorePanel.auction.currentBid != 0) {
+        if(scorePanel.auction.currentBid !== 0) {
             ctx.fillText("Highest Bid: " + scorePanel.auction.currentBid, 925, yOffsetForButtons);
             ctx.fillText("Highest Bidder: " + scorePanel.players[scorePanel.auction.currentBidLeader].displayName, 1050, yOffsetForButtons);
         }
@@ -350,38 +350,38 @@ var redraw = function(scorePanel) {
         yOffsetForButtons += 60;
         ctx.strokeStyle = GREEN;
         ctx.font = "14px monospace";
-        var offset = 0;
+        let offset = 0;
 
-        var playerPlants = [];
-        var playerOwnedPlantCosts = scorePanel.players[playerData.self.uid].plants;
+        let playerPlants = [];
+        let playerOwnedPlantCosts = scorePanel.players[playerData.self.uid].plants;
 
         // TODO: Really should make the below a function....
-        for(var i in playerOwnedPlantCosts) {
+        for(let i in playerOwnedPlantCosts) {
             playerPlants.push(ppp[parseInt(i)]);
         }
 
         // draw the resource count of the currently selected plant, so the player can change the amount to purchase
-        if(selectedOwnedPlant != undefined) {
-            for(var type in selectedOwnedPlant.resources) {
+        if(selectedOwnedPlant !== undefined) {
+            for(let type in selectedOwnedPlant.resources) {
                 ctx.fillText(selectedOwnedPlant.resources[type] + " " + type, 800, yOffsetForButtons + (offset * 20));
                 offset += 1;
             }
         }
 
         // Then, draw the total number of resources requested across all plants
-        var totalResources = {'coal': 0, 'oil': 0, 'garbage': 0, 'uranium': 0};
-        for(var index in playerPlants) {
-            var plant = playerPlants[index];
-            if(plant.resources == undefined)
+        let totalResources = {'coal': 0, 'oil': 0, 'garbage': 0, 'uranium': 0};
+        for(let index in playerPlants) {
+            let plant = playerPlants[index];
+            if(plant.resources === undefined)
                 continue;
-            for(type in plant.resources) {
+            for(let type in plant.resources) {
                 totalResources[type] += plant.resources[type];
             }
         }
 
         offset = 0;
         ctx.fillText("Total Requested", 800, yOffsetForButtons + 85);
-        for(type in totalResources) {
+        for(let type in totalResources) {
             ctx.fillText(totalResources[type] + " " + type, 800 + (80 * offset), yOffsetForButtons + 110);
             offset += 1;
         }
@@ -389,7 +389,7 @@ var redraw = function(scorePanel) {
 };
 
 function colorNameToColorCode(name) {
-    var colorMap = {
+    let colorMap = {
         "red": RED, "blue": BLUE, "green": GREEN, "yellow": YELLOW, "purple": PURPLE, "black": BLACK,
         "coal": BROWN, "oil": BLACK, "garbage": YELLOW, "uranium": RED
     };
@@ -400,12 +400,12 @@ function getPhaseName(currentAction) {
     if(gameOver) {
         return "Game Over! " + scorePanel.args.data.winner + " has won!";
     }
-    var phaseNames = {
+    let phaseNames = {
         "startGame": "Waiting for Players", "startAuction": "Start Auction", "bid": "Bidding", "buy": "Buy Resources",
         "build": "Build On Cities", "power": "Get Money!", "remove": "Remove Power Plant"
     };
-    var name = phaseNames[currentAction];
-    if(currentAction != "startGame") {
+    let name = phaseNames[currentAction];
+    if(currentAction !== "startGame") {
         name += " - Step " + currentStep;
     }
     return name;

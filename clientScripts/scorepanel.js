@@ -31,19 +31,6 @@ function tween(x, start, end) {
 
 function drawScorePanel(data, ctx, ppp) {
 
-    // currently expecting, though will need to change later:
-    //  data.currentPlayerIndex
-    //  data.playerOrder[1..]
-    //  data.players[data.playerOrder[i]]
-    //        .money = 50;
-    //        .plants = [1,2,3];
-    //        .cities = ["Berlin","some other place","Frankfurt-d"];
-    //        .resources = {'coal': 5, 'oil': 5, 'garbage': 5, 'uranium': 5};
-    //        .displayName = someJerk
-    //  data.anim.progress = 0-1
-    //           .activePlayer = i
-    //           .activeWidth = #
-
     if(!data) return;
     if(!data.playerOrder) return;
     if(!data.players)  return;
@@ -97,6 +84,7 @@ function drawScorePanel(data, ctx, ppp) {
 
         var playerColorCode = colorNameToColorCode(player.color);
 
+        // Animation for the bounding box of the player's summary area
         var p = anim.progress;
         var p1, p2, p3, p4, p5;
         p1 = tween(p, 0, .35);
@@ -165,7 +153,7 @@ function drawScorePanel(data, ctx, ppp) {
             }
 
             ctx.fillStyle = playerColorCode;
-            if(cityCount == 7) {
+            if(cityCount === 7) {
                 x = 720 + xPadding;
                 y = 20 + (mustFit <= 2 ? 5 : mustFit <= 4 ? 5 : 3);
                 x = x + (xBuffer * (currentCount % 2));
@@ -180,11 +168,11 @@ function drawScorePanel(data, ctx, ppp) {
         playersDrawnOnCityTrack[cityCount] = playersDrawnOnCityTrack[cityCount] ? playersDrawnOnCityTrack[cityCount] + 1 : 1;
 
         // draw curved border
-        if(currentPlayer == player.uid && currentActionState != "power")
+        if(currentPlayer === player.uid && currentActionState !== "power")
             ctx.strokeStyle = "#3366FF";
-        else if(currentPlayer != player.uid && data.auction.currentBidder == player.uid)
+        else if(currentPlayer !== player.uid && data.auction.currentBidder === player.uid)
             ctx.strokeStyle = "#336633";
-        else if(currentActionState == "power" && playersPaid.indexOf(player.uid) == -1)
+        else if(currentActionState === "power" && playersPaid.indexOf(player.uid) === -1)
             ctx.strokeStyle = "#336633";
         else
             ctx.strokeStyle = "#111111";
@@ -203,7 +191,7 @@ function drawScorePanel(data, ctx, ppp) {
         t_x = s_x2 - ((s_x2 - s_x1) * tween(p, .2, .8));
 
 
-        // draw a house
+        // draw a house for the number of owned cities
         ctx.strokeStyle = playerColorCode;
         ctx.lineWidth = 3;
         var h1 = t_x + p_x / 2 - arc / 2 + 8;
@@ -277,7 +265,7 @@ function drawScorePanel(data, ctx, ppp) {
                     // setup click region for resource
                     ppp[cost].resourcePositions.push({type: type, x: resourceX, y: resourceY, size: resourceSize});
 
-                    if(ppp[cost].selected && highlightSelected[type] > 0 && currentActionState == "power") {
+                    if(ppp[cost].selected && highlightSelected[type] > 0 && currentActionState === "power") {
                         ctx.strokeStyle = GREEN;
                         ctx.lineWidth = 2;
                         ctx.strokeRect(ppp[cost].curX + 13 + (20 * (drawn % 3)),
@@ -302,22 +290,22 @@ function drawScorePanel(data, ctx, ppp) {
 }
 
 function getSelectedResourceAmounts(selectionIndex, required, type) {
-    if(type == "both") {
-        if(selectionIndex == 1) {
+    if(type === "both") {
+        if(selectionIndex === 1) {
             return resourceList(required, 0, 0, 0);
         }
-        else if(selectionIndex == 2) {
+        else if(selectionIndex === 2) {
             return resourceList(0, required, 0, 0);
         }
-        else if(selectionIndex == 3) {
-            return resourceList(required == 3 ? 2 : 1, 1, 0, 0);
+        else if(selectionIndex === 3) {
+            return resourceList(required === 3 ? 2 : 1, 1, 0, 0);
         }
-        else if(selectionIndex == 4) {
-            return resourceList(1, required == 3 ? 2 : 1, 0, 0);
+        else if(selectionIndex === 4) {
+            return resourceList(1, required === 3 ? 2 : 1, 0, 0);
         }
     }
     else {
-        var resources = resourceList(0, 0, 0, 0);
+        let resources = resourceList(0, 0, 0, 0);
         resources[type] = required;
         return resources;
     }
@@ -333,7 +321,7 @@ function getSelectedResourceAmounts(selectionIndex, required, type) {
  * @returns {{}}
  */
 resourceList = function(coal, oil, garbage, uranium) {
-    var data = {};
+    let data = {};
     data['coal'] = coal;
     data['oil'] = oil;
     data['garbage'] = garbage;

@@ -11,20 +11,20 @@ var log = function(str, output) {
     console.log(output + " => " + str);
     str = escapeHtml(str);
     if(output === "chat") {
-        var prev = $('#chatOutputBox').html();
+        let prev = $('#chatOutputBox').html();
         $('#chatOutputBox').html(str + "<br/>" + prev);
     }
     else if(output === "console") {
-        var prev = $('#consoleOutputBox').html();
+        let prev = $('#consoleOutputBox').html();
         $('#consoleOutputBox').html(str + "<br/>" + prev);
     }
 };
 
 const SOCKET_SENDCHAT = 'sendchat';  // client -> server
 var handleChatInput = function(event) {
-    var key = event.keyCode || event.which;
+    let key = event.keyCode || event.which;
     if(key === 13) {
-        var input = document.getElementById('chatInputBox').value;
+        let input = document.getElementById('chatInputBox').value;
         socket.emit(SOCKET_SENDCHAT, input);
         document.getElementById('chatInputBox').value = "";
     }
