@@ -154,12 +154,12 @@ canvas.addEventListener('mouseup', function(event) {
     if(x > 800 && x < 1280 && y > 300 && y < 420 && scorePanel.args.data.currentAction === "startAuction") {
         selectedPlant = 3 - (Math.floor((1260 - x) / 114));
         selectedCity = null;
-        selectedOwnedPlant = -1;
+        selectedOwnedPlant = undefined;
         redraw(scorePanel);
         return;
     }
     else {
-        selectedPlant = -1;
+        selectedPlant = undefined;
     }
 
     // Check if the player's own power plant was selected, used for buy resources phase and power phase

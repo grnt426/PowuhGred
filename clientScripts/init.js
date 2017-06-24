@@ -23,7 +23,7 @@ var citiesDef = {};
 var selectedCity;
 var selectedCities = [];
 var selectedBid = 0;
-var selectedPlant = -1;
+var selectedPlant = undefined;
 var selectedPlants = [];
 
 var selectedResources = [];

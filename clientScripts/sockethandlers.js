@@ -44,6 +44,7 @@ socket.on(SOCKET_UPDATES, function(data) {
         futureMarket = newData.futuresMarket;
         currentStep = newData.currentStep;
         gameOver = newData.gameOver;
+        playerData.self.ownedPlants = scorePanel.args.data.players[currentPlayer].plants;
 
         // If we are the player the game is waiting on to choose a plant to remove, override the action state
         // to "remove" so the correct buttons appear

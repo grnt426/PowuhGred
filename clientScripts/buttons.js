@@ -48,7 +48,7 @@ var passButton = function() {
 };
 
 var startAuctionButton = function() {
-    if(selectedPlant != -1) {
+    if(selectedPlant != undefined) {
         socket.emit(SOCKET_GAMEACTION, {
             uid: playerData.self.uid, cmd: "startAuction",
             args: {cost: actualMarket[selectedPlant].cost, bid: selectedBid}

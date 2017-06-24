@@ -550,7 +550,6 @@ exports.Engine = function(comms, cities, plants) {
     };
 
     this.getPowerPlantFromActualAuction = function(plantCost) {
-        console.log("Cost: `" + plantCost + "`");
         if(!Number.isInteger(plantCost) || plantCost < 3 || plantCost > 50){
             return undefined;
         }

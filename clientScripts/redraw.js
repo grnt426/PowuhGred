@@ -208,17 +208,6 @@ var redraw = function(scorePanel) {
         }
     }
 
-    // Draw the player's power plants
-    let count = 0;
-    for(let p in playerData.self.ownedPlants) {
-        let plant = playerData.self.ownedPlants[p];
-        let cost = plant.cost;
-        ctx.drawImage(plantImg, ppp[cost].x * pppWidth, ppp[cost].y * pppHeight,
-            pppWidth, pppHeight,
-            800 + count * 125, 150, pppWidth, pppHeight);
-        count += 1;
-    }
-
     // Draw the actual market
     count = 0;
     ctx.strokeStyle = LTBLUE;
@@ -301,7 +290,14 @@ var redraw = function(scorePanel) {
         btn.width = btn.disp.length * 10 + 8;
         btn.height = 24;
 
+        btn.x = -1;
+        btn.y = -1;
+
         if((cur & flag) > 0) {
+            if(shouldSkipBuyResourceFlag(btn, selectedOwnedPlant)){
+                continue;
+            }
+
             buttonsDrawn += 1;
             ctx.fillStyle = GREEN;
             ctx.strokeStyle = GREEN;
@@ -326,10 +322,6 @@ var redraw = function(scorePanel) {
                 ctx.fillText(btn.disp, pos + 5, btn.y + 18);
                 currentWidth = pos + btn.width + bufferSpace;
             }
-        }
-        else {
-            btn.x = -1;
-            btn.y = -1;
         }
     }
 
@@ -409,4 +401,21 @@ function getPhaseName(currentAction) {
         name += " - Step " + currentStep;
     }
     return name;
+}
+
+function shouldSkipBuyResourceFlag(btn, selectedPlant){
+    if(selectedPlant === undefined) {
+        return false;
+    }
+    else if(btn.disp.indexOf("+") === -1 && btn.disp.indexOf("-") === -1){
+        return false;
+    }
+    let plant = playerData.self.ownedPlants[selectedPlant.cost];
+    if(plant.type !== "both" && btn.disp.toLowerCase().indexOf(plant.type) !== -1){
+        return false;
+    }
+    else if(plant.type === "both" && (btn.disp.toLowerCase().indexOf("coal") !== -1 || btn.disp.toLowerCase().indexOf("coal") !== -1)){
+        return false;
+    }
+    return true;
 }
