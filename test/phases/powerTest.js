@@ -1,6 +1,6 @@
 var assert = require('assert'),
     sinon = require('sinon'),
-    util = require('../../util.js');
+    util = require('../../util.js'),
     powerjs = require('../../phases/power.js');
 
 var power;

@@ -1,7 +1,8 @@
 var assert = require('assert'),
     sinon = require('sinon'),
     util = require('../../util.js'),
-    buildingjs = require('../../phases/building.js');
+    buildingjs = require('../../phases/building.js'),
+    PromiseMock = require('promise-mock');
 
 var building,
     player,
@@ -35,6 +36,13 @@ beforeEach(function () {
 
 describe('Phase/building', function() {
     describe('#buildCities()', function () {
+
+        beforeEach(function() {
+            PromiseMock.install();
+        });
+        afterEach(function() {
+            PromiseMock.uninstall();
+        });
 
         it('Player can pass on building cities.', function(){
             building.buildCities("pass");
@@ -76,6 +84,7 @@ describe('Phase/building', function() {
             building.cities.findOptimalPurchaseCostOrderOfCities = sinon.stub().returns(1);
 
             building.buildCities(data);
+            Promise.runAll();
 
             assert(building.isValid.calledOnce, "We should have validated the player's selection.");
             assert(building.comms.toCurrent.notCalled, "We shouldn't have had any reason to only message the current player.");
@@ -85,7 +94,7 @@ describe('Phase/building', function() {
             assert(player.buildOnCity.calledThrice);
             assert(player.money, 30);
             assert(building.engine.nextPlayer.calledOnce);
-            assert(!self.comms.calledWith("Something went wrong in processing your build request!"),
+            assert(!building.comms.calledWith("Something went wrong in processing your build request!"),
                 "We should not have emitted an error to users,");
         });
     });

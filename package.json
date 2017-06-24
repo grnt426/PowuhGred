@@ -24,7 +24,8 @@
     "socket.io": "1.7.3",
     "sqlite": "2.5.0",
     "threads": "^0.7.2",
-    "validator": "7.0.0"
+    "validator": "7.0.0",
+    "promise-mock":"1.1.1"
   },
   "scripts:": {
     "test": "mocha"

@@ -70,8 +70,6 @@ exports.Building = function(engine, comms, cities) {
                         // We must manually call this here because the engine *may* have already called it earlier
                         // after processing the request and then firing off this asynchronous Promise.
                         engine.broadcastGameState();
-
-                        let val = 4 / something.hello;
                     }
                 })
                 .catch(function(err){
