@@ -6,7 +6,7 @@ module.exports = function (request, done) {
     if(request.action === "findOptimalPurchaseCostOrderOfCities") {
         let result = 0;
         try {
-            result = findOptimalPurchaseCostOrderOfCities(data.ctx, data.cities, data.dests);
+            result = findOptimalPurchaseCostOrderOfCitiesFaster(data.ctx, data.cities, data.dests);
         }
         catch(err){
             console.error("Error in finding optimal: " + err);
@@ -180,6 +180,133 @@ function findOptimalPurchaseCostOrderOfCities(ctx, cities, dests) {
     }
     console.log("Best ordering: " + bestOrder + " at $" + totalCost + " for connections.");
     return totalCost;
+}
+
+function findOptimalPurchaseCostOrderOfCitiesFaster(ctx, cities, dests) {
+    // console.info("Searching...");
+
+    // In the very edge case of no existing cities and one destination city, this function
+    // will not work simply. Instead, just return a cost of 0, as there are no connections to make.
+    if(dests.length === 1 && cities.length === 0) {
+        return 0;
+    }
+
+    let bestCost = 999;
+    let currentOrderings = generateOptions(ctx, cities, dests, [], 0);
+    // console.info("First Set (" + currentOrderings.length + "): " + JSON.stringify(currentOrderings));
+    let bestOrdering = undefined;
+    let sortFunction = function(a, b) { return a.cost < b.cost;};
+    currentOrderings.sort(sortFunction);
+    let currentOrder = undefined;
+    let memoizedOrders = {};
+    while(currentOrderings.length > 0) {
+        currentOrder = currentOrderings.shift();
+        // console.info("Current Order: " + JSON.stringify(currentOrder));
+        // console.info("Remaining: " + currentOrder.remaining);
+        if(inMemoizedOrders(memoizedOrders, currentOrder)) {
+            continue;
+        }
+        else if(currentOrder.remaining.length === 0 && currentOrder.cost < bestCost) {
+            // console.info("Found a candidate: " + currentOrder.order);
+            bestCost = currentOrder.cost;
+            bestOrdering = currentOrder;
+        }
+        else if(bestOrdering !== undefined && currentOrder.cost > bestCost) {
+            continue;
+        }
+
+        if(currentOrder.remaining.length !== 0) {
+            currentOrderings = currentOrderings.concat(generateOptions(ctx, currentOrder.cities, currentOrder.remaining,
+                currentOrder.order, currentOrder.cost));
+            // console.info("New Set: " + JSON.stringify(currentOrderings));
+            currentOrderings.sort(sortFunction);
+        }
+    }
+
+    return bestOrdering.cost;
+}
+
+/**
+ * Returns true if the current order is in the memoized map and is the same cost.
+ * TODO: I *might* be able to save here and return true if the cost is also greater, but need to test this assumption.
+ * @param memoizedOrders
+ * @param order
+ * @returns {boolean}
+ */
+function inMemoizedOrders(memoizedOrders, order) {
+
+    // console.info("Order: " + JSON.stringify(order));
+    if(order.order === undefined)
+        return false;
+    let len = order.order.length;
+    if(len < 2) {
+        return false;
+    }
+
+    let toCompare = memoizedOrders[len];
+    // console.info("To Compare: " + toCompare);
+    if(toCompare === undefined || toCompare.length === 0) {
+       memoizedOrders[len] = [{name:order.order.join(""), cost:order.cost}];
+       return false;
+    }
+
+    let name = order.order.join("");
+    for(let opt in toCompare) {
+        // console.info("Option: " + opt);
+        if(orderAgnosticEquals(toCompare[opt].name, name) && opt.cost === order.cost)
+            return true;
+    }
+
+    memoizedOrders[len].push({name:name, cost:order.cost});
+    return false;
+}
+
+function generateOptions(ctx, cities, dests, order, prevCost) {
+    let options = [];
+    // console.info("Dests (" + dests.length + "): " + dests);
+    for(let i = 0; i < dests.length; i++) {
+        // console.info("Adding...");
+        let newOrder = deepCopy(order);
+        let newDests = deepCopy(dests);
+        let newCities = deepCopy(cities);
+        let cityName = dests[i];
+        newCities.push(convertToCityObjects(cityName, ctx.cities));
+        newOrder.push(cityName);
+        newDests.splice(i, 1);
+        let val = partialOrder(newOrder, newDests,
+            prevCost + findArbitraryCheapestToDest(ctx, cities, convertToCityObjects(cityName, ctx.cities)), newCities);
+        // console.info("New Val: " + val);
+        options.push(val);
+    }
+    // console.info("Options (" + options.length + "): " + options);
+    return options;
+}
+
+function orderAgnosticEquals(stra, strb) {
+    // console.info("StrA: " + stra + " StrB:" + strb);
+    if(stra.length !== strb.length)
+        return false;
+
+    for(let a in stra) {
+        if(strb.indexOf(a) === -1)
+            return false;
+    }
+    return true;
+}
+
+/**
+ *
+ * @param {Array} order
+ * @param {Array} remaining
+ * @param {Number} cost
+ * @param {Array} cities
+ * @returns {{order: *, remaining: *, cost: *, cities: Object}}
+ */
+function partialOrder(order, remaining, cost, cities) {
+    // console.info("Order: " + order + " remaining: " + remaining + " cost: " + cost + " cities: " + cities);
+    if(remaining === undefined)
+        remaining = [];
+    return {order: order, remaining: remaining, cost: cost, cities:cities};
 }
 
 function convertToCityObjects(cityNames, cities) {

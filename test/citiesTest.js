@@ -1,33 +1,35 @@
-var assert = require('assert'),
+const assert = require('assert'),
     sinon = require('sinon'),
     util = require('../engine/util.js'),
     citiesjs = require('../engine/cities.js');
 
-var cities = new citiesjs.Cities();
+const cities = new citiesjs.Cities();
 cities.parseCityList("data/germany_cities.txt");
 cities.parseCities("data/germany_connections.txt");
 
-var ESSEN = cities.cities["essen"];
-var DORTMUND = cities.cities["dortmund"];
-var AACHEN = cities.cities["aachen"];
-var KONSTANZ = cities.cities["konstanz"];
-var FLENSBURG = cities.cities["flensburg"];
-var KOLN = cities.cities["koln"];
-var MUNSTER = cities.cities["munster"];
-var DRESDEN = cities.cities["dresden"];
-var TORGELOW = cities.cities["torgelow"];
-var TRIER = cities.cities["trier"];
-var SAARBRUCKEN = cities.cities["saarbrucken"];
-var MUNCHEN = cities.cities["munchen"];
-var PASSAU = cities.cities["passau"];
-var FRANKFURTM = cities.cities["frankfurt-m"];
-var OSNABRUCK = cities.cities["osnabruck"];
-var KASSEL = cities.cities["kassel"];
-var FULDA = cities.cities["fulda"];
-var WURZBURG = cities.cities["wurzburg"];
-var HANNOVER = cities.cities["hannover"];
-var MAGDEBURG = cities.cities["magdeburg"];
-var BREMEN = cities.cities["bremen"];
+const ESSEN = cities.cities["essen"];
+const DORTMUND = cities.cities["dortmund"];
+const AACHEN = cities.cities["aachen"];
+const KONSTANZ = cities.cities["konstanz"];
+const FLENSBURG = cities.cities["flensburg"];
+const KOLN = cities.cities["koln"];
+const MUNSTER = cities.cities["munster"];
+const DRESDEN = cities.cities["dresden"];
+const TORGELOW = cities.cities["torgelow"];
+const TRIER = cities.cities["trier"];
+const SAARBRUCKEN = cities.cities["saarbrucken"];
+const MUNCHEN = cities.cities["munchen"];
+const PASSAU = cities.cities["passau"];
+const FRANKFURTM = cities.cities["frankfurt-m"];
+const OSNABRUCK = cities.cities["osnabruck"];
+const KASSEL = cities.cities["kassel"];
+const FULDA = cities.cities["fulda"];
+const WURZBURG = cities.cities["wurzburg"];
+const HANNOVER = cities.cities["hannover"];
+const MAGDEBURG = cities.cities["magdeburg"];
+const BREMEN = cities.cities["bremen"];
+const WIESBADEN = cities.cities["wiesbaden"];
+const MANNHEIM = cities.cities["mannheim"];
 
 beforeEach(function () {
 
@@ -135,14 +137,25 @@ describe('Cities', function () {
         });
 
         /**
-         * Intense test, to see where the limits are. On my machine, this test took 270ms
-         * (most tests take 160ms to run, so about 110ms to actually compute).
+         * Average test, to see what the cost for an above average request looks like. On my machine, this test took 
+         * 270ms (most tests take 160ms to run, so about 110ms to actually compute).
          */
         it('Find cheapest between 16 cities to 6 cities, which is 98', function () {
             return assertCost(cities.findOptimalPurchaseCostOrderOfCities(
                 [KOLN, FLENSBURG, KONSTANZ, ESSEN, MUNSTER, SAARBRUCKEN, MUNCHEN, PASSAU,
                     FRANKFURTM, OSNABRUCK, KASSEL, FULDA, WURZBURG, HANNOVER, MAGDEBURG],
-                [DRESDEN.name,DORTMUND.name,AACHEN.name,TRIER.name,FLENSBURG.name,TORGELOW.name]), 98);
+                [DRESDEN.name, DORTMUND.name, AACHEN.name, TRIER.name, FLENSBURG.name, TORGELOW.name]), 98);
+        });
+
+        /**
+         * Intense test, to see where the limits are. Currently, it takes longer than the 2000ms timeout
+         */
+        it('Find cheapest between 16 cities to 9 cities, which is unknown', function () {
+            return assertCost(cities.findOptimalPurchaseCostOrderOfCities(
+                [KOLN, FLENSBURG, KONSTANZ, ESSEN, MUNSTER, SAARBRUCKEN, MUNCHEN, PASSAU,
+                    FRANKFURTM, OSNABRUCK, KASSEL, FULDA, WURZBURG, HANNOVER, MAGDEBURG],
+                [DRESDEN.name, DORTMUND.name, AACHEN.name, TRIER.name, FLENSBURG.name, TORGELOW.name, 
+                    BREMEN.name, WIESBADEN.name, MANNHEIM.name]), 98);
         });
     });
 });
