@@ -1,10 +1,18 @@
+const fs = require('fs');
+const activeRegions = ['cyan', 'brown', 'red', 'yellow', 'blue', 'purple'].join(" ");
+
 module.exports = function (request, done) {
-    console.info("Incoming Request: " + JSON.stringify(request));
+    //console.info("Incoming Request: " + JSON.stringify(request));
 
     // TODO: we should leverage Memcached as a cache for our memoized search. For now, memoized results are thrown away.
     let data = request.data;
     if(request.action === "findOptimalPurchaseCostOrderOfCities") {
+        data.ctx.regionKey = activeRegions;
         let result = 0;
+        let contents = fs.readFileSync('data/pathcosts.txt', 'utf-8').toString();
+        let timeStart = Date.now();
+        buildMemoryCache(contents, data);
+        console.info("Took " + (Date.now() - timeStart) + "ms to read file.");
         try {
             result = findOptimalPurchaseCostOrderOfCitiesFaster(data.ctx, data.cities, data.dests);
         }
@@ -134,6 +142,23 @@ function findArbitraryCheapestToDest(ctx, cities, dest) {
     return lowestCost;
 }
 
+function findArbitraryCheapestToDestCache(ctx, cities, dest) {
+    let lowestCost = 999;
+    for(let i in cities) {
+        let cost = undefined;
+        // console.info(hash(cities[i].name + ">" + dest.name));
+        cost = get(cities[i].name + ">" + dest.name);
+        // cost = nodeCacheStore.get(cities[i].name + ">" + dest.name);
+        // console.info("Cost: " + cost);
+        if(isNaN(cost)){
+            // console.info("Bad cost? " + cost);
+        }
+        if(cost < lowestCost)
+            lowestCost = cost;
+    }
+    return lowestCost;
+}
+
 /**
  * Given a list of owned player cities and a list of destination cities, determine which ordering of purchases is
  * the most optimal so as to minimize cost.
@@ -153,7 +178,11 @@ function findOptimalPurchaseCostOrderOfCities(ctx, cities, dests) {
     let possibleOrderings = allcombinations(dests);
     let next;
     let bestOrder = [];
+    let totalOptions = 0;
+    let totalTime = 0;
+    let numberTimes = 0;
     while(!(next = possibleOrderings.next()).done) {
+        totalOptions++;
         let cost = 0;
         let tempCities = deepCopy(cities);
         let comb = next.value;
@@ -167,7 +196,10 @@ function findOptimalPurchaseCostOrderOfCities(ctx, cities, dests) {
         for(let i in comb) {
 
             // Find the cheapest cost for this city given the cities we already have
-            cost += findArbitraryCheapestToDest(ctx, tempCities, convertToCityObjects(comb[i], ctx.cities));
+            let timeStart = Date.now();
+            cost += findArbitraryCheapestToDestCache(ctx, tempCities, convertToCityObjects(comb[i], ctx.cities));
+            totalTime += (Date.now() - timeStart);
+            numberTimes++;
 
             // Then, add this city to cities we "have", so we recompute the next cheapest as this city a part of our
             // network.
@@ -179,6 +211,8 @@ function findOptimalPurchaseCostOrderOfCities(ctx, cities, dests) {
         }
     }
     console.log("Best ordering: " + bestOrder + " at $" + totalCost + " for connections.");
+    console.info("Total Options: " + totalOptions);
+    console.log("Total Time generating options: " + totalTime/1000 + "s Avg: " + totalTime/numberTimes/1000 + "s");
     return totalCost;
 }
 
@@ -192,6 +226,7 @@ function findOptimalPurchaseCostOrderOfCitiesFaster(ctx, cities, dests) {
     }
 
     let bestCost = 999;
+    let totalOptions = 0;
     let currentOrderings = generateOptions(ctx, cities, dests, [], 0);
     // console.info("First Set (" + currentOrderings.length + "): " + JSON.stringify(currentOrderings));
     let bestOrdering = undefined;
@@ -199,8 +234,14 @@ function findOptimalPurchaseCostOrderOfCitiesFaster(ctx, cities, dests) {
     currentOrderings.sort(sortFunction);
     let currentOrder = undefined;
     let memoizedOrders = {};
+    let totalTime = 0;
+    let numberTimes = 0;
     while(currentOrderings.length > 0) {
         currentOrder = currentOrderings.shift();
+        if(currentOrder.remaining.length === 0) {
+            totalOptions++;
+            // console.info("Full Order considered: " + currentOrder.order + " Cost: " + currentOrder.cost);
+        }
         // console.info("Current Order: " + JSON.stringify(currentOrder));
         // console.info("Remaining: " + currentOrder.remaining);
         if(inMemoizedOrders(memoizedOrders, currentOrder)) {
@@ -216,13 +257,20 @@ function findOptimalPurchaseCostOrderOfCitiesFaster(ctx, cities, dests) {
         }
 
         if(currentOrder.remaining.length !== 0) {
-            currentOrderings = currentOrderings.concat(generateOptions(ctx, currentOrder.cities, currentOrder.remaining,
-                currentOrder.order, currentOrder.cost));
+            let timeStart = Date.now();
+            let newOptions = generateOptions(ctx, currentOrder.cities, currentOrder.remaining,
+                currentOrder.order, currentOrder.cost);
+            totalTime += (Date.now() - timeStart);
+            numberTimes++;
+            currentOrderings = currentOrderings.concat(newOptions);
             // console.info("New Set: " + JSON.stringify(currentOrderings));
             currentOrderings.sort(sortFunction);
         }
     }
 
+    console.log("Total Options: " + totalOptions);
+    console.log("Total Time generating options: " + totalTime/1000 + "s Avg: " + totalTime/numberTimes/1000 + "s");
+    // console.log(memoizedOrders);
     return bestOrdering.cost;
 }
 
@@ -243,21 +291,21 @@ function inMemoizedOrders(memoizedOrders, order) {
         return false;
     }
 
-    let toCompare = memoizedOrders[len];
     // console.info("To Compare: " + toCompare);
-    if(toCompare === undefined || toCompare.length === 0) {
-       memoizedOrders[len] = [{name:order.order.join(""), cost:order.cost}];
-       return false;
+    let name = deepCopy(order.order).sort().join("");
+    let cost = memoizedOrders[name];
+    if(cost === undefined) {
+        memoizedOrders[name] = order.cost;
+        return false;
+    }
+    else if(cost < order.cost)
+        return true;
+    else if(order.cost < cost) {
+        memoizedOrders[name] = order.cost;
+        return false;
     }
 
-    let name = order.order.join("");
-    for(let opt in toCompare) {
-        // console.info("Option: " + opt);
-        if(orderAgnosticEquals(toCompare[opt].name, name) && opt.cost === order.cost)
-            return true;
-    }
-
-    memoizedOrders[len].push({name:name, cost:order.cost});
+    memoizedOrders[name] = order.cost;
     return false;
 }
 
@@ -274,24 +322,12 @@ function generateOptions(ctx, cities, dests, order, prevCost) {
         newOrder.push(cityName);
         newDests.splice(i, 1);
         let val = partialOrder(newOrder, newDests,
-            prevCost + findArbitraryCheapestToDest(ctx, cities, convertToCityObjects(cityName, ctx.cities)), newCities);
+            prevCost + findArbitraryCheapestToDestCache(ctx, cities, convertToCityObjects(cityName, ctx.cities)), newCities);
         // console.info("New Val: " + val);
         options.push(val);
     }
     // console.info("Options (" + options.length + "): " + options);
     return options;
-}
-
-function orderAgnosticEquals(stra, strb) {
-    // console.info("StrA: " + stra + " StrB:" + strb);
-    if(stra.length !== strb.length)
-        return false;
-
-    for(let a in stra) {
-        if(strb.indexOf(a) === -1)
-            return false;
-    }
-    return true;
 }
 
 /**
@@ -356,4 +392,78 @@ function deepCopy(obj) {
     else {
         return JSON.parse(JSON.stringify(obj));
     }
+}
+
+
+function NaiveDict(){
+    this.keys = [];
+    this.values = [];
+}
+NaiveDict.prototype.set = function(key, value){
+    this.keys.push(key);
+    this.values.push(value)
+};
+NaiveDict.prototype.get = function(lookupKey){
+    for (let i=0;i<this.keys.length;i++){
+        let key = this.keys[i];
+        if (key === lookupKey) {
+            return this.values[i];
+        }
+    }
+};
+
+let bucketCount = 100000;
+let buckets = [];
+for (let i=0; i< bucketCount;i++){
+    buckets.push(new NaiveDict());
+}
+
+function getBucketIndex(key){
+    return hash(key) % bucketCount;
+}
+function getBucket(key){
+    return buckets[getBucketIndex(key)];
+}
+
+function set(key, value){
+    getBucket(key).set(key, value);
+}
+
+function get(lookupKey){
+    return getBucket(lookupKey).get(lookupKey);
+}
+
+function buildMemoryCache(fileContent, request){
+
+    console.info("Building memory cache...");
+    let lines = fileContent.split("\n");
+    console.info("# Lines: " + lines.length);
+    // memoryStore = [];
+    for(let i = 0; i < lines.length; i++){
+        let line = lines[i];
+        if(line.length !== 0) {
+            let data = line.split("|");
+            let regions = data[0];
+            if(regions !== request.ctx.regionKey)
+                continue;
+            let path = data[1].split("=");
+            let names = path[0].split(">");
+            let cost = Number(path[1]);
+            set(names[0] + ">" + names[1], cost);
+            set(names[1] + ">" + names[0], cost);
+        }
+    }
+    console.info(JSON.stringify(buckets));
+    // console.info("Store: " + JSON.stringify(memoryStore));
+}
+
+function hash(key){
+    let hash = 0;
+    if (key.length === 0) return hash;
+    for (let i = 0; i < key.length; i++) {
+        hash = (hash<<5) - hash;
+        hash = hash + key.charCodeAt(i);
+        hash = hash & hash; // Convert to 32bit integer
+    }
+    return Math.abs(hash);
 }

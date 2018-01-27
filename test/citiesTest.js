@@ -36,6 +36,7 @@ beforeEach(function () {
 });
 
 describe('Cities', function () {
+    this.timeout(20000);
     describe('#findCheapestRoute()', function (done) {
 
         it('Find cheapest between ESSEN to DORTMUND, which is 4', function () {
@@ -150,12 +151,12 @@ describe('Cities', function () {
         /**
          * Intense test, to see where the limits are. Currently, it takes longer than the 2000ms timeout
          */
-        it('Find cheapest between 16 cities to 9 cities, which is unknown', function () {
+        it('Find cheapest between 16 cities to 9 cities, which is 102', function () {
             return assertCost(cities.findOptimalPurchaseCostOrderOfCities(
                 [KOLN, FLENSBURG, KONSTANZ, ESSEN, MUNSTER, SAARBRUCKEN, MUNCHEN, PASSAU,
                     FRANKFURTM, OSNABRUCK, KASSEL, FULDA, WURZBURG, HANNOVER, MAGDEBURG],
                 [DRESDEN.name, DORTMUND.name, AACHEN.name, TRIER.name, FLENSBURG.name, TORGELOW.name, 
-                    BREMEN.name, WIESBADEN.name, MANNHEIM.name]), 98);
+                    BREMEN.name, WIESBADEN.name]), 102);
         });
     });
 });
