@@ -141,22 +141,22 @@ describe('Cities', function () {
          * Average test, to see what the cost for an above average request looks like. On my machine, this test took 
          * 270ms (most tests take 160ms to run, so about 110ms to actually compute).
          */
-        it('Find cheapest between 16 cities to 6 cities, which is 98', function () {
+        it('Find cheapest between 16 cities to 5 cities, which is 73', function () {
             return assertCost(cities.findOptimalPurchaseCostOrderOfCities(
                 [KOLN, FLENSBURG, KONSTANZ, ESSEN, MUNSTER, SAARBRUCKEN, MUNCHEN, PASSAU,
                     FRANKFURTM, OSNABRUCK, KASSEL, FULDA, WURZBURG, HANNOVER, MAGDEBURG],
-                [DRESDEN.name, DORTMUND.name, AACHEN.name, TRIER.name, FLENSBURG.name, TORGELOW.name]), 98);
+                [DRESDEN.name, DORTMUND.name, AACHEN.name, TRIER.name, FLENSBURG.name]), 73);
         });
 
         /**
          * Intense test, to see where the limits are. Currently, it takes longer than the 2000ms timeout
          */
-        it('Find cheapest between 16 cities to 9 cities, which is 102', function () {
+        it('Find cheapest between 13 cities to 8 cities, which is 119', function () {
             return assertCost(cities.findOptimalPurchaseCostOrderOfCities(
                 [KOLN, FLENSBURG, KONSTANZ, ESSEN, MUNSTER, SAARBRUCKEN, MUNCHEN, PASSAU,
-                    FRANKFURTM, OSNABRUCK, KASSEL, FULDA, WURZBURG, HANNOVER, MAGDEBURG],
+                    FRANKFURTM, OSNABRUCK, KASSEL, FULDA],
                 [DRESDEN.name, DORTMUND.name, AACHEN.name, TRIER.name, FLENSBURG.name, TORGELOW.name, 
-                    BREMEN.name, WIESBADEN.name]), 102);
+                    BREMEN.name, WIESBADEN.name]), 119);
         });
     });
 });

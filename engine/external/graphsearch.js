@@ -14,7 +14,9 @@ module.exports = function (request, done) {
         buildMemoryCache(contents, data);
         console.info("Took " + (Date.now() - timeStart) + "ms to read file.");
         try {
+            let timeStart = Date.now();
             result = findOptimalPurchaseCostOrderOfCitiesFaster(data.ctx, data.cities, data.dests);
+            console.info("Total Time: " + (Date.now() - timeStart)/1000 + "s");
         }
         catch(err){
             console.error("Error in finding optimal: " + err);
@@ -212,7 +214,7 @@ function findOptimalPurchaseCostOrderOfCities(ctx, cities, dests) {
     }
     console.log("Best ordering: " + bestOrder + " at $" + totalCost + " for connections.");
     console.info("Total Options: " + totalOptions);
-    console.log("Total Time generating options: " + totalTime/1000 + "s Avg: " + totalTime/numberTimes/1000 + "s");
+    console.log("Total Time findArbitraryCheapestToDestCache: " + totalTime/1000 + "s Avg: " + totalTime/numberTimes/1000 + "s");
     return totalCost;
 }
 
@@ -233,7 +235,7 @@ function findOptimalPurchaseCostOrderOfCitiesFaster(ctx, cities, dests) {
     let sortFunction = function(a, b) { return a.cost < b.cost;};
     currentOrderings.sort(sortFunction);
     let currentOrder = undefined;
-    let memoizedOrders = {};
+    let memoizedOrders = new Array(50000);
     let totalTime = 0;
     let numberTimes = 0;
     while(currentOrderings.length > 0) {
@@ -293,19 +295,19 @@ function inMemoizedOrders(memoizedOrders, order) {
 
     // console.info("To Compare: " + toCompare);
     let name = deepCopy(order.order).sort().join("");
-    let cost = memoizedOrders[name];
+    let cost = memoizedOrders[hash(name)];
     if(cost === undefined) {
-        memoizedOrders[name] = order.cost;
+        memoizedOrders[hash(name)] = order.cost;
         return false;
     }
     else if(cost < order.cost)
         return true;
     else if(order.cost < cost) {
-        memoizedOrders[name] = order.cost;
+        memoizedOrders[hash(name)] = order.cost;
         return false;
     }
 
-    memoizedOrders[name] = order.cost;
+    memoizedOrders[hash(name)] = order.cost;
     return false;
 }
 
@@ -414,6 +416,7 @@ NaiveDict.prototype.get = function(lookupKey){
 
 let bucketCount = 100000;
 let buckets = [];
+let mem = [];
 for (let i=0; i< bucketCount;i++){
     buckets.push(new NaiveDict());
 }
@@ -427,9 +430,11 @@ function getBucket(key){
 
 function set(key, value){
     getBucket(key).set(key, value);
+    // mem[hash(key)] = value;
 }
 
 function get(lookupKey){
+    // return mem[hash(lookupKey)];
     return getBucket(lookupKey).get(lookupKey);
 }
 
