@@ -55,7 +55,7 @@ html
                                         td #{game.hostUser}
                                         td #{game.maxPlayers}
                                         td
-                                            if game.started == 0
+                                            if game.started === 0
                                                 a(href='/game/' + game.gameId) Join!
                     else
                         p No games found!

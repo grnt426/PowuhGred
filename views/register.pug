@@ -1,19 +1,27 @@
 html
     head
         title PowerGrid Register
+        style
+            include ./css/main.css
+            include ./css/tables.css
     body
-        if session.error
-            p #{session.error}
-            - delete session.error
-        p Username length 3-50, password length 8-50. Email optional.
-        form(method='POST' action='/registeruser')
-            label(for='username') Username:
-            input(type='text', placeholder='Username', name='username')
-            br
-            label(for='password') Password:
-            input(type='password', name='password')
-            br
-            label(for='email') Email:
-            input(type='text', name='email')
-            br
-            input(type='submit', value='Register')
+        div(class='content')
+            div(class='header card')
+                p(id='pagetitle')
+                    | PowuhGred - Register
+            div(class='card')
+                if session.error
+                    p #{session.error}
+                    - delete session.error
+                p Username length 3-50, password length 8-50. Email optional.
+                form(method='POST' action='/registeruser')
+                    p
+                        label(for='username' ) Username
+                        input(type='text', placeholder='Username', id='username' name='username')
+                    p
+                        label(for='password') Password
+                        input(type='password', id='password' name='password')
+                    p
+                        label(for='email') Email
+                        input(type='text', id='email' name='email')
+                    input(type='submit', value='Register')

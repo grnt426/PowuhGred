@@ -148,15 +148,17 @@ app.use(function(req, res, next) {
 app.get("/", globalBruteforce.prevent, function(req, res) {
     console.info("Request for home");
     console.info(req.session);
+    let payload = {session: req.session};
     Promise
         .resolve(db.all('SELECT * FROM Games'))
         .then(function(dbResult) {
             console.info(JSON.stringify(dbResult));
             if(dbResult) {
-                res.render('home', {games: dbResult});
+                payload['games'] = dbResult;
+                res.render('home', payload);
             }
             else {
-                res.render('home');
+                res.render('home', payload);
             }
         })
         .catch(function(error) {
