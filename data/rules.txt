@@ -1,0 +1,256 @@
+1. Setup
+  1.1. 50 Starting Money
+  1.2. Random player order (Refer to 6.1)
+  1.3. Starting Resources
+    1.3.1. 24 Coal
+    1.3.2. 18 Oil
+    1.3.3. 6 Garbage
+    1.3.4. 2 Uranium
+  1.4. Market Setup
+    1.4.1. Current Market Plants 3, 4, 5, 6
+    1.4.2. Future Market Plants 7, 8, 9, 10
+    1.4.3. Current Market Size 4
+      1.4.3.1. Except, Size 6 in Step 3
+    1.4.4. Futures Market Size 4
+      1.4.4.1. Except, Size 0 in Step 3
+  1.5. Deck Setup
+    1.5.1. Power Plant 13 on top
+    1.5.2. Step 3 Card on Bottom
+    1.5.3. Remove X random cards from the deck
+      1.5.3.1. 2 Players = 8
+      1.5.3.2. 3 Players = 8
+      1.5.3.3. 4 Players = 4
+      1.5.3.4. 5 Players = 0
+      1.5.3.5. 6 Players = 0
+      1.5.3.6. Except for cards 1.5.1 and 1.5.2
+  1.6. Available Regions
+    1.6.1. 2 Players = 3
+    1.6.2. 3 Players = 3
+    1.6.3. 4 Players = 4
+    1.6.4. 5 Players = 5
+    1.6.5. 6 Players = 5 
+2. Limits
+  2.1. Maximum Power Plants
+    2.1.1. 2 Players = 4
+    2.1.2. Otherwise, 3
+    2.1.3. If More Than Maximum Owned, Refer to Rule XXX to resolve
+  2.2. Cities Owned by Single Player to Trigger Step 2
+    2.2.1. 2 Players = 10
+    2.2.2. 3 Players = 7
+    2.2.3. 4 Players = 7
+    2.2.4. 5 Players = 7
+    2.2.5. 6 Players = 6
+  2.3. Cities Owned by Single Player to End Game
+    2.2.1. 2 Players = 21
+    2.2.2. 3 Players = 17
+    2.2.3. 4 Players = 17
+    2.2.4. 5 Players = 15
+    2.2.5. 6 Players = 14
+3. Exceptions and Special Rules
+  3.1. Players Must Purchase a Power Plant in the First Auction Round
+  3.2. Players are Not Required to Purchase a City in the First Round
+  3.3. In Steps 2 and 3, Players Only pay 10 to Connect to an Empty City
+  3.4. Players Can Never Build in the Same City Twice
+4. Resource Replenishment
+  4.1. 2 Players
+    4.1.1. Coal
+      4.1.1.2. 3, Step 1
+      4.1.1.3. 4, Step 2
+      4.1.1.4. 3, Step 3
+    4.1.2. Oil
+      4.1.1.2. 2, Step 1
+      4.1.1.3. 2, Step 2
+      4.1.1.4. 4, Step 3
+    4.1.3. Garbage
+      4.1.1.2. 1, Step 1
+      4.1.1.3. 2, Step 2
+      4.1.1.4. 3, Step 3
+    4.1.4. Uranium
+      4.1.1.2. 1, Step 1
+      4.1.1.3. 1, Step 2
+      4.1.1.4. 1, Step 3
+  4.2. 3 Players
+    4.2.1. Coal
+      4.1.1.2. 4, Step 1
+      4.1.1.3. 5, Step 2
+      4.1.1.4. 3, Step 3
+    4.2.2. Oil
+      4.1.1.2. 2, Step 1
+      4.1.1.3. 3, Step 2
+      4.1.1.4. 4, Step 3
+    4.2.3. Garbage
+      4.1.1.2. 1, Step 1
+      4.1.1.3. 2, Step 2
+      4.1.1.4. 3, Step 3
+    4.2.4. Uranium
+      4.1.1.2. 1, Step 1
+      4.1.1.3. 1, Step 2
+      4.1.1.4. 1, Step 3
+  4.3. 4 Players
+    4.3.1. Coal
+      4.1.1.2. 5, Step 1
+      4.1.1.3. 6, Step 2
+      4.1.1.4. 4, Step 3
+    4.3.2. Oil
+      4.1.1.2. 3, Step 1
+      4.1.1.3. 4, Step 2
+      4.1.1.4. 5, Step 3
+    4.3.3. Garbage
+      4.1.1.2. 2, Step 1
+      4.1.1.3. 3, Step 2
+      4.1.1.4. 4, Step 3
+    4.3.4. Uranium
+      4.1.1.2. 1, Step 1
+      4.1.1.3. 2, Step 2
+      4.1.1.4. 2, Step 3
+  4.4. 5 Players
+    4.4.1. Coal
+      4.1.1.2. 5, Step 1
+      4.1.1.3. 7, Step 2
+      4.1.1.4. 5, Step 3
+    4.4.2. Oil
+      4.1.1.2. 4, Step 1
+      4.1.1.3. 5, Step 2
+      4.1.1.4. 6, Step 3
+    4.4.3. Garbage
+      4.1.1.2. 3, Step 1
+      4.1.1.3. 3, Step 2
+      4.1.1.4. 5, Step 3
+    4.4.4. Uranium
+      4.1.1.2. 2, Step 1
+      4.1.1.3. 3, Step 2
+      4.1.1.4. 2, Step 3
+  4.5. 6 Players
+    4.5.1. Coal
+      4.5.1.2. 7, Step 1
+      4.1.1.3. 9, Step 2
+      4.1.1.4. 6, Step 3
+    4.5.2. Oil
+      4.1.1.2. 5, Step 1
+      4.1.1.3. 6, Step 2
+      4.1.1.4. 7, Step 3
+    4.5.3. Garbage
+      4.1.1.2. 3, Step 1
+      4.1.1.3. 5, Step 2
+      4.1.1.4. 6, Step 3
+    4.5.4. Uranium
+      4.1.1.2. 2, Step 1
+      4.1.1.3. 3, Step 2
+      4.1.1.4. 3, Step 3
+  4.6. Except, If Step 3 Was First Revealed During Phase 5, Replenish as if in Step 2
+5. Order of Play
+  5.1. Determine Player Order
+  5.2. Auction Power Plants
+  5.3. Buy Resources
+  5.4. Build
+  5.5. Bureaucracy
+  5.6. Check for Game End
+  5.7. Repeat Rule 5.1 Until Game End
+6. Determining Player Order
+  6.1. If First Turn, Randomly Assign Player Order
+    6.1.1 Then Apply Rule 6.2 After First Auction Phase Finished
+  6.2. First Player has Most Cities (Slot 1), Last Player has Least Cities (Last Slot)
+  6.3. If a Tie, The Player With the Higher Cost Plant is First
+7. Auction Power Plants
+  7.1. Turn Order From First to Last (Slot 1 to Last Slot); Current Player is the Auction Leader
+  7.2. Auction Leader Chooses:
+    7.2.1. Pass
+      7.2.1.1 Skip to Rule 7.4
+    7.2.2. Start the Bid on a Plant In the Current Market
+      7.2.2.1. Minimum Bid is Cost of Plant
+      7.2.2.2. Initial Bid Has No Maximum
+        7.2.2.2.1. Except for Max of Auction Leader's Money
+      7.2.2.3. Start Bidding
+        7.2.2.3.1. Go to Rule 7.3
+  7.3. Bidding For Plant
+    7.3.1. Turn Order is Clockwise Starting From Auction Leader; Current Player is Bidder
+    7.3.2. Bidder Chooses:
+      7.3.2.1. Pass, Skip to Rule 7.3.3
+      7.3.2.2. Bid at Least 1 Higher on Plant
+        7.3.2.2.1. Player Must Pass if They Own Less Money Than Lowest Allowable Bid
+    7.3.3. Repeat Rule 7.3.2 Until Only One Bidder Has Not Passed
+    7.3.4. Remaining Player Pays Last Bid Price
+    7.3.5. Remove Power Plant from Current Market
+    7.3.6. Give Power Plant to Remaining Bidder
+    7.3.7. This Player May Not Become Auction Leader or Bid on Plants in This Auction Round
+    7.3.8. Add Another Plant to Market; Refer to Rule XXX
+  7.4. Repeat Rule 7.1 Until No Players Remain
+  7.5. If a Power Plant Was Not Purchased in an Auction Round, Refer to Rule XXX
+8. Buy Resources
+  8.1. Turn Order From Last To First (Last Slot to Slot 1); Current Player is the Purchaser
+  8.2. Purchaser Chooses:
+    8.2.1. Pass, Skip to Rule 8.3
+    8.2.2. Buy Resources
+      8.2.2.1. Total Cost May Not Exceed Purchaser's Owned Money; refer to rule XXX
+      8.2.2.2. Purchaser May Not Buy Resources if a Plant Can Not Store It; refer to rule XXX
+      8.2.2.3. Purchaser May Not Buy More Resources Than What a Plant can Store; refer to rule XXX
+      8.2.2.4. Purchaser May Not Buy a Resource if None are in the Resource Track
+  8.3. Repeat Rule 8.1 Until All Players are Finished
+9. Build
+  9.1. Turn Order From Last to First (Last Slot to Slot 1); Current Player is the Builder
+  9.2. Builder Chooses:
+    9.2.1. Pass, Skip to Rule 9.4
+    9.2.2. Build Cities
+      9.2.2.1. Player Pays the Following Cost
+        9.2.2.1.1. Cheapest Cost to Add the City to the Player's Network of Cities
+          9.2.2.1.1.1. Except, if the Player Owns no Cities, Then the Cost is 0
+          9.2.2.1.1.2. Otherwise, a Graph Search Will Determine the Cost For the Builder
+        9.2.2.1.2. Plus, the lowest Fee of X based on:
+          9.2.2.1.2.1. 10, if City Empty
+          9.2.2.1.2.2. 15, if One Other Player
+          9.2.2.1.2.3. 20, if Two Other Players
+      9.2.2.2. Except, the Player May Not Build on a City if Three Other Players Built Previously
+      9.2.2.3. Except, the Player May Not Build on a City if the Players in a City Would Exceed the Current Step
+      9.2.2.4. Total Cost to Build May Not Exceed the Builder's Owned Money
+      9.2.3.5. Repeat Rule 9.2.2  Until No More Cities are Wanted
+  9.3. If A Player Has More Cities Than the Cost Of a Plant In the Market, Remove the Plant From the Game And Replace
+  9.4. Repeat Rule 9.1 Until All Builders are Done
+  9.5. Update the Track For The Number of Cities Owned
+10. Bureaucracy
+  10.1. No Turn Order Enforced; The Player Making Choices Below is the Operator
+  10.2. Operator Chooses:
+    10.2.1. Pass, Skip to Rule 10.4
+    10.2.2. Activate a Power Plant
+      10.2.2.1. Except, May Not Activate if Insufficient Resources; Refer to Rule XXX
+      10.2.2.2. Remove Resources Needed to Activate; Refer to Rule XXX
+      10.2.2.3. Adds to the Total of Powered Cities This Round
+        10.2.2.3.1. Except, the Total Can Not Exceed The Number of the Operator's Owned Cities
+  10.3. Repeat Rule 10.2 Until No More Power Plants or Pass
+  10.4. The Operator Gets Paid By the Rate Specified for the Total Number of Cities Powered This Round
+  10.5. Repeat 10.1 Until All Players are Finished
+  10.6. Replenish Resources According to Rule 4
+  10.7. Remove a Power Plant in the Market
+    10.7.1. If Step 3, Choose the Lowest Cost Plant
+      10.7.1.1. Unless Step 3 Was First Triggered This Round During Phase 2
+    10.7.2. Otherwise, Choose the Highest Cost Plant And Place Under the Draw Deck
+11. Triggering And Effects of Steps
+  11.1. Step 2
+    11.1.1. Triggered Just Before Bureaucracy Phase, after Build Phase
+    11.1.2. Two Players May Now Build in the Same City
+    11.1.3. Remove and Replace the Lowest Cost Power Plant
+  11.2. Step 3
+    11.2.1. If Revealed During Auction Phase
+      11.2.1.1. Immediately Shuffle Draw Stack
+      11.2.1.2. After the End of the Auction Phase, remove the Step 3 Card and the Lowest Cost Power Plant in the Market
+      11.2.1.3. Step 3 Starts in the Build Phase
+    11.2.2. If Revealed During Build Phase
+      11.2.2.1. Remove the Step 3 Card and the Lowest Cost Power Plant in the Market
+      11.2.2.2. Shuffle the Draw Stack
+      11.2.2.3. Step 3 Starts in the Bureaucracy Phase
+    11.2.3. If Revealed During Bureaucracy Phase
+      11.2.3.1. Remove the Step 3 Card and the Lowest Cost Power Plant in the Market
+      11.2.3.2. Shuffle the Draw Stack
+      11.2.3.3. Resupply at Step 2 Rates
+      11.2.3.4. Step 3 Starts in the Auction Phase
+    11.2.4. Only 6 Power Plants are in the Market at a Time
+    11.2.5. Three Players May Now Build in the Same City
+    11.2.6. Remove from the Game the Lowest Cost Power Plant From the Market in Subsequent Rounds of the Game
+12. Check for Game End
+  12.1. If the Number of Owned Cities of Any Player Equals or is Greater Than Specified in Rule 2.3
+    12.1.1. Whomever Can Supply the Most Number of Cities With Power Wins; Refer to Rule 10.2 without Passing
+    12.1.2. If a Tie, Whichever Player with the Most Cities Wins
+    12.1.3. If Still a Tie, The Player That Meets 12.1.1 and 12.1.2 and has the Most Cities Owned Wins
+    12.1.4. The Game is Over, and No More Actions may be Performed
+13. Miscellaneous
+  13.1. Players May Move Resources Between Power Plants at any Time; Refer to Rule XXX for Restrictions
+14. Power Plants
