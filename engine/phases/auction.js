@@ -89,22 +89,27 @@ exports.Auction = function(engine, comms) {
      */
     this.powerPlantBoughtInRound = false;
 
+    this.PLOG = "[AUCTION]: ";
+
     this.startNewRoundOfAuctions = function() {
         this.powerPlantBoughtInRound = false;
     };
 
     // TODO Should a different order be used?
     this.nextBidder = function(pass) {
+        console.info(this.PLOG + "nextBidder entered.");
 
         // award the power plant if the last bidder passed, or if there is only
         // one bidder at the start of the bid.
         if((this.currentBidders.length === 2 && pass) || this.currentBidders.length === 1) {
+            console.info(this.PLOG + "automatically awarded.");
             var bidWinner = this.currentBidLeader;
             this.finishedAuctions.push(bidWinner);
             var player = this.engine.players[bidWinner];
             this.comms.toAll(player.displayName + " won power plant " + this.engine.plants[this.currentBidChoice].cost
                 + " for $" + this.currentBid);
             if(player.getPlantCount() === this.engine.getMaxPowerPlantsPerPlayer()) {
+                console.info(this.PLOG + "player needs to discard a plant before receiving the new one.");
                 this.playerMustRemovePlant = true;
                 this.comms.toAll(player.displayName + " must first discard a power plant before accepting the new plant.");
                 this.engine.broadcastGameState();
@@ -114,11 +119,13 @@ exports.Auction = function(engine, comms) {
             }
         }
         else if(pass) {
+            console.info(this.PLOG + "current player chose to pass on bidding.");
             this.currentBidders.splice(this.currentPlayerBidIndex, 1);
             this.currentPlayerBidIndex = this.currentPlayerBidIndex % this.currentBidders.length;
             this.currentBidder = this.currentBidders[this.currentPlayerBidIndex];
         }
         else {
+            console.info(this.PLOG + "moving on to next bidder");
             console.info(this.currentBidder + " index: " + this.currentPlayerBidIndex);
             this.currentPlayerBidIndex = (this.currentPlayerBidIndex + 1) % this.currentBidders.length;
             this.currentBidder = this.currentBidders[this.currentPlayerBidIndex];
@@ -128,15 +135,19 @@ exports.Auction = function(engine, comms) {
 
     this.awardPlantToBidWinner = function() {
         var player = this.engine.players[this.currentBidLeader];
+        console.info(this.PLOG + JSON.stringify(this.engine.plants[this.currentBidChoice]) + " awarded to " + player.displayName +
+            " for $" + this.currentBid);
         player.awardPlant(this.engine.plants[this.currentBidChoice], this.currentBid);
         this.removeAuctionedPlant();
         this.cleanAuctionState();
     };
 
     this.removePlantAndResumeAuction = function(removePlantCost) {
+        console.info(this.PLOG + "removePlantAndResumeAuction entered.");
         var player = this.engine.players[this.currentBidLeader];
         var plantToRemove = player.plants[removePlantCost];
         if(plantToRemove === undefined) {
+            console.info(this.PLOG + "trying to remove a plant that isn't owned???");
             this.comms.toPlayer(player, "You can't remove a plant you don't own.");
         }
         else {
@@ -161,12 +172,14 @@ exports.Auction = function(engine, comms) {
      */
     this.startAuction = function(data) {
 
+        console.info(this.PLOG + "start Auction entered.");
         if(data === "pass") {
+            console.info(this.PLOG + "player passed.");
             this.finishedAuctions.push(this.engine.currentPlayer);
             this.engine.nextPlayer();
         }
         else {
-            console.info(data);
+            console.info(this.PLOG + "data received = " + JSON.stringify(data));
             var player = this.engine.getCurrentPlayer();
             var plant = data.cost;
 
@@ -179,14 +192,14 @@ exports.Auction = function(engine, comms) {
             var bid = data.bid;
             if(bid < plant || bid < 3) {
                 // Reject bid
-                console.info("Bid too low.");
+                console.info(this.PLOG + "Bid too low.");
                 this.comms.toPlayer(player, "bid too low.");
                 return;
             }
 
             if(bid > player.money) {
                 // Reject bid
-                console.info("Not enough money.");
+                console.info(this.PLOG + "Not enough money.");
                 this.comms.toPlayer(player, "not enough money.");
                 return;
             }
@@ -197,10 +210,11 @@ exports.Auction = function(engine, comms) {
             this.currentBidLeader = player.uid;
             this.engine.currentAction = this.engine.BID;
 
+            console.info(this.PLOG + player.displayName + " started the auction for plant " + plant + " at $" + bid);
             this.comms.toAll(player.displayName + " started the auction for plant " + plant + " at $" + bid);
 
             for(let key in this.engine.players) {
-                console.info(this.engine.players[key].uid + " Eligible? "
+                console.info(this.PLOG + this.engine.players[key].uid + " Eligible? "
                     + (this.finishedAuctions.indexOf(this.engine.players[key].uid) === -1 ? "yes" : "no"));
                 if(this.finishedAuctions.indexOf(this.engine.players[key].uid) === -1)
                     this.currentBidders.push(this.engine.players[key].uid);
@@ -212,7 +226,9 @@ exports.Auction = function(engine, comms) {
     };
 
     this.placeBid = function(data) {
+        console.info(this.PLOG + "placeBid entered.");
         if(data === "pass") {
+            console.info(this.PLOG + "player passing on bidding.");
             this.nextBidder(true);
             return;
         }
@@ -220,6 +236,7 @@ exports.Auction = function(engine, comms) {
         var bid = data.bid;
         if(bid <= this.currentBid) {
             // reject bid
+            console.info(this.PLOG + "too low of a bid received.");
             this.comms.toPlayer(this.engine.players[this.currentBidder], "bid too low.");
             return;
         }
@@ -227,10 +244,12 @@ exports.Auction = function(engine, comms) {
         var player = this.engine.players[this.currentBidder];
         if(bid > player.money) {
             // Reject bid
+            console.info(this.PLOG + "not enough money for bid.");
             this.comms.toPlayer(player, "not enough money.");
             return;
         }
 
+        console.info(this.PLOG + "bid accepted");
         this.currentBid = bid;
         this.currentBidLeader = player.uid;
         this.nextBidder(false);
@@ -240,6 +259,7 @@ exports.Auction = function(engine, comms) {
      * Removes the power plant currently up for auction, then draws a new power plant, and reorders the market.
      */
     this.removeAuctionedPlant = function() {
+        console.info(this.PLOG + "removeAuctionedPlant entered.");
         var index = 0;
         for(var plant in this.engine.currentMarket) {
             if(this.engine.currentMarket[plant].cost === this.currentBidChoice) {
@@ -247,6 +267,7 @@ exports.Auction = function(engine, comms) {
             }
             index += 1;
         }
+        console.info(this.PLOG + "removing " + this.currentBidChoice + " at index " + index);
         this.engine.currentMarket.splice(index, 1);
         this.addNewAndReorder();
     };
@@ -257,20 +278,22 @@ exports.Auction = function(engine, comms) {
      * @param {boolean} replaceLowest   If true, after removing the power plant, a new card is draw. Otherwise no new
      *                                  card is drawn.
      */
-    this.removeLowestPlant = function(replaceLowest) {
-        var lowestIndex = -1;
-        for(var p in this.engine.currentMarket) {
-            if(lowestIndex === -1 || this.engine.currentMarket[p].cost < this.engine.currentMarket[lowestIndex].cost) {
-                lowestIndex = p;
-            }
+    this.removeLowestPlant = function(replaceLowest, addCardBack) {
+        console.info(this.PLOG + "removing lowest cost plant.");
+        let removed = this.engine.currentMarket.splice(0, 1);
+        if(addCardBack) {
+            // Need to add plants back to the draw pile
         }
-        this.engine.currentMarket.splice(lowestIndex, 1);
+
+        console.info(this.PLOG + "removed plant " + removed + " from current market.");
         if(replaceLowest) {
+            console.info(this.PLOG + "and replacing the removed card with a new power plant.");
             this.addNewAndReorder();
         }
     };
 
     this.reorderForStep3 = function() {
+        console.info(this.PLOG + "merging current and futures market for Step 3.");
         this.engine.currentMarket = this.engine.currentMarket.concat(this.engine.futuresMarket);
         this.engine.currentMarket.sort(function(plantA, plantB) {
             return plantA.cost - plantB.cost
@@ -282,24 +305,31 @@ exports.Auction = function(engine, comms) {
      * Draws a new power plant from the market, and then reorders the market.
      */
     this.addNewAndReorder = function() {
+        console.info(this.PLOG + "addNewAndReorder entered");
         var unsortedPlants = this.engine.currentMarket.concat(this.engine.futuresMarket);
         if(this.engine.plantCosts.length !== 0) {
+            console.info(this.PLOG + "drawing a card from the power plant deck.");
             var nextCost = this.engine.plantCosts.splice(0, 1)[0];
             var newPlant = this.engine.plants[nextCost];
             unsortedPlants = unsortedPlants.concat(newPlant);
+            console.info(this.PLOG + "added " + nextCost + " power plant");
         }
         unsortedPlants.sort(function(plantA, plantB) {
-            if(plantA.cost === "step3") return 100; else return plantA.cost - plantB.cost
+            if(plantA.cost == "step3") return 100; else return plantA.cost - plantB.cost
         });
         if(unsortedPlants.length <= 6) {
+            console.info(this.PLOG + "6 or less plants total. Making all 6 the current market.");
             this.engine.currentMarket = unsortedPlants;
         }
         else {
             this.engine.currentMarket = unsortedPlants.splice(0, 4);
             this.engine.futuresMarket = unsortedPlants.splice(0, 4);
+            console.info(this.PLOG + "current market = " + JSON.stringify(this.engine.currentMarket)
+                + " | futures market = " + JSON.stringify(this.engine.futuresMarket));
             if(this.engine.futuresMarket[3].cost === this.engine.STEP_THREE && this.haveNotShuffledAfterStep3) {
 
                 // As soon as Step 3 is revealed, we must shuffle the draw deck.
+                console.info(this.PLOG + "shuffling draw deck");
                 util.shuffle(this.engine.plantCosts);
                 this.haveNotShuffledAfterStep3 = false;
             }
@@ -310,6 +340,7 @@ exports.Auction = function(engine, comms) {
      * Prepares for another round of auctions within the same phase.
      */
     this.cleanAuctionState = function() {
+        console.info(this.PLOG + "cleanAuctionState entered");
         this.engine.currentAction = this.engine.START_AUCTION;
         this.currentBid = 0;
         this.currentPlayerBidIndex = -1;
@@ -320,7 +351,7 @@ exports.Auction = function(engine, comms) {
         this.currentBidders = [];
 
         if(this.finishedAuctions.length === this.engine.getPlayerCount()) {
-            console.info("Auction done, move to next phase.");
+            console.info(this.PLOG + "Auction done, move to next phase.");
             this.engine.currentPlayerIndex = -2;
             this.finishedAuctions = [];
             this.engine.nextPlayer();
@@ -329,15 +360,18 @@ exports.Auction = function(engine, comms) {
         // If the current player lost the auction, they get to start the auction
         // once more.
         else if(this.finishedAuctions.indexOf(this.engine.currentPlayer) === -1) {
+            console.info(this.PLOG + this.engine.getCurrentPlayer().displayName + " starts auction again.");
             this.comms.toAll(this.engine.getCurrentPlayer().displayName + " gets to start the auction again.");
         }
         else {
 
             // Otherwise we keep progressing to the next player in this phase
             // until we find one that has not finished their auction phase.
+            console.info(this.PLOG + "finding next player to start the auction.");
             do {
                 this.engine.nextPlayer();
             } while(this.finishedAuctions.indexOf(this.engine.currentPlayer) !== -1);
+            console.info(this.PLOG + this.engine.getCurrentPlayer().displayName + " will now start the auction.");
         }
     };
 };

@@ -41,11 +41,11 @@
     2.2.4. 5 Players = 7
     2.2.5. 6 Players = 6
   2.3. Cities Owned by Single Player to End Game
-    2.2.1. 2 Players = 21
-    2.2.2. 3 Players = 17
-    2.2.3. 4 Players = 17
-    2.2.4. 5 Players = 15
-    2.2.5. 6 Players = 14
+    2.3.1. 2 Players = 21
+    2.3.2. 3 Players = 17
+    2.3.3. 4 Players = 17
+    2.3.4. 5 Players = 15
+    2.3.5. 6 Players = 14
 3. Exceptions and Special Rules
   3.1. Players Must Purchase a Power Plant in the First Auction Round
   3.2. Players are Not Required to Purchase a City in the First Round
@@ -58,93 +58,93 @@
       4.1.1.3. 4, Step 2
       4.1.1.4. 3, Step 3
     4.1.2. Oil
-      4.1.1.2. 2, Step 1
-      4.1.1.3. 2, Step 2
-      4.1.1.4. 4, Step 3
+      4.1.2.2. 2, Step 1
+      4.1.2.3. 2, Step 2
+      4.1.2.4. 4, Step 3
     4.1.3. Garbage
-      4.1.1.2. 1, Step 1
-      4.1.1.3. 2, Step 2
-      4.1.1.4. 3, Step 3
+      4.1.3.2. 1, Step 1
+      4.1.3.3. 2, Step 2
+      4.1.3.4. 3, Step 3
     4.1.4. Uranium
-      4.1.1.2. 1, Step 1
-      4.1.1.3. 1, Step 2
-      4.1.1.4. 1, Step 3
+      4.1.4.2. 1, Step 1
+      4.1.4.3. 1, Step 2
+      4.1.4.4. 1, Step 3
   4.2. 3 Players
     4.2.1. Coal
-      4.1.1.2. 4, Step 1
-      4.1.1.3. 5, Step 2
-      4.1.1.4. 3, Step 3
+      4.2.1.2. 4, Step 1
+      4.2.1.3. 5, Step 2
+      4.2.1.4. 3, Step 3
     4.2.2. Oil
-      4.1.1.2. 2, Step 1
-      4.1.1.3. 3, Step 2
-      4.1.1.4. 4, Step 3
+      4.2.2.2. 2, Step 1
+      4.2.2.3. 3, Step 2
+      4.2.2.4. 4, Step 3
     4.2.3. Garbage
-      4.1.1.2. 1, Step 1
-      4.1.1.3. 2, Step 2
-      4.1.1.4. 3, Step 3
+      4.2.3.2. 1, Step 1
+      4.2.3.3. 2, Step 2
+      4.2.3.4. 3, Step 3
     4.2.4. Uranium
-      4.1.1.2. 1, Step 1
-      4.1.1.3. 1, Step 2
-      4.1.1.4. 1, Step 3
+      4.2.4.2. 1, Step 1
+      4.2.4.3. 1, Step 2
+      4.2.4.4. 1, Step 3
   4.3. 4 Players
     4.3.1. Coal
-      4.1.1.2. 5, Step 1
-      4.1.1.3. 6, Step 2
-      4.1.1.4. 4, Step 3
+      4.3.1.2. 5, Step 1
+      4.3.1.3. 6, Step 2
+      4.3.1.4. 4, Step 3
     4.3.2. Oil
-      4.1.1.2. 3, Step 1
-      4.1.1.3. 4, Step 2
-      4.1.1.4. 5, Step 3
+      4.3.2.2. 3, Step 1
+      4.3.2.3. 4, Step 2
+      4.3.2.4. 5, Step 3
     4.3.3. Garbage
-      4.1.1.2. 2, Step 1
-      4.1.1.3. 3, Step 2
-      4.1.1.4. 4, Step 3
+      4.3.3.2. 2, Step 1
+      4.3.3.3. 3, Step 2
+      4.3.3.4. 4, Step 3
     4.3.4. Uranium
-      4.1.1.2. 1, Step 1
-      4.1.1.3. 2, Step 2
-      4.1.1.4. 2, Step 3
+      4.3.4.2. 1, Step 1
+      4.3.4.3. 2, Step 2
+      4.3.4.4. 2, Step 3
   4.4. 5 Players
     4.4.1. Coal
-      4.1.1.2. 5, Step 1
-      4.1.1.3. 7, Step 2
-      4.1.1.4. 5, Step 3
+      4.4.1.2. 5, Step 1
+      4.4.1.3. 7, Step 2
+      4.4.1.4. 5, Step 3
     4.4.2. Oil
-      4.1.1.2. 4, Step 1
-      4.1.1.3. 5, Step 2
-      4.1.1.4. 6, Step 3
+      4.4.2.2. 4, Step 1
+      4.4.2.3. 5, Step 2
+      4.4.2.4. 6, Step 3
     4.4.3. Garbage
-      4.1.1.2. 3, Step 1
-      4.1.1.3. 3, Step 2
-      4.1.1.4. 5, Step 3
+      4.4.3.2. 3, Step 1
+      4.4.3.3. 3, Step 2
+      4.4.3.4. 5, Step 3
     4.4.4. Uranium
-      4.1.1.2. 2, Step 1
-      4.1.1.3. 3, Step 2
-      4.1.1.4. 2, Step 3
+      4.4.4.2. 2, Step 1
+      4.4.4.3. 3, Step 2
+      4.4.4.4. 2, Step 3
   4.5. 6 Players
     4.5.1. Coal
       4.5.1.2. 7, Step 1
-      4.1.1.3. 9, Step 2
-      4.1.1.4. 6, Step 3
+      4.5.1.3. 9, Step 2
+      4.5.1.4. 6, Step 3
     4.5.2. Oil
-      4.1.1.2. 5, Step 1
-      4.1.1.3. 6, Step 2
-      4.1.1.4. 7, Step 3
+      4.5.2.2. 5, Step 1
+      4.5.2.3. 6, Step 2
+      4.5.2.4. 7, Step 3
     4.5.3. Garbage
-      4.1.1.2. 3, Step 1
-      4.1.1.3. 5, Step 2
-      4.1.1.4. 6, Step 3
+      4.5.3.2. 3, Step 1
+      4.5.3.3. 5, Step 2
+      4.5.3.4. 6, Step 3
     4.5.4. Uranium
-      4.1.1.2. 2, Step 1
-      4.1.1.3. 3, Step 2
-      4.1.1.4. 3, Step 3
+      4.5.4.2. 2, Step 1
+      4.5.4.3. 3, Step 2
+      4.5.4.4. 3, Step 3
   4.6. Except, If Step 3 Was First Revealed During Phase 5, Replenish as if in Step 2
 5. Order of Play
   5.1. Determine Player Order
   5.2. Auction Power Plants
   5.3. Buy Resources
   5.4. Build
-  5.5. Bureaucracy
-  5.6. Check for Game End
+  5.5. Check for Game End
+  5.6. Bureaucracy
   5.7. Repeat Rule 5.1 Until Game End
 6. Determining Player Order
   6.1. If First Turn, Randomly Assign Player Order
@@ -253,4 +253,5 @@
     12.1.4. The Game is Over, and No More Actions may be Performed
 13. Miscellaneous
   13.1. Players May Move Resources Between Power Plants at any Time; Refer to Rule XXX for Restrictions
+  13.2. Step 3 can happen before Step 2, which means Step 2 will never trigger and the game will stay in Step 3
 14. Power Plants
