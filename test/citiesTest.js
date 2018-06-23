@@ -21,6 +21,7 @@ var SAARBRUCKEN = cities.cities["saarbrucken"];
 var MUNCHEN = cities.cities["munchen"];
 var PASSAU = cities.cities["passau"];
 var FRANKFURTM = cities.cities["frankfurt-m"];
+var FRANKFURTD = cities.cities["frankfurt-d"];
 var OSNABRUCK = cities.cities["osnabruck"];
 var KASSEL = cities.cities["kassel"];
 var FULDA = cities.cities["fulda"];
@@ -127,22 +128,24 @@ describe('Cities', function () {
         /**
          * Larger test.
          */
-        it('Find cheapest between 16 cities to [DRESDEN,DORTMUND,AACHEN,FLENSBURG], which is 56', function () {
+        it('Find cheapest between 16 cities to [DRESDEN,DORTMUND,AACHEN,TRIER], which is 44', function () {
             return assertCost(cities.findOptimalPurchaseCostOrderOfCities(
                     [KOLN, FLENSBURG, KONSTANZ, ESSEN, MUNSTER, SAARBRUCKEN, MUNCHEN, PASSAU,
                         FRANKFURTM, OSNABRUCK, KASSEL, FULDA, WURZBURG, HANNOVER, MAGDEBURG, BREMEN],
-                    [DRESDEN.name,DORTMUND.name,AACHEN.name,FLENSBURG.name]), 56);
+                    [DRESDEN.name,DORTMUND.name,AACHEN.name,TRIER.name]), 44);
         });
 
         /**
          * Intense test, to see where the limits are. On my machine, this test took 270ms
          * (most tests take 160ms to run, so about 110ms to actually compute).
          */
-        it('Find cheapest between 16 cities to 6 cities, which is 98', function () {
+        it('Find cheapest between 15 cities to 6 cities, which is 83', function () {
             return assertCost(cities.findOptimalPurchaseCostOrderOfCities(
                 [KOLN, FLENSBURG, KONSTANZ, ESSEN, MUNSTER, SAARBRUCKEN, MUNCHEN, PASSAU,
-                    FRANKFURTM, OSNABRUCK, KASSEL, FULDA, WURZBURG, HANNOVER, MAGDEBURG],
-                [DRESDEN.name,DORTMUND.name,AACHEN.name,TRIER.name,FLENSBURG.name,TORGELOW.name]), 98);
+                    FRANKFURTM, OSNABRUCK, KASSEL, FULDA],
+                [DRESDEN.name,DORTMUND.name,AACHEN.name,TRIER.name,FRANKFURTD.name,TORGELOW.name, BREMEN.name,
+                    HANNOVER.name, MAGDEBURG.name]),
+                109);
         });
     });
 });
