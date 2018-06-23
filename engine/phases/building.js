@@ -79,6 +79,10 @@ exports.Building = function(engine, comms, cities) {
         }
     };
 
+    this.checkCost = function(data) {
+        return "Not Implemented";
+    };
+
     /**
      * Determines if the list of cities are all purchasable for that player.
      * @param {string[]} cities    The list of cities to check.

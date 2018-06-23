@@ -504,6 +504,12 @@ function readPowerPlants(){
     powerPlants.parsePowerPlants("data/power_plants.txt");
 }
 
+// In the case where a player somehow causes an uncaught exception, I would rather only the state of that game be
+// corrupted than all other games killed/website go down.
+process.on('uncaughtException', (err) => {
+    console.error("FATAL: Uncaught exception received: " + err);
+});
+
 // All setup is finished, start listening for connections.
 Promise.resolve()
     .then(() => db.open('../database.sqlite', {Promise}))
