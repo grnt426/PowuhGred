@@ -21,6 +21,7 @@ const SAARBRUCKEN = cities.cities["saarbrucken"];
 const MUNCHEN = cities.cities["munchen"];
 const PASSAU = cities.cities["passau"];
 const FRANKFURTM = cities.cities["frankfurt-m"];
+const FRANKFURTD = cities.cities["frankfurt-d"];
 const OSNABRUCK = cities.cities["osnabruck"];
 const KASSEL = cities.cities["kassel"];
 const FULDA = cities.cities["fulda"];
@@ -151,12 +152,12 @@ describe('Cities', function () {
         /**
          * Intense test, to see where the limits are. Currently, it takes longer than the 2000ms timeout
          */
-        it('Find cheapest between 13 cities to 8 cities, which is 119', function () {
+        it('Find cheapest between 12 cities to 8 cities, which is 119', function () {
             return assertCost(cities.findOptimalPurchaseCostOrderOfCities(
                 [KOLN, FLENSBURG, KONSTANZ, ESSEN, MUNSTER, SAARBRUCKEN, MUNCHEN, PASSAU,
                     FRANKFURTM, OSNABRUCK, KASSEL, FULDA],
-                [DRESDEN.name, DORTMUND.name, AACHEN.name, TRIER.name, FLENSBURG.name, TORGELOW.name, 
-                    BREMEN.name, WIESBADEN.name]), 119);
+                [DRESDEN.name, DORTMUND.name, AACHEN.name, TRIER.name, BREMEN.name, FRANKFURTD.name, TORGELOW.name,
+                    HANNOVER.name, MAGDEBURG.name]), 119);
         });
     });
 });

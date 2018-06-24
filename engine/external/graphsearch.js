@@ -228,7 +228,6 @@ function findOptimalPurchaseCostOrderOfCitiesFaster(ctx, cities, dests) {
     }
 
     let bestCost = 999;
-    let totalOptions = 0;
     let currentOrderings = generateOptions(ctx, cities, dests, [], 0);
     // console.info("First Set (" + currentOrderings.length + "): " + JSON.stringify(currentOrderings));
     let bestOrdering = undefined;
@@ -236,14 +235,8 @@ function findOptimalPurchaseCostOrderOfCitiesFaster(ctx, cities, dests) {
     currentOrderings.sort(sortFunction);
     let currentOrder = undefined;
     let memoizedOrders = new Array(50000);
-    let totalTime = 0;
-    let numberTimes = 0;
     while(currentOrderings.length > 0) {
         currentOrder = currentOrderings.shift();
-        if(currentOrder.remaining.length === 0) {
-            totalOptions++;
-            // console.info("Full Order considered: " + currentOrder.order + " Cost: " + currentOrder.cost);
-        }
         // console.info("Current Order: " + JSON.stringify(currentOrder));
         // console.info("Remaining: " + currentOrder.remaining);
         if(inMemoizedOrders(memoizedOrders, currentOrder)) {
@@ -259,19 +252,14 @@ function findOptimalPurchaseCostOrderOfCitiesFaster(ctx, cities, dests) {
         }
 
         if(currentOrder.remaining.length !== 0) {
-            let timeStart = Date.now();
             let newOptions = generateOptions(ctx, currentOrder.cities, currentOrder.remaining,
                 currentOrder.order, currentOrder.cost);
-            totalTime += (Date.now() - timeStart);
-            numberTimes++;
             currentOrderings = currentOrderings.concat(newOptions);
             // console.info("New Set: " + JSON.stringify(currentOrderings));
             currentOrderings.sort(sortFunction);
         }
     }
 
-    console.log("Total Options: " + totalOptions);
-    console.log("Total Time generating options: " + totalTime/1000 + "s Avg: " + totalTime/numberTimes/1000 + "s");
     // console.log(memoizedOrders);
     return bestOrdering.cost;
 }
