@@ -96,6 +96,11 @@ describe('Cities', function () {
 
     describe('#findOptimalPurchaseCostOrderOfCities()', function () {
 
+        it('Find cheapest between [] to [DORTMUND,AACHEN], which is 9', function () {
+            return assertCost(cities.findOptimalPurchaseCostOrderOfCities(
+                [], [FRANKFURTM.name, FULDA.name]), 8);
+        });
+
         it('Find cheapest between [KOLN,ESSEN,MUNSTER] to [DORTMUND,AACHEN], which is 9', function () {
             return assertCost(cities.findOptimalPurchaseCostOrderOfCities(
                 [KOLN, ESSEN, MUNSTER], [DORTMUND.name, AACHEN.name]), 9);

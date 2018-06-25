@@ -19,7 +19,7 @@ module.exports = function (request, done) {
             console.info("Total Time: " + (Date.now() - timeStart)/1000 + "s");
         }
         catch(err){
-            console.error("Error in finding optimal: " + err);
+            console.error("Error in finding optimal: " + err.stack);
         }
         done(result);
     }
@@ -29,7 +29,7 @@ module.exports = function (request, done) {
             result = findArbitraryCheapestToDestCache(data.ctx, data.cities, data.dest);
         }
         catch(err){
-            console.error("Error in finding arbitrary cheapest: " + err);
+            console.error("Error in finding arbitrary cheapest: " + err.stack);
         }
         done(result);
     }
@@ -39,7 +39,7 @@ module.exports = function (request, done) {
             result = get(data.start[i].name + ">" + data.end.name)
         }
         catch(err){
-            console.error("Error in finding route: " + err);
+            console.error("Error in finding route: " + err.stack);
         }
         done(result);
     }
@@ -158,8 +158,10 @@ function generateOptions(ctx, cities, dests, order, prevCost) {
         newCities.push(convertToCityObjects(cityName, ctx.cities));
         newOrder.push(cityName);
         newDests.splice(i, 1);
-        let val = partialOrder(newOrder, newDests,
-            prevCost + findArbitraryCheapestToDestCache(ctx, cities, convertToCityObjects(cityName, ctx.cities)), newCities);
+        let additionCost = 0;
+        if(cities.length !== 0)
+            additionCost = findArbitraryCheapestToDestCache(ctx, cities, convertToCityObjects(cityName, ctx.cities));
+        val = partialOrder(newOrder, newDests, prevCost + additionCost, newCities);
         // console.info("New Val: " + val);
         options.push(val);
     }
