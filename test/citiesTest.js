@@ -29,6 +29,8 @@ const WURZBURG = cities.cities["wurzburg"];
 const HANNOVER = cities.cities["hannover"];
 const MAGDEBURG = cities.cities["magdeburg"];
 const BREMEN = cities.cities["bremen"];
+const WIESBADEN = cities.cities["wiesbaden"];
+const MANNHEIM = cities.cities["mannheim"];
 
 beforeEach(function () {
 
@@ -136,10 +138,9 @@ describe('Cities', function () {
         });
 
         /**
-         * Intense test, to see where the limits are. On my machine, this test took 270ms
-         * (most tests take 160ms to run, so about 110ms to actually compute).
+         * Intense test, to see where the limits are. On my machine, this test took 7.5 seconds
          */
-        it('Find cheapest between 15 cities to 6 cities, which is 83', function () {
+        it('Find cheapest between 12 cities to 9 cities, which is 109', function () {
             return assertCost(cities.findOptimalPurchaseCostOrderOfCities(
                 [KOLN, FLENSBURG, KONSTANZ, ESSEN, MUNSTER, SAARBRUCKEN, MUNCHEN, PASSAU,
                     FRANKFURTM, OSNABRUCK, KASSEL, FULDA],
