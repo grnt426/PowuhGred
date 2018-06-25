@@ -65,7 +65,7 @@ exports.Cities = function(cities = {}) {
     this.findCheapestRoute = function(start, end){
         return threadPool
             .send({action:'findCheapestRoute',
-                data:{ctx:{cities:this.cities, cityDistDict:{}}, start:start, end:end}})
+                data:{ctx:{cities:this.cities, cityDistDict:{}, regionKey:this.activeRegions}, start:start, end:end}})
             .promise()
     };
 
@@ -73,14 +73,14 @@ exports.Cities = function(cities = {}) {
     this.findArbitraryCheapestToDest = function(cities, dest){
         return threadPool
             .send({action:'findArbitraryCheapestToDest',
-                data:{ctx:{cities:this.cities, cityDistDict:{}}, cities:cities, dest:dest}})
+                data:{ctx:{cities:this.cities, cityDistDict:{}, regionKey:this.activeRegions}, cities:cities, dest:dest}})
             .promise()
     };
 
     this.findOptimalPurchaseCostOrderOfCities = function(cities, dests){
         return threadPool
             .send({action:'findOptimalPurchaseCostOrderOfCities',
-                data:{ctx:{cities:this.cities, cityDistDict:{}}, cities:cities, dests:dests}})
+                data:{ctx:{cities:this.cities, cityDistDict:{}, regionKey:this.activeRegions}, cities:cities, dests:dests}})
             .promise()
     };
 

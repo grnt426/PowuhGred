@@ -6,6 +6,7 @@ const assert = require('assert'),
 const cities = new citiesjs.Cities();
 cities.parseCityList("data/germany_cities.txt");
 cities.parseCities("data/germany_connections.txt");
+cities.onlyUseTheseRegions(['cyan', 'brown', 'red', 'yellow', 'blue', 'purple']);
 
 const ESSEN = cities.cities["essen"];
 const DORTMUND = cities.cities["dortmund"];
@@ -31,6 +32,7 @@ const MAGDEBURG = cities.cities["magdeburg"];
 const BREMEN = cities.cities["bremen"];
 const WIESBADEN = cities.cities["wiesbaden"];
 const MANNHEIM = cities.cities["mannheim"];
+const REGENSBURG = cities.cities["regensburg"];
 
 beforeEach(function () {
 
@@ -140,6 +142,16 @@ describe('Cities', function () {
                     [KOLN, FLENSBURG, KONSTANZ, ESSEN, MUNSTER, SAARBRUCKEN, MUNCHEN, PASSAU,
                         FRANKFURTM, OSNABRUCK, KASSEL, FULDA, WURZBURG, HANNOVER, MAGDEBURG, BREMEN],
                     [DRESDEN.name,DORTMUND.name,AACHEN.name,TRIER.name]), 44);
+        });
+
+        /**
+         * Larger test.
+         */
+        it('Find cheapest between [KOLN, DORTMUND] cities to ' +
+            '[OSNABRUCK.name,SAARBRUCKEN.name,MANNHEIM.name,KONSTANZ.name,REGENSBURG.name], which is 44', function () {
+            return assertCost(cities.findOptimalPurchaseCostOrderOfCities(
+                [KOLN, DORTMUND],
+                [OSNABRUCK.name,SAARBRUCKEN.name,MANNHEIM.name,KONSTANZ.name,REGENSBURG.name,PASSAU.name]), 114);
         });
 
         /**

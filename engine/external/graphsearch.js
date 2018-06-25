@@ -6,8 +6,8 @@ module.exports = function (request, done) {
 
     // TODO: we should leverage Memcached as a cache for our memoized search. For now, memoized results are thrown away.
     let data = request.data;
+    data.ctx.regionKey = data.ctx.regionKey.join(" ");
     if(request.action === "findOptimalPurchaseCostOrderOfCities") {
-        data.ctx.regionKey = activeRegions;
         let result = 0;
         let contents = fs.readFileSync('data/pathcosts.txt', 'utf-8').toString();
         let timeStart = Date.now();
@@ -26,6 +26,8 @@ module.exports = function (request, done) {
     else if(request.action === "findArbitraryCheapestToDest") {
         let result = 0;
         try{
+            let contents = fs.readFileSync('data/pathcosts.txt', 'utf-8').toString();
+            buildMemoryCache(contents, data);
             result = findArbitraryCheapestToDestCache(data.ctx, data.cities, data.dest);
         }
         catch(err){
@@ -36,6 +38,8 @@ module.exports = function (request, done) {
     else if(request.action === "findCheapestRoute") {
         let result = 0;
         try{
+            let contents = fs.readFileSync('data/pathcosts.txt', 'utf-8').toString();
+            buildMemoryCache(contents, data);
             result = get(data.start[i].name + ">" + data.end.name)
         }
         catch(err){
