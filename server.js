@@ -73,7 +73,7 @@ else {
     // To handle when the certificate rotates. Conns already established will use the old cert, and new conns will
     // use the new cert data
     // https://github.com/nodejs/node/issues/4464
-    fs.watch('/path/to/crt', () => {
+    fs.watch('/etc/letsencrypt/live/granitegames.io/', () => {
         options.server._sharedCreds.context.setKey(fs.readFileSync('/etc/letsencrypt/live/granitegames.io/privkey.pem'));
         options.server._sharedCreds.context.setCert(fs.readFileSync('/etc/letsencrypt/live/granitegames.io/fullchain.pem'));
     });
