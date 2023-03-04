@@ -3,29 +3,29 @@
   "description": "Boardgame Clone",
   "version": "0.0.1",
   "engines": {
-    "node": ">=9.9.0"
+    "node": ">=16.0.0"
   },
   "dependencies": {
-    "allcombinations": "1.1.1",
-    "bcrypt": "1.0.2",
-    "bluebird": "^3.5.0",
-    "body-parser": "^1.17.1",
-    "connect-memcached": "0.2.0",
+    "allcombinations": "1.1.5",
+    "bcrypt": "^5.1.0",
+    "bluebird": "^3.7.2",
+    "body-parser": "^1.20.2",
+    "connect-memcached": "2.0.0",
     "express": "4.x",
     "express-brute": "1.0.1",
     "express-brute-memcached": "0.0.1",
-    "express-session": "1.15.1",
+    "express-session": "1.17.3",
     "memcached": "2.2.2",
-    "mocha": "3.2.0",
-    "promise-mock": "1.1.1",
-    "pug": "^2.0.3",
-    "session-file-store": "^1.2.0",
-    "sinon": "^4.4.8",
-    "sleep-promise": "2.0.0",
-    "socket.io": "^2.0.4",
-    "sqlite": "^2.9.1",
-    "threads": "^0.10.1",
-    "validator": "^9.4.1"
+    "mocha": "10.2.0",
+    "promise-mock": "2.1.0",
+    "pug": "^3.0.2",
+    "session-file-store": "^1.5.0",
+    "sinon": "^15.0.1",
+    "sleep-promise": "9.1.0",
+    "socket.io": "^4.6.1",
+    "sqlite": "^4.1.2",
+    "threads": "^1.7.0",
+    "validator": "^13.9.0"
   },
   "scripts:": {
     "test": "mocha"

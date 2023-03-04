@@ -88,8 +88,9 @@ var bruteforce = new ExpressBrute(bruteStore);
 
 app.set('view engine', 'pug');
 
-var io = require('socket.io').listen(server),
-    communicationsjs = require('./engine/communications.js'),
+const { Server } = require("socket.io");
+const io = new Server(server);
+var communicationsjs = require('./engine/communications.js'),
     citiesjs = require('./engine/cities.js'),
     powerPlantReaderjs = require('./engine/powerplantreader.js'),
     powerPlantjs = require("./engine/PowerPlant.js")
@@ -341,7 +342,7 @@ io.use(function(socket, next) {
 
 // connect to a player, listen
 // TODO: There seems to be an issue with a player joining, but the tab not gaining focus in FF, and the player not initializing the game correctly.
-io.sockets.on('connection', function(socket) {
+io.on('connection', function(socket) {
 
     let session = socket.handshake.session;
     let gameId = session.joining;
